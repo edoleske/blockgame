@@ -2,7 +2,7 @@
 #define BLOCKGAME_VERTEXBUFFER_H
 
 
-#include "../common.h"
+#include "common.h"
 
 class VertexBuffer {
 public:

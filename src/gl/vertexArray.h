@@ -2,7 +2,7 @@
 #define BLOCKGAME_VERTEXARRAY_H
 
 
-#include "../common.h"
+#include "common.h"
 
 class VertexArray {
 public:

@@ -2,7 +2,7 @@
 #define BLOCKGAME_WINDOW_H
 
 
-#include "../common.h"
+#include "common.h"
 
 class Window {
 public:

@@ -30,14 +30,10 @@ void Camera::move(const vec2 &normalizedVelocity, float deltaTime) {
 
 void Camera::rotate(float xOffset, float yOffset) {
     yaw += xOffset * ROTATE_SENSITIVITY;
-    pitch += yOffset * ROTATE_SENSITIVITY;
+    yaw = glm::mod(yaw, 360.0f);
 
-    if (pitch > 89.0f) {
-        pitch = 89.0f;
-    }
-    if (pitch < -89.0f) {
-        pitch = -89.0f;
-    }
+    pitch += yOffset * ROTATE_SENSITIVITY;
+    pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
     vec3 direction(
             cos(glm::radians(yaw)) * cos(glm::radians(pitch)),

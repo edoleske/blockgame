@@ -2,8 +2,8 @@
 #define BLOCKGAME_BLOCK_H
 
 
-#include "../common.h"
-#include "../utils/vertex.h"
+#include "common.h"
+#include "utils/vertex.h"
 
 enum BlockFace {
     TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK

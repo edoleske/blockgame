@@ -17,9 +17,14 @@ Game::Game(int width, int height) : Window(width, height) {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     camera = make_unique<Camera>(45.0f, static_cast<float>(width) / static_cast<float>(height));
-    shader = make_unique<Shader>("../resources/shaders/basic.vert", "../resources/shaders/basic.frag");
+    shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
     world = make_unique<World>();
     world->generateSpawnArea();
+
+    glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
+
+    texture = make_unique<Texture>("../resources/img/test_texture.png");
+    texture->bind();
 }
 
 void Game::loop() {

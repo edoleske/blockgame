@@ -14,6 +14,7 @@ Chunk::Chunk(int x, int z): chunkPosition(x, 0, z) {
     vao.bind();
     vbo.bind();
     vbo.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)nullptr);
+    vbo.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
     VertexArray::unbind();
 }
 
@@ -113,6 +114,11 @@ void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chu
                 }
             }
         }
+    }
+
+    for (auto &vertex: vertices) {
+        vertex.uv *= 0.25f;
+        vertex.uv.x += 0.25f;
     }
 
     // Copy vertices to VBO

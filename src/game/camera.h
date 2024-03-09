@@ -2,7 +2,7 @@
 #define BLOCKGAME_CAMERA_H
 
 
-#include "../common.h"
+#include "common.h"
 
 class Camera {
 public:
@@ -26,8 +26,8 @@ private:
     vec3 front = vec3(0.0f, 0.0f, -1.0f);
     vec3 up = vec3(0.0f, 1.0f, 0.0f);
 
-    mat4 projection;
-    mat4 view;
+    mat4 projection = mat4(1.0f);
+    mat4 view = mat4(1.0f);
 
     const float SPEED = 5.0f;
     const float ROTATE_SENSITIVITY = 0.1f;

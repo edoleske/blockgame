@@ -2,9 +2,9 @@
 #define BLOCKGAME_WORLD_H
 
 
-#include "../common.h"
+#include "common.h"
 #include "chunk.h"
-#include "../gl/shader.h"
+#include "gl/shader.h"
 
 class World {
 public:

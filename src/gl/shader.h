@@ -2,7 +2,7 @@
 #define BLOCKGAME_SHADER_H
 
 
-#include "../common.h"
+#include "common.h"
 
 class Shader {
 public:

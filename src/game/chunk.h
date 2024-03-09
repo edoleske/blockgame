@@ -2,10 +2,10 @@
 #define BLOCKGAME_CHUNK_H
 
 
-#include "../common.h"
-#include "../utils/vertex.h"
-#include "../gl/vertexBuffer.h"
-#include "../gl/vertexArray.h"
+#include "common.h"
+#include "utils/vertex.h"
+#include "gl/vertexBuffer.h"
+#include "gl/vertexArray.h"
 #include "block.h"
 
 template <class T>

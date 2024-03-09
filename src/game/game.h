@@ -2,13 +2,14 @@
 #define BLOCKGAME_GAME_H
 
 
-#include "../common.h"
-#include "../gl/window.h"
-#include "../gl/vertexBuffer.h"
-#include "../gl/vertexArray.h"
+#include "common.h"
+#include "gl/window.h"
+#include "gl/vertexBuffer.h"
+#include "gl/vertexArray.h"
 #include "camera.h"
-#include "../gl/shader.h"
+#include "gl/shader.h"
 #include "world.h"
+#include "gl/texture.h"
 
 class Game : public Window {
 public:
@@ -20,6 +21,9 @@ private:
     unique_ptr<Camera> camera;
     unique_ptr<Shader> shader;
     unique_ptr<World> world;
+
+    // Temporary block texture
+    unique_ptr<Texture> texture;
 
     void handleInput();
     void handleMouse();
