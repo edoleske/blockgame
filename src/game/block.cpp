@@ -1,8 +1,8 @@
 #include "block.h"
 
-Block::Block(BlockType type): type(type) {}
+Block::Block(BlockType type) : type(type) {}
 
-void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec3 &chunkPosition) {
+void Block::addBlockFaceVertices(vector<Vertex>& vertices, BlockFace face, const u8vec3& chunkPosition) {
     switch (face) {
         case BlockFace::TOP:
             vertices.insert(vertices.end(), {
@@ -57,4 +57,15 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
 
 BlockType Block::getType() const {
     return type;
+}
+
+BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
+    switch (type) {
+        case BlockType::DIRT:
+            return BlockTextureName::DIRT;
+        case BlockType::STONE:
+            return BlockTextureName::STONE;
+        default:
+            return BlockTextureName::DIRT;
+    }
 }

@@ -4,6 +4,9 @@ World::World() {
     // Initialize element buffer object shared between all chunks
     ebo = make_shared<ElementBuffer>();
     initializeEBO();
+
+    blockTexture = make_shared<BlockTexture>();
+    blockTexture->getTexture()->bind();
 }
 
 Chunk* World::getChunk(int x, int z) const {

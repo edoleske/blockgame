@@ -4,23 +4,28 @@
 
 #include "common.h"
 #include "utils/vertex.h"
+#include "blockTexture.h"
 
-enum BlockFace {
+enum class BlockFace {
     TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
 };
 
-enum BlockType {
-    AIR, STONE
+enum class BlockType {
+    AIR, DIRT, STONE
 };
 
 class Block {
 public:
     Block() = default;
+
     explicit Block(BlockType type);
 
     BlockType getType() const;
 
-    static void addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec3 &chunkPosition);
+    static void addBlockFaceVertices(vector<Vertex>& vertices, BlockFace face, const u8vec3& chunkPosition);
+
+    static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
+
 private:
     BlockType type = BlockType::AIR;
 };

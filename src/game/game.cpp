@@ -22,9 +22,6 @@ Game::Game(int width, int height) : Window(width, height) {
     world->generateSpawnArea();
 
     glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
-
-    texture = make_unique<Texture>("../resources/img/test_texture.png");
-    texture->bind();
 }
 
 void Game::loop() {
@@ -44,7 +41,7 @@ void Game::loop() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw test thing
+        // Update shader with camera matrices
         shader->use();
         shader->setMatrix4("view", camera->getView());
         shader->setMatrix4("projection", camera->getProjection());

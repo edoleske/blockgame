@@ -9,12 +9,12 @@
 #include "gl/elementBuffer.h"
 #include "block.h"
 
-template <class T>
+template<class T>
 using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
 
 class Chunk {
 public:
-    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo);
+    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
 
     Block* getBlock(int x, int y, int z) const;
 
@@ -22,9 +22,10 @@ public:
 
     void render();
 
-    const glm::ivec3 &getChunkPosition() const;
+    const glm::ivec3& getChunkPosition() const;
 
     void buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chunk* frontChunk);
+
 private:
     bool chunkBuilt = false;
     glm::ivec3 chunkPosition;
@@ -33,6 +34,9 @@ private:
     VertexArray vao;
     VertexBuffer vbo;
     shared_ptr<ElementBuffer> ebo;
+    shared_ptr<BlockTexture> blockTexture;
+
+    void addFace(Block* block, BlockFace face, const u8vec3& position);
 };
 
 

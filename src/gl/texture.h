@@ -7,9 +7,11 @@
 class Texture {
 public:
     explicit Texture(const string& path);
+
     ~Texture();
 
     void bind() const;
+
     static void unbind();
 
     GLuint getTexture() const;
