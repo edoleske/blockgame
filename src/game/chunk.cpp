@@ -1,6 +1,6 @@
 #include "chunk.h"
 
-Chunk::Chunk(int x, int z): chunkPosition(x, 0, z) {
+Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo): chunkPosition(x, 0, z), ebo(ebo) {
     // Fill chunk data with blocks
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
@@ -13,6 +13,7 @@ Chunk::Chunk(int x, int z): chunkPosition(x, 0, z) {
     // Initialize VertexBuffer attributes
     vao.bind();
     vbo.bind();
+    ebo->bind();
     vbo.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)nullptr);
     vbo.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
     VertexArray::unbind();
@@ -140,6 +141,6 @@ const glm::ivec3 &Chunk::getChunkPosition() const {
 
 void Chunk::render() {
     vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+    glDrawElements(GL_TRIANGLES, static_cast<int>(vertices.size() / 4) * 6, GL_UNSIGNED_INT, (void*)nullptr);
     VertexArray::unbind();
 }

@@ -6,7 +6,7 @@
 
 class Texture {
 public:
-    Texture(const string& path);
+    explicit Texture(const string& path);
     ~Texture();
 
     void bind() const;
@@ -19,8 +19,8 @@ public:
     int getHeight() const;
 
 private:
-    GLuint texture;
-    int width, height, channels;
+    GLuint texture{};
+    int width{}, height{}, channels{};
 
 };
 

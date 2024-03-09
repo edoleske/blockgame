@@ -6,6 +6,7 @@
 #include "utils/vertex.h"
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
+#include "gl/elementBuffer.h"
 #include "block.h"
 
 template <class T>
@@ -13,7 +14,7 @@ using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_
 
 class Chunk {
 public:
-    Chunk(int x, int z);
+    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo);
 
     Block* getBlock(int x, int y, int z) const;
 
@@ -31,6 +32,7 @@ private:
     vector<Vertex> vertices;
     VertexArray vao;
     VertexBuffer vbo;
+    shared_ptr<ElementBuffer> ebo;
 };
 
 

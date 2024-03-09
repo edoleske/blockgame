@@ -8,7 +8,7 @@
 
 class World {
 public:
-    World() = default;
+    World();
 
     Chunk* getChunk(int x, int z) const;
     bool chunkExists(int x, int z) const;
@@ -19,7 +19,7 @@ public:
         // Create chunks
         for (int x = -1; x <= 1; ++x) {
             for (int z = -1; z <= 1; ++z) {
-                    chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z));
+                    chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo));
 
             }
         }
@@ -42,7 +42,7 @@ public:
     }
 
     void createChunk(int x, int z) {
-        chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z));
+        chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo));
         auto chunk = chunkMap.at(make_pair(x, z)).get();
         chunk->buildMesh(nullptr, nullptr, nullptr, nullptr);
     }
@@ -60,6 +60,10 @@ public:
     }
 private:
     map<pair<int, int>, unique_ptr<Chunk>> chunkMap;
+
+    // Element buffer object shared between all chunks
+    shared_ptr<ElementBuffer> ebo;
+    void initializeEBO();
 };
 
 

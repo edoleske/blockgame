@@ -29,7 +29,7 @@ private:
     mat4 projection = mat4(1.0f);
     mat4 view = mat4(1.0f);
 
-    const float SPEED = 5.0f;
+    const float SPEED = 8.0f;
     const float ROTATE_SENSITIVITY = 0.1f;
 };
 

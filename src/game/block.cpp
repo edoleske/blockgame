@@ -9,9 +9,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
             });
             break;
         case BlockFace::BOTTOM:
@@ -19,9 +17,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
             });
             break;
         case BlockFace::LEFT:
@@ -29,9 +25,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
             });
             break;
         case BlockFace::RIGHT:
@@ -39,9 +33,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 0}},
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 1}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 0}},
             });
             break;
         case BlockFace::FRONT:
@@ -49,9 +41,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 0}},
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 0}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
             });
             break;
         case BlockFace::BACK:
@@ -59,9 +49,7 @@ void Block::addBlockFaceVertices(vector<Vertex> &vertices, BlockFace face, u8vec
                     {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
                     {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {0, 1}},
                     {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
                     {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
             });
             break;
     }
