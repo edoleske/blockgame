@@ -11,7 +11,7 @@ enum class BlockFace {
 };
 
 enum class BlockType {
-    AIR, DIRT, STONE
+    AIR, DIRT, GRASS, BEDROCK, STONE
 };
 
 class Block {
@@ -22,7 +22,7 @@ public:
 
     BlockType getType() const;
 
-    static void addBlockFaceVertices(vector<Vertex>& vertices, BlockFace face, const u8vec3& chunkPosition);
+    static map<BlockFace, vector<Vertex>> blockFaceVertices;
 
     static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
 

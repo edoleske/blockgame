@@ -16,6 +16,7 @@ Window::Window(int width, int height): width(width), height(height) {
     }
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSwapInterval(1);
 
     // Load OpenGL functions, gladLoadGL returns the loaded version, 0 on error
     version = gladLoadGL(glfwGetProcAddress);

@@ -6,7 +6,11 @@
 #include "gl/texture.h"
 
 enum class BlockTextureName {
+    NONE,
     DIRT,
+    GRASS_SIDE,
+    GRASS,
+    BEDROCK,
     STONE
 };
 

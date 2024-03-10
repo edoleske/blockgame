@@ -2,67 +2,64 @@
 
 Block::Block(BlockType type) : type(type) {}
 
-void Block::addBlockFaceVertices(vector<Vertex>& vertices, BlockFace face, const u8vec3& chunkPosition) {
-    switch (face) {
-        case BlockFace::TOP:
-            vertices.insert(vertices.end(), {
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
-            });
-            break;
-        case BlockFace::BOTTOM:
-            vertices.insert(vertices.end(), {
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-            });
-            break;
-        case BlockFace::LEFT:
-            vertices.insert(vertices.end(), {
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-            });
-            break;
-        case BlockFace::RIGHT:
-            vertices.insert(vertices.end(), {
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 0}},
-            });
-            break;
-        case BlockFace::FRONT:
-            vertices.insert(vertices.end(), {
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {0, 1}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {0, 0}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 1 + chunkPosition.z}, {1, 0}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 1 + chunkPosition.z}, {1, 1}},
-            });
-            break;
-        case BlockFace::BACK:
-            vertices.insert(vertices.end(), {
-                    {{0 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {1, 1}},
-                    {{1 + chunkPosition.x, 0 + chunkPosition.y, 0 + chunkPosition.z}, {0, 1}},
-                    {{1 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {0, 0}},
-                    {{0 + chunkPosition.x, 1 + chunkPosition.y, 0 + chunkPosition.z}, {1, 0}},
-            });
-            break;
-    }
-}
-
 BlockType Block::getType() const {
     return type;
 }
+
+map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
+        {BlockFace::TOP,    {
+                                    {{0, 1, 0}, {0, 0}},
+                                    {{1, 1, 0}, {1, 0}},
+                                    {{1, 1, 1}, {1, 1}},
+                                    {{0, 1, 1}, {0, 1}},
+                            }},
+        {BlockFace::BOTTOM, {
+                                    {{0, 0, 0}, {0, 0}},
+                                    {{0, 0, 1}, {0, 1}},
+                                    {{1, 0, 1}, {1, 1}},
+                                    {{1, 0, 0}, {1, 0}},
+                            }},
+        {BlockFace::LEFT,   {
+                                    {{0, 1, 1}, {0, 0}},
+                                    {{0, 0, 1}, {0, 1}},
+                                    {{0, 0, 0}, {1, 1}},
+                                    {{0, 1, 0}, {1, 0}},
+                            }},
+        {BlockFace::RIGHT,  {
+                                    {{1, 1, 1}, {1, 0}},
+                                    {{1, 1, 0}, {0, 0}},
+                                    {{1, 0, 0}, {0, 1}},
+                                    {{1, 0, 1}, {1, 1}},
+                            }},
+        {BlockFace::FRONT,  {
+                                    {{0, 0, 1}, {0, 1}},
+                                    {{0, 1, 1}, {0, 0}},
+                                    {{1, 1, 1}, {1, 0}},
+                                    {{1, 0, 1}, {1, 1}},
+                            }},
+        {BlockFace::BACK,   {
+                                    {{0, 0, 0}, {1, 1}},
+                                    {{1, 0, 0}, {0, 1}},
+                                    {{1, 1, 0}, {0, 0}},
+                                    {{0, 1, 0}, {1, 0}},
+                            }}
+};
 
 BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
     switch (type) {
         case BlockType::DIRT:
             return BlockTextureName::DIRT;
+        case BlockType::GRASS:
+            switch (face) {
+                case BlockFace::TOP:
+                    return BlockTextureName::GRASS;
+                case BlockFace::BOTTOM:
+                    return BlockTextureName::DIRT;
+                default:
+                    return BlockTextureName::GRASS_SIDE;
+            }
+        case BlockType::BEDROCK:
+            return BlockTextureName::BEDROCK;
         case BlockType::STONE:
             return BlockTextureName::STONE;
         default:

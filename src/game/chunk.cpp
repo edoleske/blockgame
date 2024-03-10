@@ -6,7 +6,17 @@ Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_pt
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto type = by < 65 ? (by < 63 ? BlockType::STONE : BlockType::DIRT) : BlockType::AIR;
+                auto type = BlockType::AIR;
+                if (by == 64) {
+                    type = BlockType::GRASS;
+                } else if (by < 64 && by > 61) {
+                    type = BlockType::DIRT;
+                } else if (by > 0 && by < 62) {
+                    type = BlockType::STONE;
+                } else if (by == 0) {
+                    type = BlockType::BEDROCK;
+                }
+
                 blocks[bz][by][bx] = make_unique<Block>(type);
             }
         }
@@ -135,16 +145,11 @@ void Chunk::render() {
 }
 
 void Chunk::addFace(Block* block, BlockFace face, const u8vec3& position) {
-    Block::addBlockFaceVertices(vertices, face, position);
+    auto name = Block::getBlockFaceTexture(block->getType(), face);
+    auto coordinates = blockTexture->getTextureCoordinates(name);
+    auto offset = blockTexture->getOffset();
 
-    if (vertices.size() > 4) {
-        auto name = Block::getBlockFaceTexture(block->getType(), face);
-        auto coordinates = blockTexture->getTextureCoordinates(name);
-        auto offset = blockTexture->getOffset();
-
-        for (auto it = vertices.end() - 4; it != vertices.end(); ++it) {
-            it->uv *= offset;
-            it->uv += coordinates;
-        }
+    for (const auto& vertex : Block::blockFaceVertices[face]) {
+        vertices.push_back(Vertex(vertex.position + position, (vertex.uv * offset) + coordinates));
     }
 }

@@ -15,6 +15,8 @@ public:
     void setInteger(const GLchar* name, GLint value) const;
 
     void setMatrix4(const GLchar* name, const glm::mat4 &matrix);
+
+    void setVector4f(const GLchar* name, const vec4& value);
 private:
     GLuint program;
     bool compiled = false;

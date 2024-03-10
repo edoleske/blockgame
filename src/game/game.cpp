@@ -17,7 +17,12 @@ Game::Game(int width, int height) : Window(width, height) {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     camera = make_unique<Camera>(45.0f, static_cast<float>(width) / static_cast<float>(height));
+
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
+    shader->use();
+    shader->setInteger("renderDistance", 6);
+    shader->setVector4f("uFogColor", vec4((vec3(190.0f, 220.0f, 245.0f) / 255.0f) * 1.1f, 1.0f));
+
     world = make_unique<World>();
     world->generateSpawnArea();
 

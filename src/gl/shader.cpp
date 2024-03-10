@@ -77,3 +77,8 @@ string Shader::readFile(const string &path) {
 
     return buffer.str();
 }
+
+void Shader::setVector4f(const GLchar* name, const vec4& value) {
+    int location = getUniformLocation(name);
+    glUniform4f(location, value.x, value.y, value.z, value.w);
+}

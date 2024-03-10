@@ -18,15 +18,15 @@ public:
 
     void generateSpawnArea() {
         // Create chunks
-        for (int x = -1; x <= 1; ++x) {
-            for (int z = -1; z <= 1; ++z) {
+        for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
+            for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
                 chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
             }
         }
 
         // Build chunk meshes
-        for (int x = -1; x <= 1; ++x) {
-            for (int z = -1; z <= 1; ++z) {
+        for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
+            for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
                 auto chunk = chunkMap.at(make_pair(x, z)).get();
 
                 // Get adjacent chunks
@@ -36,7 +36,6 @@ public:
                 auto frontChunk = getChunk(x, z + 1);
 
                 chunk->buildMesh(leftChunk, rightChunk, backChunk, frontChunk);
-
             }
         }
     }
@@ -62,6 +61,7 @@ public:
 private:
     map<pair<int, int>, unique_ptr<Chunk>> chunkMap;
     shared_ptr<BlockTexture> blockTexture;
+    const int SPAWN_SIZE = 2;
 
     // Element buffer object shared between all chunks
     shared_ptr<ElementBuffer> ebo;
