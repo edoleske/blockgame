@@ -62,19 +62,25 @@ void Game::handleInput() {
         glfwSetWindowShouldClose(window, true);
     }
 
-    vec2 velocity(0.0f, 0.0f);
+    vec3 velocity(0.0f);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        velocity.y += 1.0f;
+        velocity.z += 1.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        velocity.y -= 1.0f;
+        velocity.z -= 1.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         velocity.x -= 1.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         velocity.x += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        velocity.y += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        velocity.y -= 1.0f;
     }
 
     if (glm::length(velocity) != 0) {

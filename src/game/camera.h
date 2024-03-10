@@ -13,7 +13,7 @@ public:
 
     void setAspectRatio(int width, int height);
 
-    void move(const vec2 &normalizedVelocity, float deltaTime);
+    void move(const vec3 &normalizedVelocity, float deltaTime);
     void rotate(float xOffset, float yOffset);
 
     void recalculateProjectionMatrix();

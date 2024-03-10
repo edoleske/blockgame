@@ -21,9 +21,10 @@ void Camera::setAspectRatio(int width, int height) {
     }
 }
 
-void Camera::move(const vec2 &normalizedVelocity, float deltaTime) {
-    position += normalizedVelocity.y * SPEED * deltaTime * front;
+void Camera::move(const vec3 &normalizedVelocity, float deltaTime) {
     position += normalizedVelocity.x * SPEED * deltaTime * glm::normalize(glm::cross(front, up));
+    position += normalizedVelocity.y * SPEED * deltaTime * up;
+    position += normalizedVelocity.z * SPEED * deltaTime * front;
 
     recalculateViewMatrix();
 }
