@@ -9,11 +9,6 @@ World::World() {
     seed = rd();
     noise = make_unique<NoiseGenerator>(seed);
 
-    std::cout << "Test  1.1 -  1.1: " << noise->get(1.1, 0.1234, 1.1);
-    std::cout << "Test -1.1 -  1.1: " << noise->get(-1.1, 0.1234, -1.1);
-    std::cout << "Test  1.1 - -1.1: " << noise->get(1.1, 0.1234, -1.1);
-    std::cout << "Test -1.1 - -1.1: " << noise->get(-1.1, 0.1234, -1.1);
-
     blockTexture = make_shared<BlockTexture>();
     blockTexture->getTexture()->bind();
 }
