@@ -10,6 +10,8 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <random>
+#include <algorithm>
 #include <exception>
 #include <filesystem>
 #include <utility>

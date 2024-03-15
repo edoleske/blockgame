@@ -1,17 +1,32 @@
 #include "chunk.h"
 
-Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture)
+Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture,
+             const NoiseGenerator* noise)
         : chunkPosition(x, 0, z), ebo(ebo), blockTexture(blockTexture) {
+    // 2D height map
+    auto heightMap = std::array<std::array<int, CHUNK_SIZE_Z>, CHUNK_SIZE_X>();
+    for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
+        auto fx = static_cast<float>(31 + x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X);
+        for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+            auto fz = static_cast<float>(31 + z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z);
+            heightMap[bx][bz] = 50 + static_cast<int>(std::abs(noise->get(fx * 0.05f, 0.05f, fz * 0.05f)) * 50);
+        }
+    }
+
+    auto pair = make_pair(x, z);
+
     // Fill chunk data with blocks
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
-        for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
-            for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+        for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+            auto height = heightMap[bx][bz];
+            for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
                 auto type = BlockType::AIR;
-                if (by == 64) {
+
+                if (by == height) {
                     type = BlockType::GRASS;
-                } else if (by < 64 && by > 61) {
+                } else if (by < height && by > height - 3) {
                     type = BlockType::DIRT;
-                } else if (by > 0 && by < 62) {
+                } else if (by > 0 && by < height - 2) {
                     type = BlockType::STONE;
                 } else if (by == 0) {
                     type = BlockType::BEDROCK;
@@ -38,9 +53,15 @@ Block* Chunk::getBlock(int x, int y, int z) const {
     return nullptr;
 }
 
-void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chunk* frontChunk) {
+void Chunk::buildMesh(const map<pair<int, int>, unique_ptr<Chunk>>& chunkMap) {
     chunkBuilt = false;
     vertices.clear();
+
+    // Get adjacent chunks
+    auto leftChunk = chunkMap.find(make_pair(chunkPosition.x - 1, chunkPosition.z));
+    auto rightChunk = chunkMap.find(make_pair(chunkPosition.x + 1, chunkPosition.z));
+    auto backChunk = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z - 1));
+    auto frontChunk = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z + 1));
 
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
@@ -53,8 +74,8 @@ void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chu
                     Block* leftBlock = nullptr;
                     if (bx > 0) {
                         leftBlock = getBlock(bx - 1, by, bz);
-                    } else if (leftChunk != nullptr) {
-                        leftBlock = leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz);
+                    } else if (leftChunk != chunkMap.end()) {
+                        leftBlock = leftChunk->second->getBlock(CHUNK_SIZE_X - 1, by, bz);
                     }
 
                     if (leftBlock == nullptr || leftBlock->getType() == BlockType::AIR) {
@@ -65,8 +86,8 @@ void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chu
                     Block* rightBlock = nullptr;
                     if (bx < CHUNK_SIZE_X - 1) {
                         rightBlock = getBlock(bx + 1, by, bz);
-                    } else if (rightChunk != nullptr) {
-                        rightBlock = rightChunk->getBlock(0, by, bz);
+                    } else if (rightChunk != chunkMap.end()) {
+                        rightBlock = rightChunk->second->getBlock(0, by, bz);
                     }
 
                     if (rightBlock == nullptr || rightBlock->getType() == BlockType::AIR) {
@@ -77,8 +98,8 @@ void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chu
                     Block* backBlock = nullptr;
                     if (bz > 0) {
                         backBlock = getBlock(bx, by, bz - 1);
-                    } else if (backChunk != nullptr) {
-                        backBlock = backChunk->getBlock(CHUNK_SIZE_Z - 1, by, bz);
+                    } else if (backChunk != chunkMap.end()) {
+                        backBlock = backChunk->second->getBlock(bx, by, CHUNK_SIZE_Z - 1);
                     }
 
                     if (backBlock == nullptr || backBlock->getType() == BlockType::AIR) {
@@ -89,8 +110,8 @@ void Chunk::buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chu
                     Block* frontBlock = nullptr;
                     if (bz < CHUNK_SIZE_Z - 1) {
                         frontBlock = getBlock(bx, by, bz + 1);
-                    } else if (frontChunk != nullptr) {
-                        frontBlock = frontChunk->getBlock(0, by, bz);
+                    } else if (frontChunk != chunkMap.end()) {
+                        frontBlock = frontChunk->second->getBlock(bx, by, 0);
                     }
 
                     if (frontBlock == nullptr || frontBlock->getType() == BlockType::AIR) {
@@ -149,7 +170,7 @@ void Chunk::addFace(Block* block, BlockFace face, const u8vec3& position) {
     auto coordinates = blockTexture->getTextureCoordinates(name);
     auto offset = blockTexture->getOffset();
 
-    for (const auto& vertex : Block::blockFaceVertices[face]) {
+    for (const auto& vertex: Block::blockFaceVertices[face]) {
         vertices.push_back(Vertex(vertex.position + position, (vertex.uv * offset) + coordinates));
     }
 }

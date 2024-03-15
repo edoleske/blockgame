@@ -8,13 +8,14 @@
 #include "gl/vertexArray.h"
 #include "gl/elementBuffer.h"
 #include "block.h"
+#include "utils/noiseGenerator.h"
 
 template<class T>
 using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
 
 class Chunk {
 public:
-    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
+    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture, const NoiseGenerator* noise);
 
     Block* getBlock(int x, int y, int z) const;
 
@@ -24,7 +25,7 @@ public:
 
     const glm::ivec3& getChunkPosition() const;
 
-    void buildMesh(Chunk* leftChunk, Chunk* rightChunk, Chunk* backChunk, Chunk* frontChunk);
+    void buildMesh(const map<pair<int, int>, unique_ptr<Chunk>>& chunkMap);
 
 private:
     bool chunkBuilt = false;

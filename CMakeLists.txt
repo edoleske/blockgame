@@ -34,6 +34,8 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/gl/elementBuffer.h
         src/game/blockTexture.cpp
         src/game/blockTexture.h
+        src/utils/noiseGenerator.cpp
+        src/utils/noiseGenerator.h
 )
 
 target_link_libraries(blockgame glfw)
