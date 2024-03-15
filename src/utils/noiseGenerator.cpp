@@ -32,23 +32,23 @@ float NoiseGenerator::get(float x, float y, float z) const {
     const uint8_t BB = (permutations[(B + 1) & 255] + iz) & 255;
 
     const float p0 = grad(permutations[AA], fx, fy, fz);
-    const float p1 = grad(permutations[BA], fx, fy, fz);
-    const float p2 = grad(permutations[AB], fx, fy, fz);
-    const float p3 = grad(permutations[BB], fx, fy, fz);
-    const float p4 = grad(permutations[(AA + 1) & 255], fx, fy, fz);
-    const float p5 = grad(permutations[(BA + 1) & 255], fx, fy, fz);
-    const float p6 = grad(permutations[(AB + 1) & 255], fx, fy, fz);
-    const float p7 = grad(permutations[(BB + 1) & 255], fx, fy, fz);
+    const float p1 = grad(permutations[BA], fx - 1, fy, fz);
+    const float p2 = grad(permutations[AB], fx, fy - 1, fz);
+    const float p3 = grad(permutations[BB], fx - 1, fy - 1, fz);
+    const float p4 = grad(permutations[(AA + 1) & 255], fx, fy, fz - 1);
+    const float p5 = grad(permutations[(BA + 1) & 255], fx - 1, fy, fz - 1);
+    const float p6 = grad(permutations[(AB + 1) & 255], fx, fy - 1, fz - 1);
+    const float p7 = grad(permutations[(BB + 1) & 255], fx - 1, fy - 1, fz - 1);
 
-    const float q0 = lerp(p0, p1, u);
-    const float q1 = lerp(p2, p3, u);
-    const float q2 = lerp(p4, p5, u);
-    const float q3 = lerp(p6, p7, u);
+    const float q0 = lerp(u, p0, p1);
+    const float q1 = lerp(u, p2, p3);
+    const float q2 = lerp(u, p4, p5);
+    const float q3 = lerp(u, p6, p7);
 
-    const float r0 = lerp(q0, q1, v);
-    const float r1 = lerp(q2, q3, v);
+    const float r0 = lerp(v, q0, q1);
+    const float r1 = lerp(v, q2, q3);
 
-    return lerp(r0, r1, w) * 0.5f + 0.5f;
+    return lerp(w, r0, r1) * 0.5f + 0.5f;
 }
 
 inline constexpr float NoiseGenerator::fade(float t) const {
@@ -63,5 +63,5 @@ inline constexpr float NoiseGenerator::grad(uint8_t hash, float x, float y, floa
     const uint8_t h = hash & 15;
     const float u = h < 8 ? x : y;
     const float v = h < 4 ? y : h == 12 || h == 14 ? x : z;
-    return ((h & 1) == 0 ? u : -v) + ((h & 2) == 0 ? v : -v);
+    return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }

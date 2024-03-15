@@ -6,14 +6,12 @@ Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_pt
     // 2D height map
     auto heightMap = std::array<std::array<int, CHUNK_SIZE_Z>, CHUNK_SIZE_X>();
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
-        auto fx = static_cast<float>(31 + x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X);
+        auto fx = static_cast<float>(x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) + 1.0f / (2 * CHUNK_SIZE_X);
         for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-            auto fz = static_cast<float>(31 + z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z);
-            heightMap[bx][bz] = 50 + static_cast<int>(std::abs(noise->get(fx * 0.05f, 0.05f, fz * 0.05f)) * 50);
+            auto fz = static_cast<float>(z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z) + 1.0f / (2 * CHUNK_SIZE_X);
+            heightMap[bx][bz] = 50 + static_cast<int>(noise->get(fx * 0.05f, 0.05f, fz * 0.05f) * 50);
         }
     }
-
-    auto pair = make_pair(x, z);
 
     // Fill chunk data with blocks
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
