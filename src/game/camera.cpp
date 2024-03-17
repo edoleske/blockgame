@@ -5,6 +5,18 @@ Camera::Camera(float fov, float aspectRatio): fov(fov), aspectRatio(aspectRatio)
     view = glm::lookAt(position, position + front, up);
 }
 
+const vec3& Camera::getPosition() const {
+    return position;
+}
+
+const vec3& Camera::getFront() const {
+    return front;
+}
+
+const vec3& Camera::getUp() const {
+    return up;
+}
+
 const mat4 &Camera::getProjection() const {
     return projection;
 }
@@ -21,19 +33,16 @@ void Camera::setAspectRatio(int width, int height) {
     }
 }
 
-void Camera::move(const vec3 &normalizedVelocity, float deltaTime) {
-    position += normalizedVelocity.x * SPEED * deltaTime * glm::normalize(glm::cross(front, up));
-    position += normalizedVelocity.y * SPEED * deltaTime * up;
-    position += normalizedVelocity.z * SPEED * deltaTime * front;
-
+void Camera::move(const vec3 &newPosition) {
+    position = newPosition;
     recalculateViewMatrix();
 }
 
 void Camera::rotate(float xOffset, float yOffset) {
-    yaw += xOffset * ROTATE_SENSITIVITY;
+    yaw += xOffset;
     yaw = glm::mod(yaw, 360.0f);
 
-    pitch += yOffset * ROTATE_SENSITIVITY;
+    pitch += yOffset;
     pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
     vec3 direction(

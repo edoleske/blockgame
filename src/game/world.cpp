@@ -5,30 +5,36 @@ World::World() {
     ebo = make_shared<ElementBuffer>();
     initializeEBO();
 
-    std::random_device rd;
-    seed = rd();
-    noise = make_unique<NoiseGenerator>(seed);
-
-    blockTexture = make_shared<BlockTexture>();
-    blockTexture->getTexture()->bind();
-
     // Create save folder
     const auto savePath = "saves/" + name;
     if (!fs::is_directory(savePath) || !fs::exists(savePath)) {
         fs::create_directories(savePath);
     }
+
+    if (!loadLevel()) {
+        std::random_device rd;
+        seed = rd();
+        createLevel();
+    }
+
+    noise = make_unique<NoiseGenerator>(seed);
+
+    blockTexture = make_shared<BlockTexture>();
+    blockTexture->getTexture()->bind();
+
+    chunkMap = make_unique<ChunkMap>();
 }
 
 Chunk* World::getChunk(int x, int z) const {
-    auto chunk = chunkMap.find(make_pair(x, z));
-    if (chunk != chunkMap.end()) {
+    auto chunk = chunkMap->find(make_pair(x, z));
+    if (chunk != chunkMap->end()) {
         return chunk->second.get();
     }
     return nullptr;
 }
 
 bool World::chunkExists(int x, int z) const {
-    return chunkMap.find(make_pair(x, z)) != chunkMap.end();
+    return chunkMap->find(make_pair(x, z)) != chunkMap->end();
 }
 
 Block* World::getBlock(int x, int y, int z) {
@@ -43,9 +49,9 @@ void World::generateSpawnArea() {
     // Create chunks
     for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
         for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
-            chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
+            chunkMap->emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
 
-            auto chunk = chunkMap.at(make_pair(x, z)).get();
+            auto chunk = chunkMap->at(make_pair(x, z)).get();
             loadFromRegionFile(x, z);
             if (chunk->getChunkState() == ChunkState::EMPTY) {
                 chunk->generate(noise.get());
@@ -57,72 +63,131 @@ void World::generateSpawnArea() {
     // Build chunk meshes
     for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
         for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
-            auto chunk = chunkMap.at(make_pair(x, z)).get();
-            chunk->buildMesh(chunkMap);
+            auto chunk = chunkMap->at(make_pair(x, z)).get();
+            chunk->buildMesh(chunkMap.get());
+        }
+    }
+}
+
+void World::updateChunks(const vec3& playerPosition) {
+    // Instead of wastefully rebuilding chunks, we do it all at once
+    set<pair<int, int>> chunkRebuildSet;
+
+    auto px = static_cast<int>(playerPosition.x) >> 4;
+    auto pz = static_cast<int>(playerPosition.z) >> 4;
+
+    // Unload chunks that are beyond render distance
+    for (auto it = chunkMap->begin(); it != chunkMap->end();) {
+        auto x = it->first.first;
+        auto z = it->first.second;
+
+        auto xd = std::abs(px - x);
+        auto zd = std::abs(pz - z);
+        if (xd > RENDER_DISTANCE || zd > RENDER_DISTANCE) {
+            chunkRebuildSet.insert(it->first);
+            chunkRebuildSet.insert(make_pair(x - 1, z));
+            chunkRebuildSet.insert(make_pair(x + 1, z));
+            chunkRebuildSet.insert(make_pair(x, z - 1));
+            chunkRebuildSet.insert(make_pair(x, z + 1));
+
+            it = chunkMap->erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    // Load new chunks
+    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
+        for (int x  = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
+            auto xz = make_pair(x, z);
+            if (chunkMap->find(xz) == chunkMap->end()) {
+                chunkMap->emplace(xz, make_unique<Chunk>(x, z, ebo, blockTexture));
+
+                auto chunk = chunkMap->at(xz).get();
+                loadFromRegionFile(x, z);
+                if (chunk->getChunkState() == ChunkState::EMPTY) {
+                    chunk->generate(noise.get());
+                    updateRegionFile(x, z);
+                }
+
+                chunkRebuildSet.insert(xz);
+                chunkRebuildSet.insert(make_pair(x - 1, z));
+                chunkRebuildSet.insert(make_pair(x + 1, z));
+                chunkRebuildSet.insert(make_pair(x, z - 1));
+                chunkRebuildSet.insert(make_pair(x, z + 1));
+            }
+        }
+    }
+
+    // Rebuild all affected chunks once
+    for (auto xz : chunkRebuildSet) {
+        auto chunk = chunkMap->find(xz);
+        if (chunk != chunkMap->end()) {
+            chunk->second.get()->buildMesh(chunkMap.get());
         }
     }
 }
 
 void World::loadChunk(int x, int z) {
-    chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
-    auto chunk = chunkMap.at(make_pair(x, z)).get();
+    chunkMap->emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
+    auto chunk = chunkMap->at(make_pair(x, z)).get();
     chunk->generate(noise.get());
-    chunk->buildMesh(chunkMap);
+    chunk->buildMesh(chunkMap.get());
 
     // Rebuild surrounding meshes
     auto leftChunk = getChunk(x - 1, z);
     if (leftChunk != nullptr) {
-        leftChunk->buildMesh(chunkMap);
+        leftChunk->buildMesh(chunkMap.get());
     }
 
     auto rightChunk = getChunk(x + 1, z);
     if (rightChunk != nullptr) {
-        rightChunk->buildMesh(chunkMap);
+        rightChunk->buildMesh(chunkMap.get());
     }
 
     auto backChunk = getChunk(x, z - 1);
     if (backChunk != nullptr) {
-        backChunk->buildMesh(chunkMap);
+        backChunk->buildMesh(chunkMap.get());
     }
 
     auto frontChunk = getChunk(x, z + 1);
     if (frontChunk != nullptr) {
-        frontChunk->buildMesh(chunkMap);
+        frontChunk->buildMesh(chunkMap.get());
     }
 }
 
 void World::unloadChunk(int x, int z) {
-    auto it = chunkMap.find(make_pair(x, z));
-    if (it != chunkMap.end()) {
-        chunkMap.erase(it);
+    auto it = chunkMap->find(make_pair(x, z));
+    if (it != chunkMap->end()) {
+        chunkMap->erase(it);
     }
 
     // Rebuild surrounding meshes
     auto leftChunk = getChunk(x - 1, z);
     if (leftChunk != nullptr) {
-        leftChunk->buildMesh(chunkMap);
+        leftChunk->buildMesh(chunkMap.get());
     }
 
     auto rightChunk = getChunk(x + 1, z);
     if (rightChunk != nullptr) {
-        rightChunk->buildMesh(chunkMap);
+        rightChunk->buildMesh(chunkMap.get());
     }
 
     auto backChunk = getChunk(x, z - 1);
     if (backChunk != nullptr) {
-        backChunk->buildMesh(chunkMap);
+        backChunk->buildMesh(chunkMap.get());
     }
 
     auto frontChunk = getChunk(x, z + 1);
     if (frontChunk != nullptr) {
-        frontChunk->buildMesh(chunkMap);
+        frontChunk->buildMesh(chunkMap.get());
     }
 }
 
 void World::renderWorld(Shader* shader) {
     shader->use();
 
-    for (auto const& chunkRecord: chunkMap) {
+    for (auto const& chunkRecord: *chunkMap) {
         auto chunk = chunkRecord.second.get();
         shader->setInteger("chunkX", chunk->getChunkPosition().x);
         shader->setInteger("chunkZ", chunk->getChunkPosition().z);
@@ -149,6 +214,34 @@ void World::initializeEBO() {
     }
 
     ebo->bufferData(faceCount * 6 * sizeof(GLuint), data);
+}
+
+void World::createLevel() {
+    const auto filename = "saves/" + name + "/random.seed";
+
+    ofstream ofs;
+    ofs.open(filename, std::ios::binary);
+    if (ofs.is_open()) {
+        ofs.write((char*)&seed, sizeof(seed));
+        ofs.close();
+    }
+}
+
+bool World::loadLevel() {
+    const auto filename = "saves/" + name + "/random.seed";
+    if (!fs::exists(filename)) {
+        return false;
+    }
+
+    ifstream ifs;
+    ifs.open(filename, std::ios::binary);
+    if (!ifs.is_open()) {
+        return false;
+    }
+    ifs.read((char*)&seed, sizeof(seed));
+    ifs.close();
+
+    return true;
 }
 
 string World::getRegionFilePath(int x, int z) const {

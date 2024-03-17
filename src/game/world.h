@@ -19,6 +19,8 @@ public:
 
     void generateSpawnArea();
 
+    void updateChunks(const vec3& playerPosition);
+
     void loadChunk(int x, int z);
 
     void unloadChunk(int x, int z);
@@ -27,11 +29,12 @@ public:
 
 private:
     string name = "NewWorld";
-    map<pair<int, int>, unique_ptr<Chunk>> chunkMap;
+    unique_ptr<ChunkMap> chunkMap;
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
     const int SPAWN_SIZE = 6;
+    static constexpr int RENDER_DISTANCE = 4;
 
     // Shared block texture
     shared_ptr<BlockTexture> blockTexture;
@@ -42,6 +45,8 @@ private:
     void initializeEBO();
 
     // Region file management
+    void createLevel();
+    bool loadLevel();
     inline string getRegionFilePath(int x, int z) const;
     static void createRegionFile(const string& filepath);
     void updateRegionFile(int x, int z) const;

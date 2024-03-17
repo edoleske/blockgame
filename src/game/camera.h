@@ -13,11 +13,18 @@ public:
 
     void setAspectRatio(int width, int height);
 
-    void move(const vec3 &normalizedVelocity, float deltaTime);
+    void move(const vec3 &newPosition);
     void rotate(float xOffset, float yOffset);
 
     void recalculateProjectionMatrix();
     void recalculateViewMatrix();
+
+    const vec3& getPosition() const;
+
+    const vec3& getFront() const;
+
+    const vec3& getUp() const;
+
 private:
     float fov, aspectRatio;
     float pitch = 0.0f, yaw = 0.0f;
@@ -28,9 +35,6 @@ private:
 
     mat4 projection = mat4(1.0f);
     mat4 view = mat4(1.0f);
-
-    const float SPEED = 8.0f;
-    const float ROTATE_SENSITIVITY = 0.1f;
 };
 
 

@@ -1,6 +1,7 @@
 #include "game.h"
 
-Game::Game(int width, int height) : Window(width, height) {
+Game::Game(int width, int height) : Window(width, height),
+                                    player(45.0f, static_cast<float>(width) / static_cast<float>(height)) {
     // Turn on depth testing
     glEnable(GL_DEPTH_TEST);
 
@@ -15,8 +16,6 @@ Game::Game(int width, int height) : Window(width, height) {
 
     // Wireframe for mesh debugging
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    camera = make_unique<Camera>(45.0f, static_cast<float>(width) / static_cast<float>(height));
 
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
     shader->use();
@@ -40,16 +39,18 @@ void Game::loop() {
         handleInput();
         handleMouse();
 
-        // Window can resize itself, so we update our class every frame in case it has changed
+        // Window can resize itself, so we updateAspectRatio our class every frame in case it has changed
         glfwGetWindowSize(window, &width, &height);
-        camera->setAspectRatio(width, height);
+        player.updateAspectRatio(width, height);
+
+        world->updateChunks(player.getCamera().getPosition());
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update shader with camera matrices
         shader->use();
-        shader->setMatrix4("view", camera->getView());
-        shader->setMatrix4("projection", camera->getProjection());
+        shader->setMatrix4("view", player.getCamera().getView());
+        shader->setMatrix4("projection", player.getCamera().getProjection());
 
         world->renderWorld(shader.get());
 
@@ -84,7 +85,7 @@ void Game::handleInput() {
     }
 
     if (glm::length(velocity) != 0) {
-        camera->move(glm::normalize(velocity), deltaTime);
+        player.onMove(glm::normalize(velocity) * deltaTime);
     }
 }
 
@@ -97,5 +98,5 @@ void Game::handleMouse() {
     lastMouseX = x;
     lastMouseY = y;
 
-    camera->rotate(xOffset, yOffset);
+    player.onRotate(xOffset, yOffset);
 }

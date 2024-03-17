@@ -13,6 +13,9 @@
 template<class T>
 using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
 
+class Chunk;
+typedef map<pair<int, int>, unique_ptr<Chunk>> ChunkMap;
+
 enum class ChunkState : uint8_t {
     EMPTY, POPULATED, BUILT
 };
@@ -25,7 +28,7 @@ public:
 
     void render();
 
-    void buildMesh(const map<pair<int, int>, unique_ptr<Chunk>>& chunkMap);
+    void buildMesh(ChunkMap* chunkMap);
 
     void write(vector<char>& data);
 

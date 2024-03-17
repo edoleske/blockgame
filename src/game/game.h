@@ -8,8 +8,8 @@
 #include "gl/vertexArray.h"
 #include "gl/shader.h"
 #include "gl/texture.h"
-#include "camera.h"
 #include "world.h"
+#include "player.h"
 
 class Game : public Window {
 public:
@@ -19,7 +19,7 @@ public:
 
 private:
     double lastMouseX = 0.0, lastMouseY = 0.0;
-    unique_ptr<Camera> camera;
+    Player player;
     unique_ptr<Shader> shader;
     unique_ptr<World> world;
 
