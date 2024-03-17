@@ -11,7 +11,7 @@
 #include "utils/noiseGenerator.h"
 
 template<class T>
-using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
+using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;
 
 class Chunk;
 typedef unordered_map<pair<int, int>, unique_ptr<Chunk>, IntPairHash> ChunkMap;
@@ -45,7 +45,7 @@ public:
 private:
     ChunkState state = ChunkState::EMPTY;
     glm::ivec3 chunkPosition;
-    ChunkData<unique_ptr<Block>> blocks;
+    ChunkData<Block*> blocks;
     vector<Vertex> vertices;
     VertexArray vao;
     VertexBuffer vbo;
@@ -53,6 +53,7 @@ private:
     shared_ptr<BlockTexture> blockTexture;
 
     void addFace(Block* block, BlockFace face, const u8vec3& position);
+    static inline int getIndex(int x, int y, int z);
 };
 
 

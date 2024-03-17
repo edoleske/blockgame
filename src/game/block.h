@@ -25,7 +25,7 @@ public:
 
     uint8_t getState() const;
 
-    static map<BlockFace, vector<Vertex>> blockFaceVertices;
+    static unordered_map<BlockFace, vector<Vertex>> blockFaceVertices;
 
     static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
 

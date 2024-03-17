@@ -12,7 +12,7 @@ uint8_t Block::getState() const {
     return state;
 }
 
-map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
+unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
         {BlockFace::TOP,    {
                                     {{0, 1, 0}, {0, 0}},
                                     {{1, 1, 0}, {1, 0}},

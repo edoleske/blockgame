@@ -19,7 +19,7 @@ Game::Game(int width, int height) : Window(width, height),
 
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
     shader->use();
-    shader->setInteger("renderDistance", 6);
+    shader->setInteger("renderDistance", RENDER_DISTANCE);
     shader->setVector4f("uFogColor", vec4((vec3(190.0f, 220.0f, 245.0f) / 255.0f) * 1.1f, 1.0f));
 
     world = make_unique<World>();
@@ -52,7 +52,7 @@ void Game::loop() {
         shader->setMatrix4("view", player.getCamera().getView());
         shader->setMatrix4("projection", player.getCamera().getProjection());
 
-        world->renderWorld(shader.get());
+        world->renderWorld(shader.get(), player.getCamera().getPosition());
 
         glfwSwapBuffers(window);
     }

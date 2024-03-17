@@ -25,7 +25,7 @@ public:
 
     void unloadChunk(int x, int z);
 
-    void renderWorld(Shader* shader);
+    void renderWorld(Shader* shader, const vec3& playerPosition);
 
 private:
     string name = "NewWorld";
@@ -33,7 +33,7 @@ private:
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
-    const int SPAWN_SIZE = 6;
+    const int SPAWN_SIZE = RENDER_DISTANCE;
 
     // Shared block texture
     shared_ptr<BlockTexture> blockTexture;

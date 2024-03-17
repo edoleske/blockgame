@@ -80,7 +80,7 @@ void World::updateChunks(const vec3& playerPosition) {
         auto x = it.first.first;
         auto z = it.first.second;
 
-        if (std::abs(px - x) > RENDER_DISTANCE || std::abs(pz - z) > RENDER_DISTANCE) {
+        if (std::abs(px - x) > RENDER_DISTANCE + 2 || std::abs(pz - z) > RENDER_DISTANCE + 2) {
             it.second->setChunkState(ChunkState::UNLOADED);
         }
     }
@@ -89,10 +89,6 @@ void World::updateChunks(const vec3& playerPosition) {
     for (auto it = chunkMap.begin(); it != chunkMap.end(); ++it) {
         if (it->second->getChunkState() == ChunkState::UNLOADED) {
             auto [x, z] = it->first;
-            unbuildChunk(x - 1, z);
-            unbuildChunk(x + 1, z);
-            unbuildChunk(x, z - 1);
-            unbuildChunk(x, z + 1);
 
             chunkMap.erase(it);
             break;
@@ -100,8 +96,8 @@ void World::updateChunks(const vec3& playerPosition) {
     }
 
     // Load new chunks
-    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
-        for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
+    for (int z = pz - RENDER_DISTANCE - 2; z <= pz + RENDER_DISTANCE + 2; z++) {
+        for (int x = px - RENDER_DISTANCE - 2; x <= px + RENDER_DISTANCE + 2; x++) {
             auto xz = make_pair(x, z);
             if (chunkMap.find(xz) == chunkMap.end()) {
                 chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo, blockTexture));
@@ -118,11 +114,6 @@ void World::updateChunks(const vec3& playerPosition) {
                 chunk->generate(noise.get());
                 updateRegionFile(x, z);
             }
-
-            unbuildChunk(x - 1, z);
-            unbuildChunk(x + 1, z);
-            unbuildChunk(x, z - 1);
-            unbuildChunk(x, z + 1);
 
             break;
         }
@@ -160,19 +151,28 @@ void World::unloadChunk(int x, int z) {
     unbuildChunk(x, z + 1);
 }
 
-void World::renderWorld(Shader* shader) {
+void World::renderWorld(Shader* shader, const vec3& playerPosition) {
     shader->use();
 
-    for (auto const& chunkRecord: chunkMap) {
-        auto chunk = chunkRecord.second.get();
-        shader->setInteger("chunkX", chunk->getChunkPosition().x);
-        shader->setInteger("chunkZ", chunk->getChunkPosition().z);
+    bool builtOne = false;
+    auto px = static_cast<int>(playerPosition.x) >> 4;
+    auto pz = static_cast<int>(playerPosition.z) >> 4;
 
-        if (chunk->getChunkState() != ChunkState::BUILT) {
-            chunk->buildMesh(chunkMap);
+    for (int z = pz - RENDER_DISTANCE - 2; z <= pz + RENDER_DISTANCE + 2; z++) {
+        for (int x = px - RENDER_DISTANCE - 2; x <= px + RENDER_DISTANCE + 2; x++) {
+            auto chunk = chunkMap.find(make_pair(x, z));
+            if (chunk != chunkMap.end()) {
+                shader->setInteger("chunkX", x);
+                shader->setInteger("chunkZ", z);
+
+                if (!builtOne && chunk->second->getChunkState() != ChunkState::BUILT) {
+                    chunk->second->buildMesh(chunkMap);
+                    builtOne = true;
+                }
+
+                chunk->second->render();
+            }
         }
-
-        chunk->render();
     }
 }
 

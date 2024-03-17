@@ -59,7 +59,7 @@ const int CHUNK_SIZE_Y = 254;
 const int CHUNK_SIZE_Z = 16;
 
 const int REGION_SECTOR_SIZE = 4096;
-constexpr int RENDER_DISTANCE = 4;
+constexpr int RENDER_DISTANCE = 8;
 
 struct IntPairHash {
             std::size_t operator() (const pair<int, int> &v) const {

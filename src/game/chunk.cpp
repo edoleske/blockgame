@@ -144,7 +144,7 @@ void Chunk::generate(const NoiseGenerator* noise) {
                     type = BlockType::BEDROCK;
                 }
 
-                blocks[bz][by][bx] = make_unique<Block>(type);
+                blocks[getIndex(bx, by, bz)] = new Block(type);
             }
         }
     }
@@ -164,8 +164,8 @@ void Chunk::write(vector<char>& data) {
     for (int x = 0; x < CHUNK_SIZE_X; ++x) {
         for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
-                auto type = static_cast<uint16_t>(blocks[z][y][x]->getType());
-                uint8_t blockState = blocks[z][y][x]->getState();
+                auto type = static_cast<uint16_t>(blocks[getIndex(x, y, z)]->getType());
+                uint8_t blockState = blocks[getIndex(x, y, z)]->getState();
 
                 auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 3;
                 data[index] = static_cast<const char>(type);
@@ -185,7 +185,7 @@ void Chunk::load(ifstream& in) {
                 uint8_t blockState;
                 in.read((char*) &blockState, sizeof(blockState));
 
-                blocks[z][y][x] = make_unique<Block>(static_cast<BlockType>(type), blockState);
+                blocks[getIndex(x, y, z)] = new Block(static_cast<BlockType>(type), blockState);
             }
         }
     }
@@ -194,8 +194,8 @@ void Chunk::load(ifstream& in) {
 }
 
 Block* Chunk::getBlock(int x, int y, int z) const {
-    if (x >= 0 && x < CHUNK_SIZE_X && y >= 0 && y < CHUNK_SIZE_Y && z >= 0 && z < CHUNK_SIZE_Z) {
-        return blocks[z][y][x].get();
+    if (state != ChunkState::EMPTY) {
+        return blocks[getIndex(x, y, z)];
     }
     return nullptr;
 }
@@ -220,4 +220,8 @@ void Chunk::addFace(Block* block, BlockFace face, const u8vec3& position) {
 
 void Chunk::setChunkState(ChunkState state) {
     Chunk::state = state;
+}
+
+int Chunk::getIndex(int x, int y, int z) {
+    return x * CHUNK_SIZE_Y * CHUNK_SIZE_Z + y * CHUNK_SIZE_Z + z;
 }
