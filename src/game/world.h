@@ -29,12 +29,11 @@ public:
 
 private:
     string name = "NewWorld";
-    unique_ptr<ChunkMap> chunkMap;
+    ChunkMap chunkMap;
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
     const int SPAWN_SIZE = 6;
-    static constexpr int RENDER_DISTANCE = 4;
 
     // Shared block texture
     shared_ptr<BlockTexture> blockTexture;
@@ -43,6 +42,8 @@ private:
     shared_ptr<ElementBuffer> ebo;
 
     void initializeEBO();
+
+    inline void unbuildChunk(int x, int z);
 
     // Region file management
     void createLevel();

@@ -29,7 +29,7 @@ const vec2& BlockTexture::getTextureCoordinates(BlockTextureName name) const {
     if (coordinates != textureCoordinateMap.end()) {
         return coordinates->second;
     }
-    return {0.0f, 1.0f};
+    return textureCoordinateMap.begin()->second;
 }
 
 const vec2& BlockTexture::getOffset() const {

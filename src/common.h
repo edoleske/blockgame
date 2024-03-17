@@ -8,6 +8,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -16,7 +17,6 @@
 #include <exception>
 #include <filesystem>
 #include <utility>
-#include <thread>
 
 using std::string;
 using std::stringstream;
@@ -28,12 +28,12 @@ using std::make_unique;
 using std::shared_ptr;
 using std::make_shared;
 using std::map;
+using std::unordered_map;
 using std::array;
 using std::vector;
 using std::set;
 using std::pair;
 using std::make_pair;
-using std::thread;
 
 namespace fs = std::filesystem;
 
@@ -59,5 +59,12 @@ const int CHUNK_SIZE_Y = 254;
 const int CHUNK_SIZE_Z = 16;
 
 const int REGION_SECTOR_SIZE = 4096;
+constexpr int RENDER_DISTANCE = 4;
+
+struct IntPairHash {
+            std::size_t operator() (const pair<int, int> &v) const {
+                return std::hash<int>()(v.first) ^ std::hash<int>()(v.second) << 1;
+            }
+};
 
 #endif //BLOCKGAME_COMMON_H

@@ -14,10 +14,10 @@ template<class T>
 using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
 
 class Chunk;
-typedef map<pair<int, int>, unique_ptr<Chunk>> ChunkMap;
+typedef unordered_map<pair<int, int>, unique_ptr<Chunk>, IntPairHash> ChunkMap;
 
 enum class ChunkState : uint8_t {
-    EMPTY, POPULATED, BUILT
+    EMPTY, POPULATED, BUILT, UNLOADED
 };
 
 class Chunk {
@@ -28,7 +28,7 @@ public:
 
     void render();
 
-    void buildMesh(ChunkMap* chunkMap);
+    void buildMesh(const ChunkMap& chunkMap);
 
     void write(vector<char>& data);
 
@@ -37,6 +37,8 @@ public:
     Block* getBlock(int x, int y, int z) const;
 
     ChunkState getChunkState() const;
+
+    void setChunkState(ChunkState state);
 
     const glm::ivec3& getChunkPosition() const;
 
