@@ -18,7 +18,9 @@
 
 using std::string;
 using std::stringstream;
+using std::fstream;
 using std::ifstream;
+using std::ofstream;
 using std::unique_ptr;
 using std::make_unique;
 using std::shared_ptr;
@@ -51,5 +53,7 @@ using glm::mat4;
 const int CHUNK_SIZE_X = 16;
 const int CHUNK_SIZE_Y = 254;
 const int CHUNK_SIZE_Z = 16;
+
+const int REGION_SECTOR_SIZE = 4096;
 
 #endif //BLOCKGAME_COMMON_H

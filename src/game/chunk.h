@@ -13,22 +13,32 @@
 template<class T>
 using ChunkData = array<array<array<T, CHUNK_SIZE_X>, CHUNK_SIZE_Y>, CHUNK_SIZE_Z>;
 
+enum class ChunkState : uint8_t {
+    EMPTY, POPULATED, BUILT
+};
+
 class Chunk {
 public:
-    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture, const NoiseGenerator* noise);
+    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
 
-    Block* getBlock(int x, int y, int z) const;
-
-    bool isChunkBuilt() const;
+    void generate(const NoiseGenerator* noise);
 
     void render();
 
-    const glm::ivec3& getChunkPosition() const;
-
     void buildMesh(const map<pair<int, int>, unique_ptr<Chunk>>& chunkMap);
 
+    void write(vector<char>& data);
+
+    void load(ifstream& in);
+
+    Block* getBlock(int x, int y, int z) const;
+
+    ChunkState getChunkState() const;
+
+    const glm::ivec3& getChunkPosition() const;
+
 private:
-    bool chunkBuilt = false;
+    ChunkState state = ChunkState::EMPTY;
     glm::ivec3 chunkPosition;
     ChunkData<unique_ptr<Block>> blocks;
     vector<Vertex> vertices;

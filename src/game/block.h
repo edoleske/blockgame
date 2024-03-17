@@ -6,11 +6,11 @@
 #include "utils/vertex.h"
 #include "blockTexture.h"
 
-enum class BlockFace {
+enum class BlockFace : uint8_t {
     TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
 };
 
-enum class BlockType {
+enum class BlockType : uint16_t {
     AIR, DIRT, GRASS, BEDROCK, STONE
 };
 
@@ -19,8 +19,11 @@ public:
     Block() = default;
 
     explicit Block(BlockType type);
+    explicit Block(BlockType type, uint8_t state);
 
     BlockType getType() const;
+
+    uint8_t getState() const;
 
     static map<BlockFace, vector<Vertex>> blockFaceVertices;
 
@@ -28,6 +31,7 @@ public:
 
 private:
     BlockType type = BlockType::AIR;
+    uint8_t state{ 0 };
 };
 
 

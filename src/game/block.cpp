@@ -2,8 +2,14 @@
 
 Block::Block(BlockType type) : type(type) {}
 
+Block::Block(BlockType type, uint8_t state): type(type), state(state) {}
+
 BlockType Block::getType() const {
     return type;
+}
+
+uint8_t Block::getState() const {
+    return state;
 }
 
 map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {

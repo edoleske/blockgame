@@ -17,102 +17,35 @@ public:
 
     Block* getBlock(int x, int y, int z);
 
-    void generateSpawnArea() {
-        // Create chunks
-        for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
-            for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
-                chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture, noise.get()));
-            }
-        }
+    void generateSpawnArea();
 
-        // Build chunk meshes
-        for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
-            for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
-                auto chunk = chunkMap.at(make_pair(x, z)).get();
-                chunk->buildMesh(chunkMap);
-            }
-        }
-    }
+    void loadChunk(int x, int z);
 
-    void createChunk(int x, int z) {
-        chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture, noise.get()));
-        auto chunk = chunkMap.at(make_pair(x, z)).get();
-        chunk->buildMesh(chunkMap);
+    void unloadChunk(int x, int z);
 
-        // Rebuild surrounding meshes
-        auto leftChunk = getChunk(x - 1, z);
-        if (leftChunk != nullptr) {
-            leftChunk->buildMesh(chunkMap);
-        }
-
-        auto rightChunk = getChunk(x + 1, z);
-        if (rightChunk != nullptr) {
-            rightChunk->buildMesh(chunkMap);
-        }
-
-        auto backChunk = getChunk(x, z - 1);
-        if (backChunk != nullptr) {
-            backChunk->buildMesh(chunkMap);
-        }
-
-        auto frontChunk = getChunk(x, z + 1);
-        if (frontChunk != nullptr) {
-            frontChunk->buildMesh(chunkMap);
-        }
-    }
-
-    void unloadChunk(int x, int z) {
-        auto it = chunkMap.find(make_pair(x, z));
-        if (it != chunkMap.end()) {
-            chunkMap.erase(it);
-        }
-
-        // Rebuild surrounding meshes
-        auto leftChunk = getChunk(x - 1, z);
-        if (leftChunk != nullptr) {
-            leftChunk->buildMesh(chunkMap);
-        }
-
-        auto rightChunk = getChunk(x + 1, z);
-        if (rightChunk != nullptr) {
-            rightChunk->buildMesh(chunkMap);
-        }
-
-        auto backChunk = getChunk(x, z - 1);
-        if (backChunk != nullptr) {
-            backChunk->buildMesh(chunkMap);
-        }
-
-        auto frontChunk = getChunk(x, z + 1);
-        if (frontChunk != nullptr) {
-            frontChunk->buildMesh(chunkMap);
-        }
-    }
-
-    void renderWorld(Shader* shader) {
-        shader->use();
-
-        for (auto const& chunkRecord: chunkMap) {
-            auto chunk = chunkRecord.second.get();
-            shader->setInteger("chunkX", chunk->getChunkPosition().x);
-            shader->setInteger("chunkZ", chunk->getChunkPosition().z);
-
-            chunk->render();
-        }
-    }
+    void renderWorld(Shader* shader);
 
 private:
+    string name = "NewWorld";
     map<pair<int, int>, unique_ptr<Chunk>> chunkMap;
-    shared_ptr<BlockTexture> blockTexture;
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
     const int SPAWN_SIZE = 6;
 
+    // Shared block texture
+    shared_ptr<BlockTexture> blockTexture;
+
     // Element buffer object shared between all chunks
     shared_ptr<ElementBuffer> ebo;
 
     void initializeEBO();
+
+    // Region file management
+    inline string getRegionFilePath(int x, int z) const;
+    static void createRegionFile(const string& filepath);
+    void updateRegionFile(int x, int z) const;
+    void loadFromRegionFile(int x, int z);
 };
 
 
