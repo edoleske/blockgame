@@ -38,6 +38,8 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/utils/noiseGenerator.h
         src/player/player.cpp
         src/player/player.h
+        src/game/worldGenerator.cpp
+        src/game/worldGenerator.h
 )
 
 target_link_libraries(blockgame glfw)

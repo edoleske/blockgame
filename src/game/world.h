@@ -5,7 +5,7 @@
 #include "common.h"
 #include "chunk.h"
 #include "gl/shader.h"
-#include "utils/noiseGenerator.h"
+#include "worldGenerator.h"
 
 class World {
 public:
@@ -31,7 +31,7 @@ private:
     string name = "NewWorld";
     ChunkMap chunkMap;
     unsigned seed;
-    unique_ptr<NoiseGenerator> noise;
+    unique_ptr<WorldGenerator> worldGen;
 
     const int SPAWN_SIZE = RENDER_DISTANCE;
 

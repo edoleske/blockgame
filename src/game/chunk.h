@@ -8,7 +8,7 @@
 #include "gl/vertexArray.h"
 #include "gl/elementBuffer.h"
 #include "block.h"
-#include "utils/noiseGenerator.h"
+#include "worldGenerator.h"
 
 template<class T>
 using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;
@@ -24,7 +24,7 @@ class Chunk {
 public:
     Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
 
-    void generate(const NoiseGenerator* noise);
+    void generate(const unique_ptr<WorldGenerator>& noise);
 
     void render();
 

@@ -113,7 +113,7 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     state = ChunkState::BUILT;
 }
 
-void Chunk::generate(const NoiseGenerator* noise) {
+void Chunk::generate(const unique_ptr<WorldGenerator>& worldGen) {
     // 2D height map
     auto heightMap = std::array<std::array<int, CHUNK_SIZE_Z>, CHUNK_SIZE_X>();
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
@@ -122,7 +122,7 @@ void Chunk::generate(const NoiseGenerator* noise) {
         for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
             auto fz = static_cast<float>(chunkPosition.z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z) +
                       1.0f / (2 * CHUNK_SIZE_X);
-            heightMap[bx][bz] = 50 + static_cast<int>(noise->get(fx * 0.05f, 0.05f, fz * 0.05f) * 50);
+            heightMap[bx][bz] = worldGen->getHeight(fx, fz);
         }
     }
 
