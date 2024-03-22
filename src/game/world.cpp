@@ -35,12 +35,12 @@ bool World::chunkExists(int x, int z) const {
     return chunkMap.find(make_pair(x, z)) != chunkMap.end();
 }
 
-Block* World::getBlock(int x, int y, int z) {
+Block World::getBlock(int x, int y, int z) const {
     auto chunk = getChunk(x / CHUNK_SIZE_X, z / CHUNK_SIZE_Z);
     if (chunk != nullptr) {
         return chunk->getBlock(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z);
     }
-    return nullptr;
+    return {};
 }
 
 void World::generateSpawnArea() {

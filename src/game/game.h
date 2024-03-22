@@ -9,7 +9,7 @@
 #include "gl/shader.h"
 #include "gl/texture.h"
 #include "world.h"
-#include "player.h"
+#include "player/player.h"
 
 class Game : public Window {
 public:

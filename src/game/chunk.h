@@ -34,7 +34,7 @@ public:
 
     void load(ifstream& in);
 
-    Block* getBlock(int x, int y, int z) const;
+    Block getBlock(int x, int y, int z) const;
 
     ChunkState getChunkState() const;
 
@@ -45,14 +45,14 @@ public:
 private:
     ChunkState state = ChunkState::EMPTY;
     glm::ivec3 chunkPosition;
-    ChunkData<Block*> blocks;
+    ChunkData<Block> blocks;
     vector<Vertex> vertices;
     VertexArray vao;
     VertexBuffer vbo;
     shared_ptr<ElementBuffer> ebo;
     shared_ptr<BlockTexture> blockTexture;
 
-    void addFace(Block* block, BlockFace face, const u8vec3& position);
+    void addFace(const Block& block, BlockFace face, const u8vec3& position);
     static inline int getIndex(int x, int y, int z);
 };
 

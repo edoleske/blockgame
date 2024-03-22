@@ -20,8 +20,8 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/utils/vertex.h
         src/gl/shader.cpp
         src/gl/shader.h
-        src/game/camera.cpp
-        src/game/camera.h
+        src/player/camera.cpp
+        src/player/camera.h
         src/game/block.cpp
         src/game/block.h
         src/game/chunk.cpp
@@ -36,8 +36,8 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/game/blockTexture.h
         src/utils/noiseGenerator.cpp
         src/utils/noiseGenerator.h
-        src/game/player.cpp
-        src/game/player.h
+        src/player/player.cpp
+        src/player/player.h
 )
 
 target_link_libraries(blockgame glfw)

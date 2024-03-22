@@ -17,87 +17,86 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
         return;
     }
 
+    // Get adjacent chunks
+    auto leftChunkIt = chunkMap.find(make_pair(chunkPosition.x - 1, chunkPosition.z));
+    auto rightChunkIt = chunkMap.find(make_pair(chunkPosition.x + 1, chunkPosition.z));
+    auto backChunkIt = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z - 1));
+    auto frontChunkIt = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z + 1));
+
+    // Check for error case where neighboring chunks aren't defined
+    if (leftChunkIt == chunkMap.end() || rightChunkIt == chunkMap.end() ||
+        backChunkIt == chunkMap.end() || frontChunkIt == chunkMap.end()) {
+        return;
+    }
+
+    auto leftChunk = leftChunkIt->second.get();
+    auto rightChunk = rightChunkIt->second.get();
+    auto backChunk = backChunkIt->second.get();
+    auto frontChunk = frontChunkIt->second.get();
+
+    // Assert that all neighboring chunks are populated
+    if (leftChunk->getChunkState() == ChunkState::EMPTY || rightChunk->getChunkState() == ChunkState::EMPTY ||
+        backChunk->getChunkState() == ChunkState::EMPTY || frontChunk->getChunkState() == ChunkState::EMPTY) {
+        return;
+    }
+
     state = ChunkState::POPULATED;
     vertices.clear();
-
-    // Get adjacent chunks
-    auto leftChunk = chunkMap.find(make_pair(chunkPosition.x - 1, chunkPosition.z));
-    auto rightChunk = chunkMap.find(make_pair(chunkPosition.x + 1, chunkPosition.z));
-    auto backChunk = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z - 1));
-    auto frontChunk = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z + 1));
 
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto block = getBlock(bx, by, bz);
+                Block block = blocks[getIndex(bx, by, bz)];
                 auto localPosition = u8vec3(bx, by, bz);
 
-                if (block != nullptr && block->getType() != BlockType::AIR) {
+                if (block.getType() != BlockType::AIR) {
                     // Left Face
-                    Block* leftBlock = nullptr;
-                    if (bx > 0) {
-                        leftBlock = getBlock(bx - 1, by, bz);
-                    } else if (leftChunk != chunkMap.end()) {
-                        leftBlock = leftChunk->second->getBlock(CHUNK_SIZE_X - 1, by, bz);
-                    }
+                    bool leftFace = bx > 0 ?
+                                    getBlock(bx - 1, by, bz).getType() == BlockType::AIR :
+                                    leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz).getType() == BlockType::AIR;
 
-                    if (leftBlock == nullptr || leftBlock->getType() == BlockType::AIR) {
+                    if (leftFace) {
                         addFace(block, BlockFace::LEFT, localPosition);
                     }
 
                     // Right Face
-                    Block* rightBlock = nullptr;
-                    if (bx < CHUNK_SIZE_X - 1) {
-                        rightBlock = getBlock(bx + 1, by, bz);
-                    } else if (rightChunk != chunkMap.end()) {
-                        rightBlock = rightChunk->second->getBlock(0, by, bz);
-                    }
+                    bool rightFace = bx < CHUNK_SIZE_X - 1 ?
+                                     getBlock(bx + 1, by, bz).getType() == BlockType::AIR :
+                                     rightChunk->getBlock(0, by, bz).getType() == BlockType::AIR;
 
-                    if (rightBlock == nullptr || rightBlock->getType() == BlockType::AIR) {
+                    if (rightFace) {
                         addFace(block, BlockFace::RIGHT, localPosition);
                     }
 
                     // Back Face
-                    Block* backBlock = nullptr;
-                    if (bz > 0) {
-                        backBlock = getBlock(bx, by, bz - 1);
-                    } else if (backChunk != chunkMap.end()) {
-                        backBlock = backChunk->second->getBlock(bx, by, CHUNK_SIZE_Z - 1);
-                    }
+                    bool backFace = bz > 0 ?
+                                    getBlock(bx, by, bz - 1).getType() == BlockType::AIR :
+                                    backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1).getType() == BlockType::AIR;
 
-                    if (backBlock == nullptr || backBlock->getType() == BlockType::AIR) {
+                    if (backFace) {
                         addFace(block, BlockFace::BACK, localPosition);
                     }
 
                     // Front Face
-                    Block* frontBlock = nullptr;
-                    if (bz < CHUNK_SIZE_Z - 1) {
-                        frontBlock = getBlock(bx, by, bz + 1);
-                    } else if (frontChunk != chunkMap.end()) {
-                        frontBlock = frontChunk->second->getBlock(bx, by, 0);
-                    }
+                    bool frontFace = bz < CHUNK_SIZE_Z - 1 ?
+                                     getBlock(bx, by, bz + 1).getType() == BlockType::AIR :
+                                     frontChunk->getBlock(bx, by, 0).getType() == BlockType::AIR;
 
-                    if (frontBlock == nullptr || frontBlock->getType() == BlockType::AIR) {
+                    if (frontFace) {
                         addFace(block, BlockFace::FRONT, localPosition);
                     }
 
                     // Bottom Face
-                    Block* bottomBlock = nullptr;
-                    if (by > 0) {
-                        bottomBlock = getBlock(bx, by - 1, bz);
-                    }
+                    bool bottomFace = by > 0 && getBlock(bx, by - 1, bz).getType() == BlockType::AIR;
 
-                    if (bottomBlock == nullptr || bottomBlock->getType() == BlockType::AIR) {
+                    if (bottomFace) {
                         addFace(block, BlockFace::BOTTOM, localPosition);
                     }
 
                     // Top Face
-                    Block* topBlock = nullptr;
-                    if (by < CHUNK_SIZE_Y - 1) {
-                        topBlock = getBlock(bx, by + 1, bz);
-                    }
+                    bool topFace = by < CHUNK_SIZE_Y - 1 && getBlock(bx, by + 1, bz).getType() == BlockType::AIR;
 
-                    if (topBlock == nullptr || topBlock->getType() == BlockType::AIR) {
+                    if (topFace) {
                         addFace(block, BlockFace::TOP, localPosition);
                     }
                 }
@@ -144,7 +143,7 @@ void Chunk::generate(const NoiseGenerator* noise) {
                     type = BlockType::BEDROCK;
                 }
 
-                blocks[getIndex(bx, by, bz)] = new Block(type);
+                blocks[getIndex(bx, by, bz)] = Block(type);
             }
         }
     }
@@ -164,8 +163,8 @@ void Chunk::write(vector<char>& data) {
     for (int x = 0; x < CHUNK_SIZE_X; ++x) {
         for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
-                auto type = static_cast<uint16_t>(blocks[getIndex(x, y, z)]->getType());
-                uint8_t blockState = blocks[getIndex(x, y, z)]->getState();
+                auto type = static_cast<uint16_t>(blocks[getIndex(x, y, z)].getType());
+                uint8_t blockState = blocks[getIndex(x, y, z)].getState();
 
                 auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 3;
                 data[index] = static_cast<const char>(type);
@@ -177,6 +176,10 @@ void Chunk::write(vector<char>& data) {
 }
 
 void Chunk::load(ifstream& in) {
+    if (state != ChunkState::EMPTY) {
+        return;
+    }
+
     for (int x = 0; x < CHUNK_SIZE_X; ++x) {
         for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
@@ -185,7 +188,7 @@ void Chunk::load(ifstream& in) {
                 uint8_t blockState;
                 in.read((char*) &blockState, sizeof(blockState));
 
-                blocks[getIndex(x, y, z)] = new Block(static_cast<BlockType>(type), blockState);
+                blocks[getIndex(x, y, z)] = Block(static_cast<BlockType>(type), blockState);
             }
         }
     }
@@ -193,11 +196,8 @@ void Chunk::load(ifstream& in) {
     state = ChunkState::POPULATED;
 }
 
-Block* Chunk::getBlock(int x, int y, int z) const {
-    if (state != ChunkState::EMPTY) {
-        return blocks[getIndex(x, y, z)];
-    }
-    return nullptr;
+Block Chunk::getBlock(int x, int y, int z) const {
+    return blocks[getIndex(x, y, z)];
 }
 
 ChunkState Chunk::getChunkState() const {
@@ -208,8 +208,8 @@ const glm::ivec3& Chunk::getChunkPosition() const {
     return chunkPosition;
 }
 
-void Chunk::addFace(Block* block, BlockFace face, const u8vec3& position) {
-    auto name = Block::getBlockFaceTexture(block->getType(), face);
+void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position) {
+    auto name = Block::getBlockFaceTexture(block.getType(), face);
     auto coordinates = blockTexture->getTextureCoordinates(name);
     auto offset = blockTexture->getOffset();
 
