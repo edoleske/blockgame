@@ -11,5 +11,5 @@ void main() {
         oColor = texture(uTexture, vTexCoords);
 
         // Mix in fog
-        oColor = mix(vec4(pow(uFogColor.xyz, vec3(1.75)), uFogColor.w), oColor, vVisibility);
+//        oColor = mix(vec4(pow(uFogColor.xyz, vec3(1.75)), uFogColor.w), oColor, vVisibility);
 }

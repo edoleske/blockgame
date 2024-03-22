@@ -1,7 +1,7 @@
 #include "camera.h"
 
 Camera::Camera(float fov, float aspectRatio): fov(fov), aspectRatio(aspectRatio) {
-    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 1000.0f);
     view = glm::lookAt(position, position + front, up);
 }
 

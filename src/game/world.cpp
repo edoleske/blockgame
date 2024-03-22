@@ -72,7 +72,7 @@ void World::updateChunks(const vec3& playerPosition) {
     auto pz = static_cast<int>(playerPosition.z) >> 4;
 
     // Unload chunks that are beyond render distance
-    for (auto & it : chunkMap) {
+    for (auto& it: chunkMap) {
         if (it.second->getChunkState() == ChunkState::UNLOADED) {
             continue;
         }
@@ -80,7 +80,7 @@ void World::updateChunks(const vec3& playerPosition) {
         auto x = it.first.first;
         auto z = it.first.second;
 
-        if (std::abs(px - x) > RENDER_DISTANCE + 2 || std::abs(pz - z) > RENDER_DISTANCE + 2) {
+        if (std::abs(px - x) > RENDER_DISTANCE + 1 || std::abs(pz - z) > RENDER_DISTANCE + 1) {
             it.second->setChunkState(ChunkState::UNLOADED);
         }
     }
@@ -96,8 +96,8 @@ void World::updateChunks(const vec3& playerPosition) {
     }
 
     // Load new chunks
-    for (int z = pz - RENDER_DISTANCE - 2; z <= pz + RENDER_DISTANCE + 2; z++) {
-        for (int x = px - RENDER_DISTANCE - 2; x <= px + RENDER_DISTANCE + 2; x++) {
+    for (int z = pz - RENDER_DISTANCE - 1; z <= pz + RENDER_DISTANCE + 1; z++) {
+        for (int x = px - RENDER_DISTANCE - 1; x <= px + RENDER_DISTANCE + 1; x++) {
             auto xz = make_pair(x, z);
             if (chunkMap.find(xz) == chunkMap.end()) {
                 chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo, blockTexture));
@@ -158,14 +158,14 @@ void World::renderWorld(Shader* shader, const vec3& playerPosition) {
     auto px = static_cast<int>(playerPosition.x) >> 4;
     auto pz = static_cast<int>(playerPosition.z) >> 4;
 
-    for (int z = pz - RENDER_DISTANCE - 2; z <= pz + RENDER_DISTANCE + 2; z++) {
-        for (int x = px - RENDER_DISTANCE - 2; x <= px + RENDER_DISTANCE + 2; x++) {
+    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
+        for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
             auto chunk = chunkMap.find(make_pair(x, z));
             if (chunk != chunkMap.end()) {
                 shader->setInteger("chunkX", x);
                 shader->setInteger("chunkZ", z);
 
-                if (!builtOne && chunk->second->getChunkState() != ChunkState::BUILT) {
+                if (!builtOne && chunk->second->getChunkState() != ChunkState::BUILT && chunkNeighborsPopulated(x, z)) {
                     chunk->second->buildMesh(chunkMap);
                     builtOne = true;
                 }
@@ -201,6 +201,13 @@ void World::unbuildChunk(int x, int z) {
     if (chunk != chunkMap.end() && chunk->second->getChunkState() == ChunkState::BUILT) {
         chunk->second->setChunkState(ChunkState::POPULATED);
     }
+}
+
+bool World::chunkNeighborsPopulated(int x, int z) {
+    return getChunk(x - 1, z) != nullptr &&
+           getChunk(x + 1, z) != nullptr &&
+           getChunk(x, z - 1) != nullptr &&
+           getChunk(x, z + 1) != nullptr;
 }
 
 void World::createLevel() {

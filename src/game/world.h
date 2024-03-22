@@ -44,6 +44,7 @@ private:
     void initializeEBO();
 
     inline void unbuildChunk(int x, int z);
+    inline bool chunkNeighborsPopulated(int x, int z);
 
     // Region file management
     void createLevel();
