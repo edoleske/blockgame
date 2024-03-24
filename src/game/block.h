@@ -30,8 +30,7 @@ public:
     static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
 
 private:
-    BlockType type = BlockType::AIR;
-    uint8_t state{ 0 };
+    uint16_t data{ 0 };
 };
 
 

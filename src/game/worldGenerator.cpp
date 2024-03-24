@@ -1,6 +1,6 @@
 #include "worldGenerator.h"
 
-WorldGenerator::WorldGenerator(unsigned int seed): seed(seed) {
+WorldGenerator::WorldGenerator(unsigned int seed) : seed(seed) {
     noise = make_unique<NoiseGenerator>(seed);
 }
 
@@ -16,4 +16,20 @@ int WorldGenerator::getHeight(float x, float z) {
     }
 
     return height;
+}
+
+BlockType WorldGenerator::getBlockType(int blockHeight, int terrainHeight) {
+    if (blockHeight > terrainHeight) {
+        return BlockType::AIR;
+    }
+    if (blockHeight == terrainHeight) {
+        return terrainHeight > 62 ? BlockType::GRASS : BlockType::DIRT;
+    }
+    if (blockHeight < terrainHeight && blockHeight > terrainHeight - 3) {
+        return BlockType::DIRT;
+    }
+    if (blockHeight > 0 && blockHeight < terrainHeight - 2) {
+        return BlockType::STONE;
+    }
+    return BlockType::BEDROCK;
 }

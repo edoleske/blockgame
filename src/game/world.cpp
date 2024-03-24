@@ -1,6 +1,6 @@
 #include "world.h"
 
-World::World() {
+World::World(const unique_ptr<Shader>& shader) {
     // Initialize element buffer object shared between all chunks
     ebo = make_shared<ElementBuffer>();
     initializeEBO();
@@ -21,6 +21,9 @@ World::World() {
 
     blockTexture = make_shared<BlockTexture>();
     blockTexture->getTexture()->bind();
+
+    shader->setInteger("uTexWidth", blockTexture->getTexture()->getWidth());
+    shader->setInteger("uTexHeight", blockTexture->getTexture()->getHeight());
 }
 
 Chunk* World::getChunk(int x, int z) const {

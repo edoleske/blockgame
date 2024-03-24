@@ -4,12 +4,15 @@
 
 #include "common.h"
 #include "utils/noiseGenerator.h"
+#include "block.h"
 
 class WorldGenerator {
 public:
-    WorldGenerator(unsigned seed);
+    explicit WorldGenerator(unsigned seed);
 
     int getHeight(float x, float z);
+
+    static BlockType getBlockType(int blockHeight, int terrainHeight);
 private:
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;

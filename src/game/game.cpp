@@ -14,6 +14,9 @@ Game::Game(int width, int height) : Window(width, height),
     // Capture cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // Disable VSync for performance tuning
+    glfwSwapInterval(0);
+
     // Wireframe for mesh debugging
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -22,7 +25,7 @@ Game::Game(int width, int height) : Window(width, height),
     shader->setInteger("renderDistance", RENDER_DISTANCE);
     shader->setVector4f("uFogColor", vec4((vec3(190.0f, 220.0f, 245.0f) / 255.0f) * 1.1f, 1.0f));
 
-    world = make_unique<World>();
+    world = make_unique<World>(shader);
     world->generateSpawnArea();
 
     glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
@@ -33,7 +36,7 @@ void Game::loop() {
         auto currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - time;
         time = currentTime;
-        glfwSetWindowTitle(window, std::to_string(deltaTime).c_str());
+        glfwSetWindowTitle(window, std::to_string(1.0f / deltaTime).c_str());
 
         glfwPollEvents();
         handleInput();

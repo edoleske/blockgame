@@ -46,9 +46,11 @@ private:
     ChunkState state = ChunkState::EMPTY;
     glm::ivec3 chunkPosition;
     ChunkData<Block> blocks;
+
     vector<Vertex> vertices;
     VertexArray vao;
     VertexBuffer vbo;
+
     shared_ptr<ElementBuffer> ebo;
     shared_ptr<BlockTexture> blockTexture;
 

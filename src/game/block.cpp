@@ -1,15 +1,20 @@
 #include "block.h"
 
-Block::Block(BlockType type) : type(type) {}
+Block::Block(BlockType type) {
+    data = static_cast<uint16_t>(type) << 4;
+}
 
-Block::Block(BlockType type, uint8_t state): type(type), state(state) {}
+Block::Block(BlockType type, uint8_t state) {
+    data = static_cast<uint16_t>(type) << 4;
+    data |= (state & 0xF);
+}
 
 BlockType Block::getType() const {
-    return type;
+    return static_cast<BlockType>(data >> 4);
 }
 
 uint8_t Block::getState() const {
-    return state;
+    return data & 0xF;
 }
 
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {

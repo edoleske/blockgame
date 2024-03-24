@@ -7,7 +7,7 @@ Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_pt
     vbo.bind();
     ebo->bind();
     vbo.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*) nullptr);
-    vbo.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, uv));
+    vbo.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
     VertexArray::unbind();
 }
 
@@ -114,36 +114,18 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 }
 
 void Chunk::generate(const unique_ptr<WorldGenerator>& worldGen) {
-    // 2D height map
-    auto heightMap = std::array<std::array<int, CHUNK_SIZE_Z>, CHUNK_SIZE_X>();
+    int height = 0;
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         auto fx = static_cast<float>(chunkPosition.x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) +
                   1.0f / (2 * CHUNK_SIZE_X);
         for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
             auto fz = static_cast<float>(chunkPosition.z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z) +
                       1.0f / (2 * CHUNK_SIZE_X);
-            heightMap[bx][bz] = worldGen->getHeight(fx, fz);
-        }
-    }
+            height = worldGen->getHeight(fx, fz);
 
-    // Fill chunk data with blocks
-    for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
-        for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-            auto height = heightMap[bx][bz];
+            // Populate column
             for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
-                auto type = BlockType::AIR;
-
-                if (by == height) {
-                    type = BlockType::GRASS;
-                } else if (by < height && by > height - 3) {
-                    type = BlockType::DIRT;
-                } else if (by > 0 && by < height - 2) {
-                    type = BlockType::STONE;
-                } else if (by == 0) {
-                    type = BlockType::BEDROCK;
-                }
-
-                blocks[getIndex(bx, by, bz)] = Block(type);
+                blocks[getIndex(bx, by, bz)] = Block(worldGen->getBlockType(by, height));
             }
         }
     }
@@ -211,10 +193,9 @@ const glm::ivec3& Chunk::getChunkPosition() const {
 void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position) {
     auto name = Block::getBlockFaceTexture(block.getType(), face);
     auto coordinates = blockTexture->getTextureCoordinates(name);
-    auto offset = blockTexture->getOffset();
 
     for (const auto& vertex: Block::blockFaceVertices[face]) {
-        vertices.push_back(Vertex(vertex.position + position, (vertex.uv * offset) + coordinates));
+        vertices.push_back(Vertex(vertex.position + position, (vertex.uv * BlockTexture::RESOLUTION) + coordinates));
     }
 }
 

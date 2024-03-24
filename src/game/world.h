@@ -9,7 +9,7 @@
 
 class World {
 public:
-    World();
+    World(const unique_ptr<Shader>& shader);
 
     Chunk* getChunk(int x, int z) const;
 

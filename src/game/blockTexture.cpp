@@ -13,9 +13,7 @@ BlockTexture::BlockTexture() {
     for (int y = 0; y < rows; y++) {
         for (int x = 0; x < cols; x++) {
             auto name = static_cast<BlockTextureName>(y * cols + x);
-            textureCoordinateMap[name] = vec2(
-                    static_cast<float>(x) * offset.x,
-                    static_cast<float>(y) * offset.y);
+            textureCoordinateMap[name] = u16vec2(x * RESOLUTION,y * RESOLUTION);
         }
     }
 }
@@ -24,14 +22,10 @@ Texture* BlockTexture::getTexture() const {
     return texture.get();
 }
 
-const vec2& BlockTexture::getTextureCoordinates(BlockTextureName name) const {
+const u16vec2& BlockTexture::getTextureCoordinates(BlockTextureName name) const {
     auto coordinates = textureCoordinateMap.find(name);
     if (coordinates != textureCoordinateMap.end()) {
         return coordinates->second;
     }
     return textureCoordinateMap.begin()->second;
-}
-
-const vec2& BlockTexture::getOffset() const {
-    return offset;
 }
