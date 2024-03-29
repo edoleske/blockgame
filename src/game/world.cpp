@@ -161,6 +161,7 @@ void World::renderWorld(Shader* shader, const vec3& playerPosition) {
     auto px = static_cast<int>(playerPosition.x) >> 4;
     auto pz = static_cast<int>(playerPosition.z) >> 4;
 
+    // Render the mesh for each chunk
     for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
         for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
             auto chunk = chunkMap.find(make_pair(x, z));
@@ -174,6 +175,19 @@ void World::renderWorld(Shader* shader, const vec3& playerPosition) {
                 }
 
                 chunk->second->render();
+            }
+        }
+    }
+
+    // Render the transparent mesh for each chunk, it must be done after the opaque mesh for blending
+    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
+        for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
+            auto chunk = chunkMap.find(make_pair(x, z));
+            if (chunk != chunkMap.end()) {
+                shader->setInteger("chunkX", x);
+                shader->setInteger("chunkZ", z);
+
+                chunk->second->renderTransparent();
             }
         }
     }
@@ -206,7 +220,7 @@ void World::unbuildChunk(int x, int z) {
     }
 }
 
-bool World::chunkNeighborsPopulated(int x, int z) {
+bool World::chunkNeighborsPopulated(int x, int z) const {
     return getChunk(x - 1, z) != nullptr &&
            getChunk(x + 1, z) != nullptr &&
            getChunk(x, z - 1) != nullptr &&

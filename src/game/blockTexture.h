@@ -11,7 +11,8 @@ enum class BlockTextureName {
     GRASS_SIDE,
     GRASS,
     BEDROCK,
-    STONE
+    STONE,
+    WATER
 };
 
 class BlockTexture {

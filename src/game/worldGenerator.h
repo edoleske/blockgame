@@ -17,6 +17,7 @@ private:
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
+    static const int seaLevel = 62;
     const int octaves = 5;
     const float lacunarity = 1.75f;
     const float gain = 0.1f;

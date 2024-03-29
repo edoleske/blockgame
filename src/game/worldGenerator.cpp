@@ -20,10 +20,10 @@ int WorldGenerator::getHeight(float x, float z) {
 
 BlockType WorldGenerator::getBlockType(int blockHeight, int terrainHeight) {
     if (blockHeight > terrainHeight) {
-        return BlockType::AIR;
+        return blockHeight <= seaLevel ? BlockType::WATER : BlockType::AIR;
     }
     if (blockHeight == terrainHeight) {
-        return terrainHeight > 62 ? BlockType::GRASS : BlockType::DIRT;
+        return terrainHeight > seaLevel - 1 ? BlockType::GRASS : BlockType::DIRT;
     }
     if (blockHeight < terrainHeight && blockHeight > terrainHeight - 3) {
         return BlockType::DIRT;

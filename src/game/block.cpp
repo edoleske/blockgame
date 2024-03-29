@@ -17,6 +17,20 @@ uint8_t Block::getState() const {
     return data & 0xF;
 }
 
+bool Block::isOpaque() const {
+    auto type = getType();
+    return Block::isBlockTypeOpaque(type);
+}
+
+bool Block::isDifferentTransparent(const BlockType& otherType) const {
+    auto type = getType();
+    return !Block::isBlockTypeOpaque(type) && type != otherType;
+}
+
+bool Block::isBlockTypeOpaque(BlockType type) {
+    return type != BlockType::AIR && type != BlockType::WATER;
+}
+
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
         {BlockFace::TOP,    {
                                     {{0, 1, 0}, {0, 0}},
@@ -73,6 +87,8 @@ BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
             return BlockTextureName::BEDROCK;
         case BlockType::STONE:
             return BlockTextureName::STONE;
+        case BlockType::WATER:
+            return BlockTextureName::WATER;
         default:
             return BlockTextureName::DIRT;
     }

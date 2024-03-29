@@ -28,6 +28,8 @@ public:
 
     void render();
 
+    void renderTransparent();
+
     void buildMesh(const ChunkMap& chunkMap);
 
     void write(vector<char>& data);
@@ -51,10 +53,14 @@ private:
     VertexArray vao;
     VertexBuffer vbo;
 
+    vector<Vertex> transparentVertices;
+    VertexArray transparentVAO;
+    VertexBuffer transparentVBO;
+
     shared_ptr<ElementBuffer> ebo;
     shared_ptr<BlockTexture> blockTexture;
 
-    void addFace(const Block& block, BlockFace face, const u8vec3& position);
+    void addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent = false);
     static inline int getIndex(int x, int y, int z);
 };
 

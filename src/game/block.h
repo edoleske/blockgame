@@ -11,7 +11,7 @@ enum class BlockFace : uint8_t {
 };
 
 enum class BlockType : uint16_t {
-    AIR, DIRT, GRASS, BEDROCK, STONE
+    AIR, DIRT, GRASS, BEDROCK, STONE, WATER
 };
 
 class Block {
@@ -24,6 +24,12 @@ public:
     BlockType getType() const;
 
     uint8_t getState() const;
+
+    bool isOpaque() const;
+
+    bool isDifferentTransparent(const BlockType& otherType) const;
+
+    static bool isBlockTypeOpaque(BlockType type);
 
     static unordered_map<BlockFace, vector<Vertex>> blockFaceVertices;
 

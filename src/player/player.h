@@ -20,7 +20,7 @@ public:
 private:
     Camera camera;
 
-    const float SPEED = 8.0f;
+    const float SPEED = 10.0f;
     const float ROTATE_SENSITIVITY = 0.1f;
 };
 

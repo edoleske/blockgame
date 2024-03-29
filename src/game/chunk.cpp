@@ -9,6 +9,13 @@ Chunk::Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_pt
     vbo.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*) nullptr);
     vbo.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
     VertexArray::unbind();
+
+    transparentVAO.bind();
+    transparentVBO.bind();
+    ebo->bind();
+    transparentVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*) nullptr);
+    transparentVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
+    VertexArray::unbind();
 }
 
 void Chunk::buildMesh(const ChunkMap& chunkMap) {
@@ -42,18 +49,74 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
     state = ChunkState::POPULATED;
     vertices.clear();
+    transparentVertices.clear();
 
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
                 Block block = blocks[getIndex(bx, by, bz)];
+                auto type = block.getType();
+                if (type == BlockType::AIR) {
+                    continue;
+                }
+
                 auto localPosition = u8vec3(bx, by, bz);
 
-                if (block.getType() != BlockType::AIR) {
+                if (!block.isOpaque()) {
                     // Left Face
                     bool leftFace = bx > 0 ?
-                                    getBlock(bx - 1, by, bz).getType() == BlockType::AIR :
-                                    leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz).getType() == BlockType::AIR;
+                                    getBlock(bx - 1, by, bz).isDifferentTransparent(type) :
+                                    leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz).isDifferentTransparent(type);
+
+                    if (leftFace) {
+                        addFace(block, BlockFace::LEFT, localPosition, true);
+                    }
+
+                    // Right Face
+                    bool rightFace = bx < CHUNK_SIZE_X - 1 ?
+                                     getBlock(bx + 1, by, bz).isDifferentTransparent(type) :
+                                     rightChunk->getBlock(0, by, bz).isDifferentTransparent(type);
+
+                    if (rightFace) {
+                        addFace(block, BlockFace::RIGHT, localPosition, true);
+                    }
+
+                    // Back Face
+                    bool backFace = bz > 0 ?
+                                    getBlock(bx, by, bz - 1).isDifferentTransparent(type) :
+                                    backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1).isDifferentTransparent(type);
+
+                    if (backFace) {
+                        addFace(block, BlockFace::BACK, localPosition, true);
+                    }
+
+                    // Front Face
+                    bool frontFace = bz < CHUNK_SIZE_Z - 1 ?
+                                     getBlock(bx, by, bz + 1).isDifferentTransparent(type) :
+                                     frontChunk->getBlock(bx, by, 0).isDifferentTransparent(type);
+
+                    if (frontFace) {
+                        addFace(block, BlockFace::FRONT, localPosition, true);
+                    }
+
+                    // Bottom Face
+                    bool bottomFace = by > 0 && getBlock(bx, by - 1, bz).isDifferentTransparent(type);
+
+                    if (bottomFace) {
+                        addFace(block, BlockFace::BOTTOM, localPosition, true);
+                    }
+
+                    // Top Face
+                    bool topFace = by < CHUNK_SIZE_Y - 1 && getBlock(bx, by + 1, bz).isDifferentTransparent(type);
+
+                    if (topFace) {
+                        addFace(block, BlockFace::TOP, localPosition, true);
+                    }
+                } else {
+                    // Left Face
+                    bool leftFace = bx > 0 ?
+                                    !getBlock(bx - 1, by, bz).isOpaque() :
+                                    !leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz).isOpaque();
 
                     if (leftFace) {
                         addFace(block, BlockFace::LEFT, localPosition);
@@ -61,8 +124,8 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
                     // Right Face
                     bool rightFace = bx < CHUNK_SIZE_X - 1 ?
-                                     getBlock(bx + 1, by, bz).getType() == BlockType::AIR :
-                                     rightChunk->getBlock(0, by, bz).getType() == BlockType::AIR;
+                                     !getBlock(bx + 1, by, bz).isOpaque() :
+                                     !rightChunk->getBlock(0, by, bz).isOpaque();
 
                     if (rightFace) {
                         addFace(block, BlockFace::RIGHT, localPosition);
@@ -70,8 +133,8 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
                     // Back Face
                     bool backFace = bz > 0 ?
-                                    getBlock(bx, by, bz - 1).getType() == BlockType::AIR :
-                                    backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1).getType() == BlockType::AIR;
+                                    !getBlock(bx, by, bz - 1).isOpaque() :
+                                    !backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1).isOpaque();
 
                     if (backFace) {
                         addFace(block, BlockFace::BACK, localPosition);
@@ -79,36 +142,47 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
                     // Front Face
                     bool frontFace = bz < CHUNK_SIZE_Z - 1 ?
-                                     getBlock(bx, by, bz + 1).getType() == BlockType::AIR :
-                                     frontChunk->getBlock(bx, by, 0).getType() == BlockType::AIR;
+                                     !getBlock(bx, by, bz + 1).isOpaque() :
+                                     !frontChunk->getBlock(bx, by, 0).isOpaque();
 
                     if (frontFace) {
                         addFace(block, BlockFace::FRONT, localPosition);
                     }
 
                     // Bottom Face
-                    bool bottomFace = by > 0 && getBlock(bx, by - 1, bz).getType() == BlockType::AIR;
+                    bool bottomFace = by > 0 && !getBlock(bx, by - 1, bz).isOpaque();
 
                     if (bottomFace) {
                         addFace(block, BlockFace::BOTTOM, localPosition);
                     }
 
                     // Top Face
-                    bool topFace = by < CHUNK_SIZE_Y - 1 && getBlock(bx, by + 1, bz).getType() == BlockType::AIR;
+                    bool topFace = by < CHUNK_SIZE_Y - 1 && !getBlock(bx, by + 1, bz).isOpaque();
 
                     if (topFace) {
                         addFace(block, BlockFace::TOP, localPosition);
                     }
                 }
+
             }
         }
     }
 
     // Copy vertices to VBO
-    vao.bind();
-    vbo.bind();
-    vbo.bufferData(vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
-    VertexArray::unbind();
+    if (!vertices.empty()) {
+        vao.bind();
+        vbo.bind();
+        vbo.bufferData(vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
+        VertexArray::unbind();
+    }
+
+    if (!transparentVertices.empty()) {
+        transparentVAO.bind();
+        transparentVBO.bind();
+        transparentVBO.bufferData(transparentVertices.size() * sizeof(Vertex), &transparentVertices.front(),
+                                  GL_STATIC_DRAW);
+        VertexArray::unbind();
+    }
 
     state = ChunkState::BUILT;
 }
@@ -134,9 +208,18 @@ void Chunk::generate(const unique_ptr<WorldGenerator>& worldGen) {
 }
 
 void Chunk::render() {
-    if (state == ChunkState::BUILT) {
+    if (state == ChunkState::BUILT && !vertices.empty()) {
         vao.bind();
         glDrawElements(GL_TRIANGLES, static_cast<int>(vertices.size() / 4) * 6, GL_UNSIGNED_INT, (void*) nullptr);
+        VertexArray::unbind();
+    }
+}
+
+void Chunk::renderTransparent() {
+    if (state == ChunkState::BUILT && !transparentVertices.empty()) {
+        transparentVAO.bind();
+        glDrawElements(GL_TRIANGLES, static_cast<int>(transparentVertices.size() / 4) * 6, GL_UNSIGNED_INT,
+                       (void*) nullptr);
         VertexArray::unbind();
     }
 }
@@ -190,12 +273,18 @@ const glm::ivec3& Chunk::getChunkPosition() const {
     return chunkPosition;
 }
 
-void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position) {
+void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent) {
     auto name = Block::getBlockFaceTexture(block.getType(), face);
     auto coordinates = blockTexture->getTextureCoordinates(name);
 
     for (const auto& vertex: Block::blockFaceVertices[face]) {
-        vertices.push_back(Vertex(vertex.position + position, (vertex.uv * BlockTexture::RESOLUTION) + coordinates));
+        auto v = Vertex(vertex.position + position, (vertex.uv * BlockTexture::RESOLUTION) + coordinates);
+
+        if (transparent) {
+            transparentVertices.push_back(v);
+        } else {
+            vertices.push_back(v);
+        }
     }
 }
 
