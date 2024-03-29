@@ -12,7 +12,11 @@ uniform int uTexHeight;
 
 void main() {
         vec2 calcTexCoords = vec2(vTexCoords.x / uTexWidth, vTexCoords.y / uTexHeight);
-        oColor = texture(uTexture, calcTexCoords);
+        vec4 texColor = texture(uTexture, calcTexCoords);
+        if (texColor.a < 0.1) {
+                discard;
+        }
+        oColor = texColor;
 
         // Mix in fog
 //        oColor = mix(vec4(pow(uFogColor.xyz, vec3(1.75)), uFogColor.w), oColor, vVisibility);

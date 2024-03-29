@@ -63,6 +63,12 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
                 auto localPosition = u8vec3(bx, by, bz);
 
                 if (!block.isOpaque()) {
+                    // Check if transparent block is a billboard
+                    if (Block::isBlockTypeBillboard(type)) {
+                        addBillboard(block, localPosition);
+                        continue;
+                    }
+
                     // Left Face
                     bool leftFace = bx > 0 ?
                                     getBlock(bx - 1, by, bz).isDifferentTransparent(type) :
@@ -187,26 +193,6 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     state = ChunkState::BUILT;
 }
 
-void Chunk::generate(const unique_ptr<WorldGenerator>& worldGen) {
-    int height = 0;
-    for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
-        auto fx = static_cast<float>(chunkPosition.x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) +
-                  1.0f / (2 * CHUNK_SIZE_X);
-        for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-            auto fz = static_cast<float>(chunkPosition.z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z) +
-                      1.0f / (2 * CHUNK_SIZE_X);
-            height = worldGen->getHeight(fx, fz);
-
-            // Populate column
-            for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
-                blocks[getIndex(bx, by, bz)] = Block(worldGen->getBlockType(by, height));
-            }
-        }
-    }
-
-    state = ChunkState::POPULATED;
-}
-
 void Chunk::render() {
     if (state == ChunkState::BUILT && !vertices.empty()) {
         vao.bind();
@@ -265,6 +251,10 @@ Block Chunk::getBlock(int x, int y, int z) const {
     return blocks[getIndex(x, y, z)];
 }
 
+void Chunk::setBlock(int x, int y, int z, const Block& block) {
+    blocks[getIndex(x, y, z)] = block;
+}
+
 ChunkState Chunk::getChunkState() const {
     return state;
 }
@@ -285,6 +275,17 @@ void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position, 
         } else {
             vertices.push_back(v);
         }
+    }
+}
+
+void Chunk::addBillboard(const Block& block, const u8vec3& position) {
+    auto name = Block::getBlockFaceTexture(block.getType(), BlockFace::LEFT);
+    auto coordinates = blockTexture->getTextureCoordinates(name);
+
+
+
+    for (const auto& vertex: Block::billboardVertices) {
+        transparentVertices.emplace_back(vertex.position + position, (vertex.uv * BlockTexture::RESOLUTION) + coordinates);
     }
 }
 

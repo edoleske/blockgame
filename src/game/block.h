@@ -11,7 +11,7 @@ enum class BlockFace : uint8_t {
 };
 
 enum class BlockType : uint16_t {
-    AIR, DIRT, GRASS, BEDROCK, STONE, WATER
+    AIR, DIRT, GRASS, BEDROCK, STONE, WATER, LEAVES, LOG, FLOWER
 };
 
 class Block {
@@ -31,7 +31,11 @@ public:
 
     static bool isBlockTypeOpaque(BlockType type);
 
+    static bool isBlockTypeBillboard(BlockType type);
+
     static unordered_map<BlockFace, vector<Vertex>> blockFaceVertices;
+
+    static vector<Vertex> billboardVertices;
 
     static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
 

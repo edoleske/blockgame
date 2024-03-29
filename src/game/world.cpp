@@ -55,7 +55,7 @@ void World::generateSpawnArea() {
             auto chunk = chunkMap.at(make_pair(x, z)).get();
             loadFromRegionFile(x, z);
             if (chunk->getChunkState() == ChunkState::EMPTY) {
-                chunk->generate(worldGen);
+                worldGen->generate(chunk);
                 updateRegionFile(x, z);
             }
         }
@@ -114,7 +114,7 @@ void World::updateChunks(const vec3& playerPosition) {
             auto [x, z] = xz;
             loadFromRegionFile(x, z);
             if (chunk->getChunkState() == ChunkState::EMPTY) {
-                chunk->generate(worldGen);
+                worldGen->generate(chunk.get());
                 updateRegionFile(x, z);
             }
 
@@ -130,7 +130,7 @@ void World::loadChunk(int x, int z) {
     auto chunk = chunkMap.at(xz).get();
     loadFromRegionFile(x, z);
     if (chunk->getChunkState() == ChunkState::EMPTY) {
-        chunk->generate(worldGen);
+        worldGen->generate(chunk);
         updateRegionFile(x, z);
     }
 

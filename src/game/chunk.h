@@ -8,7 +8,6 @@
 #include "gl/vertexArray.h"
 #include "gl/elementBuffer.h"
 #include "block.h"
-#include "worldGenerator.h"
 
 template<class T>
 using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;
@@ -24,8 +23,6 @@ class Chunk {
 public:
     Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
 
-    void generate(const unique_ptr<WorldGenerator>& noise);
-
     void render();
 
     void renderTransparent();
@@ -37,6 +34,8 @@ public:
     void load(ifstream& in);
 
     Block getBlock(int x, int y, int z) const;
+
+    void setBlock(int x, int y, int z, const Block& block);
 
     ChunkState getChunkState() const;
 
@@ -61,6 +60,8 @@ private:
     shared_ptr<BlockTexture> blockTexture;
 
     void addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent = false);
+    void addBillboard(const Block& block, const u8vec3& position);
+
     static inline int getIndex(int x, int y, int z);
 };
 

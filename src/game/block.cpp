@@ -28,7 +28,19 @@ bool Block::isDifferentTransparent(const BlockType& otherType) const {
 }
 
 bool Block::isBlockTypeOpaque(BlockType type) {
-    return type != BlockType::AIR && type != BlockType::WATER;
+    switch (type) {
+        case BlockType::AIR:
+        case BlockType::WATER:
+        case BlockType::LEAVES:
+        case BlockType::FLOWER:
+            return false;
+        default:
+            return true;
+    }
+}
+
+bool Block::isBlockTypeBillboard(BlockType type) {
+    return type == BlockType::FLOWER;
 }
 
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
@@ -70,6 +82,25 @@ unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
                             }}
 };
 
+vector<Vertex> Block::billboardVertices = {
+        {{0, 0, 0}, {0, 1}},
+        {{0, 1, 0}, {0, 0}},
+        {{1, 1, 1}, {1, 0}},
+        {{1, 0, 1}, {1, 1}},
+        {{0, 0, 0}, {1, 1}},
+        {{1, 0, 1}, {0, 1}},
+        {{1, 1, 1}, {0, 0}},
+        {{0, 1, 0}, {1, 0}},
+        {{0, 1, 1}, {0, 0}},
+        {{0, 0, 1}, {0, 1}},
+        {{1, 0, 0}, {1, 1}},
+        {{1, 1, 0}, {1, 0}},
+        {{0, 1, 1}, {1, 0}},
+        {{1, 1, 0}, {0, 0}},
+        {{1, 0, 0}, {0, 1}},
+        {{0, 0, 1}, {1, 1}},
+};
+
 BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
     switch (type) {
         case BlockType::DIRT:
@@ -89,7 +120,19 @@ BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
             return BlockTextureName::STONE;
         case BlockType::WATER:
             return BlockTextureName::WATER;
+        case BlockType::LEAVES:
+            return BlockTextureName::LEAVES;
+        case BlockType::LOG:
+            switch (face) {
+                case BlockFace::TOP:
+                case BlockFace::BOTTOM:
+                    return BlockTextureName::LOG_CROSS;
+                default:
+                    return BlockTextureName::LOG_SIDE;
+            }
+        case BlockType::FLOWER:
+            return BlockTextureName::FLOWER;
         default:
-            return BlockTextureName::DIRT;
+            return BlockTextureName::NONE;
     }
 }
