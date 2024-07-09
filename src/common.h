@@ -17,6 +17,7 @@
 #include <exception>
 #include <filesystem>
 #include <utility>
+#include <optional>
 
 using std::string;
 using std::stringstream;
@@ -34,6 +35,8 @@ using std::vector;
 using std::set;
 using std::pair;
 using std::make_pair;
+using std::optional;
+using std::nullopt;
 
 namespace fs = std::filesystem;
 

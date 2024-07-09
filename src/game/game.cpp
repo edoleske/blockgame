@@ -17,6 +17,7 @@ Game::Game(int width, int height) : Window(width, height),
 
     // Capture cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
 
     // Disable VSync for performance tuning
     glfwSwapInterval(0);
@@ -106,4 +107,8 @@ void Game::handleMouse() {
     lastMouseY = y;
 
     player.onRotate(xOffset, yOffset);
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        auto result = world->getBlockRaycast(player.getCamera().getPosition(), player.getCamera().getFront(), 10);
+    }
 }

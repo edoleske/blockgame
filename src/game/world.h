@@ -17,6 +17,8 @@ public:
 
     Block getBlock(int x, int y, int z) const;
 
+    optional<Block> getBlockRaycast(vec3 position, const vec3 &front, int distance) const;
+
     void generateSpawnArea();
 
     void updateChunks(const vec3& playerPosition);

@@ -46,6 +46,33 @@ Block World::getBlock(int x, int y, int z) const {
     return {};
 }
 
+optional<Block> World::getBlockRaycast(vec3 position, const vec3& front, int distance) const {
+    // Pre-calculate whether each component of ray is positive
+    // We will be adding 1 to each positive component to get the targeted plane after flooring
+    vec3 sign = vec3(front.x > 0, front.y > 0, front.z > 0);
+
+    for (int i = 0; i < distance; i++) {
+        if (position.y > 0 && position.y < CHUNK_SIZE_Y) {
+            auto block = getBlock(
+                    static_cast<int>(position.x),
+                    static_cast<int>(position.y),
+                    static_cast<int>(position.z)
+            );
+            if (block.isOpaque()) {
+                std::cout << "Block hit at " << position.x << " " << position.y << " " << position.z << std::endl;
+                return block;
+            }
+        }
+
+        // Calculate the offset to each targeted plane of the next block in the grid
+        // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
+        vec3 t = (floor(position + sign) - position) / front;
+        position += front * (std::min(t.x, std::min(t.y, t.z)) + 0.001f);
+    }
+
+    return nullopt;
+}
+
 void World::generateSpawnArea() {
     // Create chunks
     for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {

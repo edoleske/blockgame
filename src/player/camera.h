@@ -29,7 +29,7 @@ private:
     float fov, aspectRatio;
     float pitch = 0.0f, yaw = 0.0f;
 
-    vec3 position = vec3(0.0f, 66.0f, 0.0f);
+    vec3 position = vec3(0.0f, 80.0f, 0.0f);
     vec3 front = vec3(0.0f, 0.0f, -1.0f);
     vec3 up = vec3(0.0f, 1.0f, 0.0f);
 
