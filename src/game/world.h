@@ -15,9 +15,9 @@ public:
 
     bool chunkExists(int x, int z) const;
 
-    Block getBlock(int x, int y, int z) const;
+    optional<Block> getBlock(int x, int y, int z) const;
 
-    optional<Block> getBlockRaycast(vec3 position, const vec3 &front, int distance) const;
+    optional<Block> getBlockRaycast(vec3 position, const vec3 &front, float distance) const;
 
     void generateSpawnArea();
 

@@ -263,6 +263,12 @@ const glm::ivec3& Chunk::getChunkPosition() const {
     return chunkPosition;
 }
 
+bool Chunk::isValidBlockPosition(int x, int y, int z) {
+    return x >= 0 && x < CHUNK_SIZE_X &&
+           y >= 0 && y < CHUNK_SIZE_Y &&
+           z >= 0 && z < CHUNK_SIZE_Z;
+}
+
 void Chunk::addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent) {
     auto name = Block::getBlockFaceTexture(block.getType(), face);
     auto coordinates = blockTexture->getTextureCoordinates(name);
@@ -283,9 +289,9 @@ void Chunk::addBillboard(const Block& block, const u8vec3& position) {
     auto coordinates = blockTexture->getTextureCoordinates(name);
 
 
-
     for (const auto& vertex: Block::billboardVertices) {
-        transparentVertices.emplace_back(vertex.position + position, (vertex.uv * BlockTexture::RESOLUTION) + coordinates);
+        transparentVertices.emplace_back(vertex.position + position,
+                                         (vertex.uv * BlockTexture::RESOLUTION) + coordinates);
     }
 }
 

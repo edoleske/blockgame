@@ -109,6 +109,6 @@ void Game::handleMouse() {
     player.onRotate(xOffset, yOffset);
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        auto result = world->getBlockRaycast(player.getCamera().getPosition(), player.getCamera().getFront(), 10);
+        auto result = world->getBlockRaycast(player.getCamera().getPosition(), player.getCamera().getFront(), 6.0f);
     }
 }

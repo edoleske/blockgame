@@ -58,11 +58,11 @@ using glm::mat4;
 #include <GLFW/glfw3.h>
 
 // Global constants
-const int CHUNK_SIZE_X = 16;
-const int CHUNK_SIZE_Y = 254;
-const int CHUNK_SIZE_Z = 16;
+constexpr int CHUNK_SIZE_X = 16;
+constexpr int CHUNK_SIZE_Y = 254;
+constexpr int CHUNK_SIZE_Z = 16;
 
-const int REGION_SECTOR_SIZE = 4096;
+constexpr int REGION_SECTOR_SIZE = 4096;
 constexpr int RENDER_DISTANCE = 12;
 
 struct IntPairHash {

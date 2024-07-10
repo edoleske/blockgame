@@ -43,6 +43,8 @@ public:
 
     const glm::ivec3& getChunkPosition() const;
 
+    static bool isValidBlockPosition(int x, int y, int z);
+
 private:
     ChunkState state = ChunkState::EMPTY;
     glm::ivec3 chunkPosition;
