@@ -33,6 +33,7 @@ Game::Game(int width, int height) : Window(width, height),
     world = make_unique<World>(shader);
     world->generateSpawnArea();
 
+    InputState::registerCallback(window);
     glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
 }
 
@@ -67,28 +68,24 @@ void Game::loop() {
 }
 
 void Game::handleInput() {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-
     vec3 velocity(0.0f);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_FRONT).current) {
         velocity.z += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_BACK).current) {
         velocity.z -= 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_LEFT).current) {
         velocity.x -= 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_RIGHT).current) {
         velocity.x += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_UP).current) {
         velocity.y += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MOVE_DOWN).current) {
         velocity.y -= 1.0f;
     }
 

@@ -53,16 +53,6 @@ optional<Block> World::getBlockRaycast(vec3 position, const vec3& front, float d
 
     float travelled = 0.0f;
     for (int i = 0; i < 50; i++) {
-        auto block = getBlock(
-                static_cast<int>(position.x),
-                static_cast<int>(position.y),
-                static_cast<int>(position.z)
-        );
-        if (block.has_value() && block->isOpaque()) {
-            std::cout << "Block hit at " << position.x << " " << position.y << " " << position.z << std::endl;
-            return block;
-        }
-
         // Calculate the offset to each targeted plane of the next block in the grid
         // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
         vec3 t = (floor(position + sign) - position) / front;
@@ -75,6 +65,16 @@ optional<Block> World::getBlockRaycast(vec3 position, const vec3& front, float d
         }
 
         position += delta;
+
+        auto block = getBlock(
+                static_cast<int>(position.x),
+                static_cast<int>(position.y),
+                static_cast<int>(position.z)
+        );
+        if (block.has_value() && block->isOpaque()) {
+            std::cout << "Block hit at " << position.x << " " << position.y << " " << position.z << std::endl;
+            return block;
+        }
     }
 
     return nullopt;

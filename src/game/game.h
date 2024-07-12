@@ -10,6 +10,7 @@
 #include "gl/texture.h"
 #include "world.h"
 #include "player/player.h"
+#include "inputState.h"
 
 class Game : public Window {
 public:
@@ -22,6 +23,7 @@ private:
     Player player;
     unique_ptr<Shader> shader;
     unique_ptr<World> world;
+    InputState input;
 
     void handleInput();
 

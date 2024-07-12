@@ -40,6 +40,9 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/player/player.h
         src/game/worldGenerator.cpp
         src/game/worldGenerator.h
+        src/game/inputState.cpp
+        src/game/inputState.h
+        src/game/inputEvent.h
 )
 
 target_link_libraries(blockgame glfw)
