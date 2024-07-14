@@ -19,15 +19,12 @@ public:
     void loop() override;
 
 private:
-    double lastMouseX = 0.0, lastMouseY = 0.0;
     Player player;
     unique_ptr<Shader> shader;
     unique_ptr<World> world;
     InputState input;
 
     void handleInput();
-
-    void handleMouse();
 
     VertexArray vao;
     VertexBuffer vbo;

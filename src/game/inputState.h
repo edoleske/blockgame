@@ -5,7 +5,7 @@
 #include "common.h"
 #include "inputEvent.h"
 
-struct KeyState {
+struct ButtonState {
     bool current, previous;
 };
 
@@ -14,15 +14,24 @@ public:
     InputState();
     ~InputState();
 
-    KeyState getState(InputEvent event) const;
+    ButtonState getState(InputEvent event) const;
+
+    vec2 getCursorOffset();
 
     void updateKey(int key, bool state);
 
-    static void registerCallback(GLFWwindow* window);
-private:
-    unordered_map<int, KeyState> keyStateMap;
+    void updateCursor(double x, double y);
 
-    static void callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void registerCallbacks(GLFWwindow* window);
+private:
+    unordered_map<InputEvent, ButtonState> inputMap;
+    vec<2, double> currentCursor, previousCursor;
+
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void cursorPositionCallback(GLFWwindow* window, double x, double y);
+
+    // Created InputState instance for registering static callbacks with GLFW
     static InputState* _instance;
 };
 

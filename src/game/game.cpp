@@ -33,8 +33,7 @@ Game::Game(int width, int height) : Window(width, height),
     world = make_unique<World>(shader);
     world->generateSpawnArea();
 
-    InputState::registerCallback(window);
-    glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
+    InputState::registerCallbacks(window);
 }
 
 void Game::loop() {
@@ -44,9 +43,9 @@ void Game::loop() {
         time = currentTime;
         glfwSetWindowTitle(window, std::to_string(1.0f / deltaTime).c_str());
 
+        // Poll input and update game based on input state
         glfwPollEvents();
         handleInput();
-        handleMouse();
 
         // Window can resize itself, so we updateAspectRatio our class every frame in case it has changed
         glfwGetWindowSize(window, &width, &height);
@@ -92,20 +91,11 @@ void Game::handleInput() {
     if (glm::length(velocity) != 0) {
         player.onMove(glm::normalize(velocity) * deltaTime);
     }
-}
 
-void Game::handleMouse() {
-    double x, y;
-    glfwGetCursorPos(window, &x, &y);
+    auto cursorOffset = input.getCursorOffset();
+    player.onRotate(cursorOffset.x, cursorOffset.y);
 
-    auto xOffset = static_cast<float>(x - lastMouseX);
-    auto yOffset = static_cast<float>(lastMouseY - y);
-    lastMouseX = x;
-    lastMouseY = y;
-
-    player.onRotate(xOffset, yOffset);
-
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (input.getState(InputEvent::MINE_BLOCK).current) {
         auto result = world->getBlockRaycast(player.getCamera().getPosition(), player.getCamera().getFront(), 6.0f);
     }
 }
