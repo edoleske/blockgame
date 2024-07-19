@@ -22,6 +22,9 @@ public:
 
     void updateCursor(double x, double y);
 
+    // Called every frame to update keys so previous frame is accurate
+    void postUpdate();
+
     static void registerCallbacks(GLFWwindow* window);
 private:
     unordered_map<InputEvent, ButtonState> inputMap;

@@ -17,7 +17,11 @@ public:
 
     optional<Block> getBlock(int x, int y, int z) const;
 
-    optional<Block> getBlockRaycast(vec3 position, const vec3 &front, float distance) const;
+    void mineBlock(vec3 position, const vec3 &front);
+
+    void placeBlock(vec3 position, const vec3 &front);
+
+    void setBlock(int x, int y, int z, Block block);
 
     void generateSpawnArea();
 
@@ -47,6 +51,10 @@ private:
 
     inline void unbuildChunk(int x, int z);
     inline bool chunkNeighborsPopulated(int x, int z) const;
+
+    optional<vec3> raycast(vec3 position, const vec3 &front, float distance) const;
+
+    inline void rebuildChunk(int x, int z);
 
     // Region file management
     void createLevel();

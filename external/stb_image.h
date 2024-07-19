@@ -831,7 +831,7 @@ static void stbi__start_mem(stbi__context *s, stbi_uc const *buffer, int len)
    s->img_buffer_end = s->img_buffer_original_end = (stbi_uc *) buffer+len;
 }
 
-// initialize a keyCallback-based context
+// initialize a callback-based context
 static void stbi__start_callbacks(stbi__context *s, stbi_io_callbacks *c, void *user)
 {
    s->io = *c;

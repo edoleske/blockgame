@@ -46,38 +46,56 @@ optional<Block> World::getBlock(int x, int y, int z) const {
     return nullopt;
 }
 
-optional<Block> World::getBlockRaycast(vec3 position, const vec3& front, float distance) const {
-    // Pre-calculate whether each component of ray is positive
-    // We will be adding 1 to each positive component to get the targeted plane after flooring
-    vec3 sign = vec3(front.x > 0, front.y > 0, front.z > 0);
+void World::mineBlock(vec3 position, const vec3& front) {
+    auto hit = raycast(position, front, 6.0f);
+    if (hit.has_value()) {
+        setBlock(static_cast<int>(hit->x), static_cast<int>(hit->y), static_cast<int>(hit->z), Block(BlockType::AIR));
+    }
+}
 
-    float travelled = 0.0f;
-    for (int i = 0; i < 50; i++) {
-        // Calculate the offset to each targeted plane of the next block in the grid
-        // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
-        vec3 t = (floor(position + sign) - position) / front;
-        vec3 delta = front * (std::min(t.x, std::min(t.y, t.z)) + 0.001f);
+void World::placeBlock(glm::vec3 position, const glm::vec3& front) {
+    auto hit = raycast(position, front, 6.0f);
+    if (hit.has_value()) {
+        ivec3 frontPosition(static_cast<int>(hit->x),static_cast<int>(hit->y),static_cast<int>(hit->z));
 
-        // Check if distance ray has travelled has exceeded distance provided
-        travelled += glm::length(delta);
-        if (travelled > distance) {
-            break;
+        // Use the same logic in raycast to find last target face
+        vec3 sign = vec3(-front.x > 0, -front.y > 0, -front.z > 0);
+        vec3 t = (floor(hit.value() + sign) - hit.value()) / front;
+        if (t.x >= t.y && t.x >= t.z) {
+            frontPosition.x += front.x > 0 ? -1 : 1;
+        } else if (t.y >= t.x && t.y >= t.z) {
+            frontPosition.y += front.y > 0 ? -1 : 1;
+        } else if (t.z >= t.x && t.z >= t.y) {
+            frontPosition.z += front.z > 0 ? -1 : 1;
         }
 
-        position += delta;
-
-        auto block = getBlock(
-                static_cast<int>(position.x),
-                static_cast<int>(position.y),
-                static_cast<int>(position.z)
-        );
-        if (block.has_value() && block->isOpaque()) {
-            std::cout << "Block hit at " << position.x << " " << position.y << " " << position.z << std::endl;
-            return block;
+        auto frontBlock = getBlock(frontPosition.x, frontPosition.y, frontPosition.z);
+        if (frontBlock.has_value() && !frontBlock->isOpaque() && !Block::isBlockTypeBillboard(frontBlock->getType())) {
+            setBlock(frontPosition.x, frontPosition.y, frontPosition.z, Block(BlockType::STONE));
         }
     }
+}
 
-    return nullopt;
+void World::setBlock(int x, int y, int z, Block block) {
+    auto cx = x / CHUNK_SIZE_X, cz = z / CHUNK_SIZE_Z;
+    auto chunk = getChunk(cx, cz);
+    if (chunk != nullptr && Chunk::isValidBlockPosition(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z)) {
+        chunk->setBlock(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z, block);
+
+        // Rebuild chunk mesh and neighbors if necessary
+        chunk->buildMesh(chunkMap);
+
+        if (x % CHUNK_SIZE_X == 0) {
+            rebuildChunk(cx - 1, cz);
+        } else if (x % CHUNK_SIZE_X == CHUNK_SIZE_X - 1) {
+            rebuildChunk(cx + 1, cz);
+        }
+        if (z % CHUNK_SIZE_Z == 0) {
+            rebuildChunk(cx, cz - 1);
+        } else if (z % CHUNK_SIZE_Z == CHUNK_SIZE_Z - 1) {
+            rebuildChunk(cx, cz + 1);
+        }
+    }
 }
 
 void World::generateSpawnArea() {
@@ -259,6 +277,46 @@ bool World::chunkNeighborsPopulated(int x, int z) const {
            getChunk(x + 1, z) != nullptr &&
            getChunk(x, z - 1) != nullptr &&
            getChunk(x, z + 1) != nullptr;
+}
+
+optional<vec3> World::raycast(vec3 position, const vec3& front, float distance) const {
+    // Pre-calculate whether each component of ray is positive
+    // We will be adding 1 to each positive component to get the targeted plane after flooring
+    vec3 sign = vec3(front.x > 0, front.y > 0, front.z > 0);
+
+    float travelled = 0.0f;
+    for (int i = 0; i < 50; i++) {
+        // Calculate the offset to each targeted plane of the next block in the grid
+        // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
+        vec3 t = (floor(position + sign) - position) / front;
+        vec3 delta = front * (std::min(t.x, std::min(t.y, t.z)) + 0.001f);
+
+        // Check if distance ray has travelled has exceeded distance provided
+        travelled += glm::length(delta);
+        if (travelled > distance) {
+            break;
+        }
+
+        position += delta;
+
+        auto block = getBlock(
+                static_cast<int>(position.x),
+                static_cast<int>(position.y),
+                static_cast<int>(position.z)
+        );
+        if (block.has_value() && (block->isOpaque() || Block::isBlockTypeBillboard(block->getType()))) {
+            return position;
+        }
+    }
+
+    return nullopt;
+}
+
+inline void World::rebuildChunk(int x, int z) {
+    auto chunk = getChunk(x, z);
+    if (chunk != nullptr) {
+        chunk->buildMesh(chunkMap);
+    }
 }
 
 void World::createLevel() {

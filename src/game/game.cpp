@@ -46,6 +46,7 @@ void Game::loop() {
         // Poll input and update game based on input state
         glfwPollEvents();
         handleInput();
+        input.postUpdate();
 
         // Window can resize itself, so we updateAspectRatio our class every frame in case it has changed
         glfwGetWindowSize(window, &width, &height);
@@ -95,7 +96,13 @@ void Game::handleInput() {
     auto cursorOffset = input.getCursorOffset();
     player.onRotate(cursorOffset.x, cursorOffset.y);
 
-    if (input.getState(InputEvent::MINE_BLOCK).current) {
-        auto result = world->getBlockRaycast(player.getCamera().getPosition(), player.getCamera().getFront(), 6.0f);
+    auto mine = input.getState(InputEvent::MINE_BLOCK);
+    if (mine.current && !mine.previous) {
+        world->mineBlock(player.getCamera().getPosition(), player.getCamera().getFront());
+    }
+
+    auto place = input.getState(InputEvent::PLACE_BLOCK);
+    if (place.current && !place.previous) {
+        world->placeBlock(player.getCamera().getPosition(), player.getCamera().getFront());
     }
 }

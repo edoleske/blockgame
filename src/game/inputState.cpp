@@ -68,3 +68,10 @@ void InputState::cursorPositionCallback(GLFWwindow* window, double x, double y) 
         _instance->updateCursor(x, y);
     }
 }
+
+void InputState::postUpdate() {
+    for (auto const& [key, event]: InputEventMap) {
+        auto state = inputMap[event];
+        inputMap[event] = ButtonState(state.current, state.current);
+    }
+}
