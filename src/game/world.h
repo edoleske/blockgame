@@ -52,7 +52,7 @@ private:
     inline void unbuildChunk(int x, int z);
     inline bool chunkNeighborsPopulated(int x, int z) const;
 
-    optional<vec3> raycast(vec3 position, const vec3 &front, float distance) const;
+    optional<vec3> raycast(vec3 position, const vec3 &front, float distance, bool place = false) const;
 
     inline void rebuildChunk(int x, int z);
 

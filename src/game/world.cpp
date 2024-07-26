@@ -55,20 +55,9 @@ void World::mineBlock(vec3 position, const vec3& front) {
 }
 
 void World::placeBlock(glm::vec3 position, const glm::vec3& front) {
-    auto hit = raycast(position, front, 6.0f);
+    auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         ivec3 frontPosition(static_cast<int>(hit->x),static_cast<int>(hit->y),static_cast<int>(hit->z));
-
-        // Use the same logic in raycast to find last target face
-        vec3 sign = vec3(-front.x > 0, -front.y > 0, -front.z > 0);
-        vec3 t = (floor(hit.value() + sign) - hit.value()) / front;
-        if (t.x >= t.y && t.x >= t.z) {
-            frontPosition.x += front.x > 0 ? -1 : 1;
-        } else if (t.y >= t.x && t.y >= t.z) {
-            frontPosition.y += front.y > 0 ? -1 : 1;
-        } else if (t.z >= t.x && t.z >= t.y) {
-            frontPosition.z += front.z > 0 ? -1 : 1;
-        }
 
         auto frontBlock = getBlock(frontPosition.x, frontPosition.y, frontPosition.z);
         if (frontBlock.has_value() && !frontBlock->isOpaque() && !Block::isBlockTypeBillboard(frontBlock->getType())) {
@@ -282,7 +271,7 @@ bool World::chunkNeighborsPopulated(int x, int z) const {
            getChunk(x, z + 1) != nullptr;
 }
 
-optional<vec3> World::raycast(vec3 position, const vec3& front, float distance) const {
+optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, bool place) const {
     // Pre-calculate whether each component of ray is positive
     // We will be adding 1 to each positive component to get the targeted plane after flooring
     vec3 sign = vec3(front.x > 0, front.y > 0, front.z > 0);
@@ -292,7 +281,8 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance) 
         // Calculate the offset to each targeted plane of the next block in the grid
         // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
         vec3 t = (floor(position + sign) - position) / front;
-        vec3 delta = front * (std::min(t.x, std::min(t.y, t.z)) + 0.001f);
+        auto tMin = std::min(t.x, std::min(t.y, t.z));
+        vec3 delta = front * (tMin + 0.001f);
 
         // Check if distance ray has travelled has exceeded distance provided
         travelled += glm::length(delta);
@@ -308,6 +298,11 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance) 
                 static_cast<int>(position.z)
         );
         if (block.has_value() && (block->isOpaque() || Block::isBlockTypeBillboard(block->getType()))) {
+            // If placing a block, we retract position to the last block
+            if (place) {
+                position -= delta;
+            }
+
             return position;
         }
     }
