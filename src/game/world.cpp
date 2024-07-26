@@ -39,9 +39,10 @@ bool World::chunkExists(int x, int z) const {
 }
 
 optional<Block> World::getBlock(int x, int y, int z) const {
-    auto chunk = getChunk(x / CHUNK_SIZE_X, z / CHUNK_SIZE_Z);
-    if (chunk != nullptr && Chunk::isValidBlockPosition(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z)) {
-        return chunk->getBlock(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z);
+    auto chunk = getChunk(x >> 4, z >> 4);
+    bool test = Chunk::isValidBlockPosition(x & 0xF, y, z & 0xF);
+    if (chunk != nullptr && Chunk::isValidBlockPosition(x & 0xF, y, z & 0xF)) {
+        return chunk->getBlock(x & 0xF, y, z & 0xF);
     }
     return nullopt;
 }
@@ -77,22 +78,24 @@ void World::placeBlock(glm::vec3 position, const glm::vec3& front) {
 }
 
 void World::setBlock(int x, int y, int z, Block block) {
-    auto cx = x / CHUNK_SIZE_X, cz = z / CHUNK_SIZE_Z;
+    auto cx = x >> 4, cz = z >> 4;
     auto chunk = getChunk(cx, cz);
-    if (chunk != nullptr && Chunk::isValidBlockPosition(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z)) {
-        chunk->setBlock(x % CHUNK_SIZE_X, y, z % CHUNK_SIZE_Z, block);
+
+    auto rx = x & 0xF, rz = z & 0xF;
+    if (chunk != nullptr && Chunk::isValidBlockPosition(rx, y, rz)) {
+        chunk->setBlock(rx, y, rz, block);
 
         // Rebuild chunk mesh and neighbors if necessary
         chunk->buildMesh(chunkMap);
 
-        if (x % CHUNK_SIZE_X == 0) {
+        if (rx == 0) {
             rebuildChunk(cx - 1, cz);
-        } else if (x % CHUNK_SIZE_X == CHUNK_SIZE_X - 1) {
+        } else if (rx == CHUNK_SIZE_X - 1) {
             rebuildChunk(cx + 1, cz);
         }
-        if (z % CHUNK_SIZE_Z == 0) {
+        if (rz == 0) {
             rebuildChunk(cx, cz - 1);
-        } else if (z % CHUNK_SIZE_Z == CHUNK_SIZE_Z - 1) {
+        } else if (rz == CHUNK_SIZE_Z - 1) {
             rebuildChunk(cx, cz + 1);
         }
     }
