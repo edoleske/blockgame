@@ -30,7 +30,7 @@ private:
     const float SPEED = 10.0f;
     const float ROTATE_SENSITIVITY = 0.1f;
 
-    bool testCollision(const vec3& position, const unique_ptr<World>& world) const;
+    bool testCollision(const vec3& position, const vec3& oldPosition, const unique_ptr<World>& world) const;
 };
 
 
