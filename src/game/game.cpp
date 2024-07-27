@@ -90,7 +90,7 @@ void Game::handleInput() {
     }
 
     if (glm::length(velocity) != 0) {
-        player.onMove(glm::normalize(velocity) * deltaTime);
+        player.onMove(glm::normalize(velocity) * deltaTime, world);
     }
 
     auto cursorOffset = input.getCursorOffset();
