@@ -12,6 +12,77 @@ const vec3& Player::getSize() const {
     return size;
 }
 
+bool Player::isFlying() const {
+    return flying;
+}
+
+void Player::update(float deltaTime, InputState& input, const unique_ptr<World>& world) {
+    auto fly = input.getState(InputEvent::TOGGLE_FLY);
+    if (fly.current && !fly.previous) {
+        flying = !flying;
+    }
+
+    vec3 velocity = vec3(0.0f);
+
+    if (input.getState(InputEvent::MOVE_FRONT).current) {
+        velocity.z += 1.0f;
+    }
+    if (input.getState(InputEvent::MOVE_BACK).current) {
+        velocity.z -= 1.0f;
+    }
+    if (input.getState(InputEvent::MOVE_LEFT).current) {
+        velocity.x -= 1.0f;
+    }
+    if (input.getState(InputEvent::MOVE_RIGHT).current) {
+        velocity.x += 1.0f;
+    }
+    if (input.getState(InputEvent::MOVE_UP).current) {
+        if (flying) {
+        velocity.y += 1.0f;
+        } else if (!input.getState(InputEvent::MOVE_UP).previous) {
+            // Todo: Add jump here
+        }
+    }
+    if (input.getState(InputEvent::MOVE_DOWN).current && flying) {
+        velocity.y -= 1.0f;
+    }
+
+    if (glm::length(velocity) != 0) {
+        onMove(glm::normalize(velocity) * deltaTime, world);
+    }
+
+    // Apply gravity
+    if (!flying) {
+        vec3 cornerPosition = camera.getPosition() - CENTER_OFFSET;
+        vec3 gravity = vec3(0.0f, -10.0f, 0.0f) * deltaTime;
+        if (!testCollision(cornerPosition + gravity, cornerPosition, world)) {
+            camera.move(camera.getPosition() + gravity);
+        }
+    }
+
+    auto cursorOffset = input.getCursorOffset();
+    onRotate(cursorOffset.x, cursorOffset.y);
+
+    auto mine = input.getState(InputEvent::MINE_BLOCK);
+    if (mine.current && !mine.previous) {
+        world->mineBlock(camera.getPosition(), camera.getFront());
+    }
+
+    auto place = input.getState(InputEvent::PLACE_BLOCK);
+    if (place.current && !place.previous) {
+        world->placeBlock(camera.getPosition(), camera.getFront());
+    }
+
+    // Gravity
+    if (!flying) {
+        vec3 cornerPosition = camera.getPosition() - CENTER_OFFSET;
+        vec3 gravity = vec3(0.0f, -10.0f, 0.0f) * deltaTime;
+        if (!testCollision(cornerPosition + gravity, cornerPosition, world)) {
+            camera.move(camera.getPosition() + gravity);
+        }
+    }
+}
+
 void Player::updateAspectRatio(int width, int height) {
     camera.setAspectRatio(width, height);
 }
@@ -30,8 +101,6 @@ void Player::onMove(const vec3& velocity, const unique_ptr<World>& world) {
 
     // Test for collisions
     vec3 cornerPosition = position - CENTER_OFFSET;
-    ivec3 startIndex = glm::floor(cornerPosition);
-    ivec3 endIndex = glm::floor(cornerPosition + size);
 
     if (testCollision(vec3(cornerPosition.x, cornerPosition.y + movement.y, cornerPosition.z), cornerPosition, world)) {
         movement.y = 0;
