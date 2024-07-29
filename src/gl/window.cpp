@@ -19,7 +19,7 @@ Window::Window(int width, int height): width(width), height(height) {
     glfwSwapInterval(1);
 
     // Load OpenGL functions, gladLoadGL returns the loaded version, 0 on error
-    version = gladLoadGL(glfwGetProcAddress);
+    version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     if (version == 0) {
         std::cerr << "Failed to initialize OpenGL context" << std::endl;
         glfwTerminate();

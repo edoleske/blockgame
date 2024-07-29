@@ -55,7 +55,7 @@ using glm::u8vec3;
 using glm::mat4;
 
 // Ensure GLAD is included before GLFW
-#include "glad/gl.h"
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 // Global constants

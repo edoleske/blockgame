@@ -1,13 +1,53 @@
 cmake_minimum_required(VERSION 3.27)
-project(blockgame)
-
+project(blockgame
+        VERSION 0.0.0
+        DESCRIPTION "Minecraft-inspired OpenGL game"
+        HOMEPAGE_URL "https://github.com/edoleske/blockgame")
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-find_package(glfw3 REQUIRED)
+# Fetch/find project dependencies
+include(FetchContent)
 
-include_directories(external/glad/include external src)
+FetchContent_Declare(
+        glfw3
+        GIT_REPOSITORY https://github.com/glfw/glfw
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        FIND_PACKAGE_ARGS
+)
 
-add_executable(blockgame src/main.cpp external/glad/src/gl.c
+FetchContent_Declare(
+        glad
+        GIT_REPOSITORY https://github.com/Dav1dde/glad
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+)
+set(GLAD_PROFILE "core" CACHE STRING "OpenGL profile")
+set(GLAD_GENERATOR "c" CACHE STRING "Language to generate the binding for")
+
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 1.0.1
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        FIND_PACKAGE_ARGS)
+
+FetchContent_Declare(
+        stb_image
+        GIT_REPOSITORY https://github.com/nothings/stb
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        FIND_PACKAGE_ARGS)
+
+FetchContent_MakeAvailable(glfw3 glad glm stb_image)
+
+add_library(stb_image INTERFACE ${stb_image_SOURCE_DIR}/stb_image.h)
+target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
+
+# Create project target
+add_executable(${PROJECT_NAME} src/main.cpp
         src/common.h
         src/gl/window.cpp
         src/gl/window.h
@@ -45,4 +85,5 @@ add_executable(blockgame src/main.cpp external/glad/src/gl.c
         src/game/inputEvent.h
 )
 
-target_link_libraries(blockgame glfw)
+target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm::glm glad stb_image)
