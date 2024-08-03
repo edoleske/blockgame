@@ -33,9 +33,11 @@ private:
     const vec3 CENTER_OFFSET = vec3(0.5f, 0.8f, 0.5f) * size;
 
     bool flying = false;
+    vec3 jumpVelocity = vec3(0.0f);
 
     const float SPEED = 10.0f;
     const float ROTATE_SENSITIVITY = 0.1f;
+    const float GRAVITY = -1.2f;
 
     bool testCollision(const vec3& position, const vec3& oldPosition, const unique_ptr<World>& world) const;
 };
