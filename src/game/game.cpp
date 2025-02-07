@@ -43,19 +43,20 @@ void Game::loop() {
         time = currentTime;
         glfwSetWindowTitle(window, std::to_string(1.0f / deltaTime).c_str());
 
-        // Poll input and update game based on input state
-        glfwPollEvents();
-
-        handleInput();
-        player.update(deltaTime, input, world);
-
-        input.postUpdate();
-
         // Window can resize itself, so we updateAspectRatio our class every frame in case it has changed
         glfwGetWindowSize(window, &width, &height);
         player.updateAspectRatio(width, height);
 
         world->updateChunks(player.getCamera().getPosition());
+
+        // Poll input and update game based on input state
+        glfwPollEvents();
+
+        handleInput();
+
+        player.update(deltaTime, input, world);
+
+        input.postUpdate();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

@@ -40,7 +40,7 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
         if (flying) {
             movementVector.y += 1.0f;
         } else if (!input.getState(InputEvent::MOVE_UP).previous && jumpVelocity.y <= 0.0f) {
-            jumpVelocity.y = 0.9f;
+            jumpVelocity.y = 0.95f;
         }
     }
     if (input.getState(InputEvent::MOVE_DOWN).current && flying) {
@@ -54,7 +54,6 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
         currentVelocity += glm::normalize(movementVector);
     }
 
-    std::cout << currentVelocity.y << std::endl;
     onMove(currentVelocity * deltaTime, world);
 
     auto cursorOffset = input.getCursorOffset();
