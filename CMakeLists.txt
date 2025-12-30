@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.10)
 project(blockgame
         VERSION 0.0.0
         DESCRIPTION "Minecraft-inspired OpenGL game"
@@ -16,6 +16,9 @@ FetchContent_Declare(
         GIT_PROGRESS TRUE
         FIND_PACKAGE_ARGS
 )
+
+# Silence GLAD CMake Version Error
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 FetchContent_Declare(
         glad
