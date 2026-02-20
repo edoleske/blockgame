@@ -12,9 +12,10 @@ include(FetchContent)
 FetchContent_Declare(
         glfw3
         GIT_REPOSITORY https://github.com/glfw/glfw
+        GIT_TAG dbadda26835ec5089ef922e6c290bcf58cf12056
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
-        FIND_PACKAGE_ARGS
+        #FIND_PACKAGE_ARGS
 )
 
 # Silence GLAD CMake Version Error

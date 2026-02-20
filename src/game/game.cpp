@@ -37,6 +37,9 @@ Game::Game(int width, int height) : Window(width, height),
 }
 
 void Game::loop() {
+    // First update setup
+    time = static_cast<float>(glfwGetTime());
+
     while (!glfwWindowShouldClose(window)) {
         auto currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - time;

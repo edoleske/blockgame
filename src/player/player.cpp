@@ -48,7 +48,7 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
     }
 
     jumpVelocity.y = std::max(GRAVITY * deltaTime + jumpVelocity.y, GRAVITY * 5);
-    auto currentVelocity = jumpVelocity;
+    auto currentVelocity = flying ? vec3(0.0f) : jumpVelocity;
 
     if (glm::length(movementVector) != 0) {
         currentVelocity += glm::normalize(movementVector);
