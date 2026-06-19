@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
         glfw3
         GIT_REPOSITORY https://github.com/glfw/glfw
-        GIT_TAG dbadda26835ec5089ef922e6c290bcf58cf12056
+        GIT_TAG 567b1ec2442d59525e24c19e8d413df6baf02496
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         #FIND_PACKAGE_ARGS

@@ -6,6 +6,7 @@
 #include "chunk.h"
 #include "gl/shader.h"
 #include "worldGenerator.h"
+#include "player/camera.h"
 
 class World {
 public:
@@ -31,7 +32,7 @@ public:
 
     void unloadChunk(int x, int z);
 
-    void renderWorld(Shader* shader, const vec3& playerPosition);
+    void renderWorld(Shader* shader, const Camera& playerCamera);
 
 private:
     string name = "NewWorld";
@@ -48,6 +49,11 @@ private:
     shared_ptr<ElementBuffer> ebo;
 
     void initializeEBO();
+
+    // Highlight mesh for player cursor
+    vector<Vertex> highlightVertices;
+    VertexArray highlightVAO;
+    VertexBuffer highlightVBO;
 
     inline void unbuildChunk(int x, int z);
     inline bool chunkNeighborsPopulated(int x, int z) const;

@@ -5,6 +5,30 @@ World::World(const unique_ptr<Shader>& shader) {
     ebo = make_shared<ElementBuffer>();
     initializeEBO();
 
+    // Initialize VAO for highlight vertices (single cube)
+    highlightVAO.bind();
+    highlightVBO.bind();
+    highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*) nullptr);
+    highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
+
+    highlightVertices = vector<Vertex>();
+    highlightVertices.reserve(40);
+    for (const auto& [face, vertices] : Block::blockFaceVertices) {
+        if (face == BlockFace::TOP || face == BlockFace::BOTTOM) {
+            for (auto i = 0; i < vertices.size(); ++i) {
+                auto next = (i + 1) % vertices.size();
+                highlightVertices.push_back(vertices[i]);
+                highlightVertices.push_back(vertices[next]);
+            }
+        }
+
+        highlightVertices.insert(highlightVertices.end(), vertices.begin(), vertices.end());
+    }
+    highlightVBO.bufferData(highlightVertices.size() * sizeof(Vertex), &highlightVertices.front(),
+                                  GL_STATIC_DRAW);
+
+    VertexArray::unbind();
+
     // Create save folder
     const auto savePath = "saves/" + name;
     if (!fs::is_directory(savePath) || !fs::exists(savePath)) {
@@ -40,7 +64,6 @@ bool World::chunkExists(int x, int z) const {
 
 optional<Block> World::getBlock(int x, int y, int z) const {
     auto chunk = getChunk(x >> 4, z >> 4);
-    bool test = Chunk::isValidBlockPosition(x & 0xF, y, z & 0xF);
     if (chunk != nullptr && Chunk::isValidBlockPosition(x & 0xF, y, z & 0xF)) {
         return chunk->getBlock(x & 0xF, y, z & 0xF);
     }
@@ -198,7 +221,10 @@ void World::unloadChunk(int x, int z) {
     unbuildChunk(x, z + 1);
 }
 
-void World::renderWorld(Shader* shader, const vec3& playerPosition) {
+void World::renderWorld(Shader* shader, const Camera& playerCamera) {
+    auto playerPosition = playerCamera.getPosition();
+    auto playerFront = playerCamera.getFront();
+
     shader->use();
 
     bool builtOne = false;
@@ -234,6 +260,23 @@ void World::renderWorld(Shader* shader, const vec3& playerPosition) {
                 chunk->second->renderTransparent();
             }
         }
+    }
+
+
+    auto hit = raycast(playerPosition, playerFront, 6.0f);
+    if (hit.has_value()) {
+        shader->setVector3f("uHighlightOffset", vec3(static_cast<int>(hit->x), static_cast<int>(hit->y), static_cast<int>(hit->z)));
+
+        shader->setInteger("chunkX", 0);
+        shader->setInteger("chunkZ", 0);
+        shader->setInteger("uIsHighlight", 1);
+
+        highlightVAO.bind();
+        glDrawArrays(GL_LINES, 0, highlightVertices.size());
+        VertexArray::unbind();
+
+        shader->setInteger("uIsHighlight", 0);
+        shader->setVector3f("uHighlightOffset", vec3(0));
     }
 }
 

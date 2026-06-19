@@ -63,10 +63,10 @@ unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
                                     {{0, 1, 0}, {1, 0}},
                             }},
         {BlockFace::RIGHT,  {
+                                    {{1, 0, 1}, {1, 1}},
                                     {{1, 1, 1}, {1, 0}},
                                     {{1, 1, 0}, {0, 0}},
                                     {{1, 0, 0}, {0, 1}},
-                                    {{1, 0, 1}, {1, 1}},
                             }},
         {BlockFace::FRONT,  {
                                     {{0, 0, 1}, {0, 1}},

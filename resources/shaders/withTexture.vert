@@ -14,11 +14,14 @@ uniform int CHUNK_SIZE_Z;
 uniform int chunkX;
 uniform int chunkZ;
 
+uniform vec3 uHighlightOffset;
+
 const float fogDensity = 0.01f;
 const float fogGradient = 4.0f;
 
 void main() {
-    vec3 worldPosition = vec3(aPos.x + (chunkX * CHUNK_SIZE_X), aPos.y, aPos.z + (chunkZ * CHUNK_SIZE_Z));
+    ivec3 pos = aPos + ivec3(uHighlightOffset);
+    vec3 worldPosition = vec3(pos.x + (chunkX * CHUNK_SIZE_X), pos.y, pos.z + (chunkZ * CHUNK_SIZE_Z));
     gl_Position = projection * view * vec4(worldPosition, 1.0);
 
     // Fog Calculation

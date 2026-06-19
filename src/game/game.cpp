@@ -15,6 +15,9 @@ Game::Game(int width, int height) : Window(width, height),
 
     glClearColor(0.6f, 0.8f, 0.9f, 1.0f);
 
+    // Line width for highlight
+    glLineWidth(2.0f);
+
     // Capture cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
@@ -68,7 +71,7 @@ void Game::loop() {
         shader->setMatrix4("view", player.getCamera().getView());
         shader->setMatrix4("projection", player.getCamera().getProjection());
 
-        world->renderWorld(shader.get(), player.getCamera().getPosition());
+        world->renderWorld(shader.get(), player.getCamera());
 
         glfwSwapBuffers(window);
     }

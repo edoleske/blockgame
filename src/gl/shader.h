@@ -16,6 +16,8 @@ public:
 
     void setMatrix4(const GLchar* name, const glm::mat4 &matrix);
 
+    void setVector3f(const GLchar* name, const vec3& value);
+
     void setVector4f(const GLchar* name, const vec4& value);
 private:
     GLuint program;
