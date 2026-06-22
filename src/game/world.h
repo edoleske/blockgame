@@ -18,11 +18,15 @@ public:
 
     optional<Block> getBlock(int x, int y, int z) const;
 
+    optional<Block> getBlock(vec3 position) const;
+
     void mineBlock(vec3 position, const vec3 &front);
 
     void placeBlock(vec3 position, const vec3 &front);
 
     void setBlock(int x, int y, int z, Block block);
+
+    void setBlock(vec3 position, Block block);
 
     void generateSpawnArea();
 

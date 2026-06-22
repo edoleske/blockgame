@@ -70,26 +70,28 @@ optional<Block> World::getBlock(int x, int y, int z) const {
     return nullopt;
 }
 
+optional<Block> World::getBlock(const vec3 position) const {
+    return getBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z));
+}
+
 void World::mineBlock(vec3 position, const vec3& front) {
     auto hit = raycast(position, front, 6.0f);
     if (hit.has_value()) {
-        setBlock(static_cast<int>(hit->x), static_cast<int>(hit->y), static_cast<int>(hit->z), Block(BlockType::AIR));
+        setBlock(hit.value(), Block(BlockType::AIR));
     }
 }
 
 void World::placeBlock(glm::vec3 position, const glm::vec3& front) {
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
-        ivec3 frontPosition(static_cast<int>(hit->x),static_cast<int>(hit->y),static_cast<int>(hit->z));
-
-        auto frontBlock = getBlock(frontPosition.x, frontPosition.y, frontPosition.z);
+        auto frontBlock = getBlock(hit.value());
         if (frontBlock.has_value() && !frontBlock->isOpaque() && !Block::isBlockTypeBillboard(frontBlock->getType())) {
-            setBlock(frontPosition.x, frontPosition.y, frontPosition.z, Block(BlockType::STONE));
+            setBlock(hit.value(), Block(BlockType::STONE));
         }
     }
 }
 
-void World::setBlock(int x, int y, int z, Block block) {
+void World::setBlock(int x, int y, int z, const Block block) {
     auto cx = x >> 4, cz = z >> 4;
     auto chunk = getChunk(cx, cz);
 
@@ -111,6 +113,10 @@ void World::setBlock(int x, int y, int z, Block block) {
             rebuildChunk(cx, cz + 1);
         }
     }
+}
+
+void World::setBlock(const vec3 position, const Block block) {
+    setBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z), block);
 }
 
 void World::generateSpawnArea() {
@@ -265,7 +271,7 @@ void World::renderWorld(Shader* shader, const Camera& playerCamera) {
 
     auto hit = raycast(playerPosition, playerFront, 6.0f);
     if (hit.has_value()) {
-        shader->setVector3f("uHighlightOffset", vec3(static_cast<int>(hit->x), static_cast<int>(hit->y), static_cast<int>(hit->z)));
+        shader->setVector3f("uHighlightOffset", floor(hit.value()));
 
         shader->setInteger("chunkX", 0);
         shader->setInteger("chunkZ", 0);
@@ -315,15 +321,13 @@ bool World::chunkNeighborsPopulated(int x, int z) const {
 }
 
 optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, bool place) const {
-    // Pre-calculate whether each component of ray is positive
-    // We will be adding 1 to each positive component to get the targeted plane after flooring
-    vec3 sign = vec3(front.x > 0, front.y > 0, front.z > 0);
-
     float travelled = 0.0f;
     for (int i = 0; i < 50; i++) {
         // Calculate the offset to each targeted plane of the next block in the grid
         // then adjust that offset by the ray, so we can find the smallest distance to follow the ray
-        vec3 t = (floor(position + sign) - position) / front;
+        vec3 t_neg = (floor(position) - position) / front;
+        vec3 t_pos = (ceil(position) - position) / front;
+        vec3 t = glm::max(t_neg, t_pos);
         auto tMin = std::min(t.x, std::min(t.y, t.z));
         vec3 delta = front * (tMin + 0.001f);
 
@@ -336,9 +340,9 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
         position += delta;
 
         auto block = getBlock(
-                static_cast<int>(position.x),
-                static_cast<int>(position.y),
-                static_cast<int>(position.z)
+                std::floor(position.x),
+                std::floor(position.y),
+                std::floor(position.z)
         );
         if (block.has_value() && (block->isOpaque() || Block::isBlockTypeBillboard(block->getType()))) {
             // If placing a block, we retract position to the last block
