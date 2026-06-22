@@ -84,7 +84,7 @@ void Player::onMove(const vec3& velocity, const unique_ptr<World>& world) {
     vec3 movement = vec3(0.0f);
     movement += adjustedVelocity.x * glm::normalize(glm::cross(front, up));
     movement += adjustedVelocity.y * up;
-    movement += adjustedVelocity.z * front;
+    movement += adjustedVelocity.z * glm::normalize(vec3(front.x, 0.0f, front.z));
 
     // Test for collisions
     vec3 cornerPosition = position - CENTER_OFFSET;
