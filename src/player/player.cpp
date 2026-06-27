@@ -39,7 +39,7 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
     if (input.getState(InputEvent::MOVE_UP).current) {
         if (flying) {
             movementVector.y += 1.0f;
-        } else if (!input.getState(InputEvent::MOVE_UP).previous && jumpVelocity.y <= 0.0f) {
+        } else if (!input.getState(InputEvent::MOVE_UP).previous && jumpVelocity.y == 0.0f) {
             jumpVelocity.y = 0.95f;
         }
     }
