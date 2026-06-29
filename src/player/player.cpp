@@ -70,8 +70,8 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
     }
 }
 
-void Player::updateAspectRatio(int width, int height) {
-    camera.setAspectRatio(width, height);
+void Player::updateAspectRatio(float aspectRatio) {
+    camera.setAspectRatio(aspectRatio);
 }
 
 void Player::onMove(const vec3& velocity, const unique_ptr<World>& world) {

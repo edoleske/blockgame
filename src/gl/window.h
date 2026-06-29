@@ -7,10 +7,11 @@
 class Window {
 public:
     Window(int width, int height);
-    ~Window();
+    virtual ~Window();
 
     bool isInitialized() const;
     virtual void loop() = 0;
+    virtual void updateWindowSize(int w, int h);
 protected:
     int width, height, version;
     float aspectRatio, time = 0.0f, deltaTime = 0.0f;

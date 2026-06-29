@@ -10,7 +10,7 @@
 
 class World {
 public:
-    World(const unique_ptr<Shader>& shader);
+    explicit World(const unique_ptr<Shader>& shader);
 
     Chunk* getChunk(int x, int z) const;
 
@@ -20,9 +20,9 @@ public:
 
     optional<Block> getBlock(vec3 position) const;
 
-    void mineBlock(vec3 position, const vec3 &front);
+    void mineBlock(vec3 position, const vec3& front);
 
-    void placeBlock(vec3 position, const vec3 &front);
+    void placeBlock(vec3 position, const vec3& front);
 
     void setBlock(int x, int y, int z, Block block);
 
@@ -60,18 +60,24 @@ private:
     VertexBuffer highlightVBO;
 
     inline void unbuildChunk(int x, int z);
+
     inline bool chunkNeighborsPopulated(int x, int z) const;
 
-    optional<vec3> raycast(vec3 position, const vec3 &front, float distance, bool place = false) const;
+    optional<vec3> raycast(vec3 position, const vec3& front, float distance, bool place = false) const;
 
     inline void rebuildChunk(int x, int z);
 
     // Region file management
     void createLevel();
+
     bool loadLevel();
+
     inline string getRegionFilePath(int x, int z) const;
+
     static void createRegionFile(const string& filepath);
+
     void updateRegionFile(int x, int z) const;
+
     void loadFromRegionFile(int x, int z);
 };
 

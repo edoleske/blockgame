@@ -20,7 +20,7 @@ public:
 
     void update(float deltaTime, InputState& input, const unique_ptr<World>& world);
 
-    void updateAspectRatio(int width, int height);
+    void updateAspectRatio(float aspectRatio);
 
     void onMove(const vec3 &velocity, const unique_ptr<World>& world);
 

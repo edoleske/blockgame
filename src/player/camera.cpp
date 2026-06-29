@@ -25,8 +25,7 @@ const mat4 &Camera::getView() const {
     return view;
 }
 
-void Camera::setAspectRatio(int width, int height) {
-    auto newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+void Camera::setAspectRatio(float newAspectRatio) {
     if (newAspectRatio != aspectRatio) {
         aspectRatio = newAspectRatio;
         recalculateProjectionMatrix();

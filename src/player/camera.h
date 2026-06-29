@@ -11,7 +11,7 @@ public:
     const mat4 &getProjection() const;
     const mat4 &getView() const;
 
-    void setAspectRatio(int width, int height);
+    void setAspectRatio(float newAspectRatio);
 
     void move(const vec3 &newPosition);
     void rotate(float xOffset, float yOffset);

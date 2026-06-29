@@ -18,6 +18,7 @@ public:
 
     void loop() override;
 
+    void updateWindowSize(int w, int h) override;
 private:
     Player player;
     unique_ptr<Shader> shader;

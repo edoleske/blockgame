@@ -26,7 +26,7 @@ Game::Game(int width, int height) : Window(width, height),
     glfwSwapInterval(0);
 
     // Wireframe for mesh debugging
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
     shader->use();
@@ -48,10 +48,6 @@ void Game::loop() {
         deltaTime = currentTime - time;
         time = currentTime;
         glfwSetWindowTitle(window, std::to_string(1.0f / deltaTime).c_str());
-
-        // Window can resize itself, so we updateAspectRatio our class every frame in case it has changed
-        glfwGetWindowSize(window, &width, &height);
-        player.updateAspectRatio(width, height);
 
         world->updateChunks(player.getCamera().getPosition());
 
@@ -77,6 +73,9 @@ void Game::loop() {
     }
 }
 
-void Game::handleInput() {
-
+void Game::updateWindowSize(int w, int h) {
+    Window::updateWindowSize(w, h);
+    player.updateAspectRatio(aspectRatio);
 }
+
+void Game::handleInput() {}

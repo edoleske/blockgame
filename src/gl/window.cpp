@@ -1,6 +1,6 @@
 #include "window.h"
 
-Window::Window(int width, int height): width(width), height(height) {
+Window::Window(int width, int height) : width(width), height(height) {
     aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
     glfwInit();
@@ -26,6 +26,9 @@ Window::Window(int width, int height): width(width), height(height) {
         return;
     }
 
+    // Register user pointer for static callback
+    glfwSetWindowUserPointer(window, this);
+
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 }
@@ -38,6 +41,16 @@ bool Window::isInitialized() const {
     return version != 0;
 }
 
+void Window::updateWindowSize(int w, int h) {
+    width = w;
+    height = h;
+    aspectRatio = (static_cast<float>(width) / static_cast<float>(height));
+}
+
 void Window::framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+
+    if (auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window))) {
+        instance->updateWindowSize(width, height);
+    }
 }
