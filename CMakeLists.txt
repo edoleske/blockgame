@@ -87,6 +87,10 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/inputState.cpp
         src/game/inputState.h
         src/game/inputEvent.h
+        src/ui/uiManager.cpp
+        src/ui/uiManager.h
+        src/ui/uiElement.cpp
+        src/ui/uiElement.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

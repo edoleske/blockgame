@@ -232,6 +232,7 @@ void World::renderWorld(Shader* shader, const Camera& playerCamera) {
     auto playerFront = playerCamera.getFront();
 
     shader->use();
+    blockTexture->getTexture()->bind();
 
     bool builtOne = false;
     auto px = static_cast<int>(playerPosition.x) >> 4;

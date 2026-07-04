@@ -36,6 +36,8 @@ Game::Game(int width, int height) : Window(width, height),
     world = make_unique<World>(shader);
     world->generateSpawnArea();
 
+    uiManager = make_unique<UIManager>();
+
     InputState::registerCallbacks(window);
 }
 
@@ -68,6 +70,9 @@ void Game::loop() {
         shader->setMatrix4("projection", player.getCamera().getProjection());
 
         world->renderWorld(shader.get(), player.getCamera());
+
+        // Render UI
+        uiManager->render(width, height);
 
         glfwSwapBuffers(window);
     }
