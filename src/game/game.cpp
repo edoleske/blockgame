@@ -37,6 +37,7 @@ Game::Game(int width, int height) : Window(width, height),
     world->generateSpawnArea();
 
     uiManager = make_unique<UIManager>();
+    uiManager->updateWindowSize(width, height);
 
     InputState::registerCallbacks(window);
 }
@@ -81,6 +82,7 @@ void Game::loop() {
 void Game::updateWindowSize(int w, int h) {
     Window::updateWindowSize(w, h);
     player.updateAspectRatio(aspectRatio);
+    uiManager->updateWindowSize(w, h);
 }
 
 void Game::handleInput() {}

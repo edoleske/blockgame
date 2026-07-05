@@ -19,6 +19,7 @@ public:
 
     shared_ptr<Texture> getTexture() const;
 
+    virtual void updateWindowSize(int width, int height);
 private:
     vec2 position;
     vec2 size;

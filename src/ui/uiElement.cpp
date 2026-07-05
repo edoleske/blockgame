@@ -26,6 +26,14 @@ shared_ptr<Texture> UIElement::getTexture() const {
     return _texture;
 }
 
+void UIElement::updateWindowSize(int width, int height) {
+    // Temporary centering
+    auto half_size = size / 2.0f;
+    position = vec2(width / 2.0f, height / 2.0f) - half_size;
+
+    recalculateModel();
+}
+
 void UIElement::recalculateModel() {
     model = mat4(1);
     model = glm::translate(model, vec3(position, 0.0f));

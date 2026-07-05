@@ -8,7 +8,7 @@ UIManager::UIManager() {
     quadVBO.bind();
     quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*) nullptr);
     quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(2 * sizeof(float)));
-    quadVBO.bufferData(sizeof(vertices), vertices, GL_STATIC_DRAW);
+    quadVBO.bufferData(sizeof(quadData), quadData, GL_STATIC_DRAW);
     VertexArray::unbind();
 
     elements = vector<UIElement>();
@@ -38,6 +38,12 @@ void UIManager::render(int width, int height) {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+}
+
+void UIManager::updateWindowSize(int width, int height) {
+    for (UIElement& element : elements) {
+        element.updateWindowSize(width, height);
+    }
 }
 
 
