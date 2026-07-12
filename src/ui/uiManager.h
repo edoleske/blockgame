@@ -15,26 +15,30 @@ public:
 
     void render(int width, int height);
 
-    void updateWindowSize(int width, int height);
+    void updateWindowSize(int width, int height) const;
+
 private:
     unique_ptr<Shader> shader;
     shared_ptr<Texture> crosshairTexture;
 
-    vector<UIElement> elements;
+    vector<unique_ptr<UIElement>> elements = {};
+
+    static constexpr size_t MAX_SPRITES = 100;
+    inline static UIVertex QUAD_VERTICES[4] = {
+        {{1.0f, 0.0f}, {1.0f, 0.0f}}, // TOP RIGHT
+        {{1.0f, 1.0f}, {1.0f, 1.0f}}, // BOTTOM RIGHT
+        {{0.0f, 1.0f}, {0.0f, 1.0f}}, // BOTTOM LEFT
+        {{0.0f, 0.0f}, {0.0f, 0.0f}}, // TOP LEFT
+    };
 
     VertexBuffer quadVBO;
     VertexArray quadVAO;
-    float quadData[16] = {
-        1.0f, 0.0f, 1.0f, 0.0f, // TOP RIGHT
-        1.0f, 1.0f, 1.0f, 1.0f, // BOTTOM RIGHT
-        0.0f, 1.0f, 0.0f, 1.0f, // BOTTOM LEFT
-        0.0f, 0.0f, 0.0f, 0.0f, // TOP LEFT
-    };
     ElementBuffer quadEBO;
-    GLuint quadIndices[6] = {
-        0, 1, 3,
-        1, 2, 3
-    };
+    std::array<UIVertex, MAX_SPRITES * 4> vertexBuffer = {};
+
+    void submitBatch(size_t count) const;
+
+    static void precalculateElementBuffer(ElementBuffer& ebo);
 };
 
 
