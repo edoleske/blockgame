@@ -2,6 +2,7 @@
 #define BLOCKGAME_UIMANAGER_H
 
 #include "uiElement.h"
+#include "gl/elementBuffer.h"
 #include "gl/shader.h"
 #include "gl/texture.h"
 #include "gl/vertexArray.h"
@@ -25,9 +26,14 @@ private:
     VertexArray quadVAO;
     float quadData[16] = {
         1.0f, 0.0f, 1.0f, 0.0f, // TOP RIGHT
-        0.0f, 0.0f, 0.0f, 0.0f, // TOP LEFT
         1.0f, 1.0f, 1.0f, 1.0f, // BOTTOM RIGHT
         0.0f, 1.0f, 0.0f, 1.0f, // BOTTOM LEFT
+        0.0f, 0.0f, 0.0f, 0.0f, // TOP LEFT
+    };
+    ElementBuffer quadEBO;
+    GLuint quadIndices[6] = {
+        0, 1, 3,
+        1, 2, 3
     };
 };
 

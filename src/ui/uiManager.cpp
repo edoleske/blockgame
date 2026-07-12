@@ -6,9 +6,11 @@ UIManager::UIManager() {
 
     quadVAO.bind();
     quadVBO.bind();
-    quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*) nullptr);
+    quadEBO.bind();
+    quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
     quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(2 * sizeof(float)));
     quadVBO.bufferData(sizeof(quadData), quadData, GL_STATIC_DRAW);
+    quadEBO.bufferData(sizeof(quadIndices), quadIndices);
     VertexArray::unbind();
 
     elements = vector<UIElement>();
@@ -31,7 +33,7 @@ void UIManager::render(int width, int height) {
         element.getTexture()->bind();
         shader->setInteger("uTexWidth", element.getTexture()->getWidth());
         shader->setInteger("uTexHeight", element.getTexture()->getHeight());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
 
     VertexArray::unbind();
@@ -45,5 +47,3 @@ void UIManager::updateWindowSize(int width, int height) {
         element.updateWindowSize(width, height);
     }
 }
-
-
