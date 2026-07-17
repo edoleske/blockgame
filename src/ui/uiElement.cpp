@@ -1,4 +1,5 @@
 #include "uiElement.h"
+#include "uiBatch.h"
 
 UIElement::UIElement() : position(0.0f), size(1.0f) {}
 
@@ -12,8 +13,8 @@ void UIElement::setSize(float x, float y) {
     size = vec2(x, y);
 }
 
-UIVertex UIElement::transformVertex(const UIVertex& vertex) const {
-    return {(vertex.position * size) + position, vertex.uv};
+void UIElement::generateVertices(const unique_ptr<UIBatch>& batch) const {
+    batch->insertQuad(position, size);
 }
 
 void UIElement::updateWindowSize(int width, int height) {}

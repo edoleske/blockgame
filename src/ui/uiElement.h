@@ -4,6 +4,8 @@
 #include "common.h"
 
 
+class UIBatch;
+
 struct UIVertex {
     vec2 position;
     vec2 uv;
@@ -22,7 +24,7 @@ public:
 
     void setSize(float x, float y);
 
-    UIVertex transformVertex(const UIVertex& vertex) const;
+    virtual void generateVertices(const unique_ptr<UIBatch>& batch) const;
 
     virtual void updateWindowSize(int width, int height);
 

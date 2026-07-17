@@ -91,8 +91,10 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/uiManager.h
         src/ui/uiElement.cpp
         src/ui/uiElement.h
-        src/ui/crosshair.cpp
-        src/ui/crosshair.h
+        src/ui/elements/crosshair.cpp
+        src/ui/elements/crosshair.h
+        src/ui/uiBatch.cpp
+        src/ui/uiBatch.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

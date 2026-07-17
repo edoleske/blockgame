@@ -1,6 +1,6 @@
 #ifndef BLOCKGAME_CROSSHAIR_H
 #define BLOCKGAME_CROSSHAIR_H
-#include "uiElement.h"
+#include "../uiElement.h"
 
 
 class Crosshair : public UIElement {
