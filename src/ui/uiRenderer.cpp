@@ -1,5 +1,7 @@
 #include "uiRenderer.h"
 
+#include <format>
+
 #include "font.h"
 #include "elements/crosshair.h"
 #include "elements/textBox.h"
@@ -12,10 +14,20 @@ UIRenderer::UIRenderer() {
     elements.emplace_back(make_unique<Crosshair>(vec2(0.0f), vec2(16.0f)));
     elements.emplace_back(make_unique<UIElement>(vec2(100.0f), vec2(16.0f)));
 
-    textElements.emplace_back(make_unique<TextBox>("TEST", font));
+    textElements.emplace_back(make_unique<TextBox>("FPS: ", font));
+    textElements[0]->setPosition(1.0f, 1.0f);
 
     batch = make_unique<UIBatch>();
 
+}
+
+void UIRenderer::update(const float deltaTime, const InputState& input) const {
+    const auto toggleDebug = input.getState(InputEvent::TOGGLE_DEBUG);
+    if (toggleDebug.current == true && !toggleDebug.previous) {
+        textElements[0]->hidden = !textElements[0]->hidden;
+    }
+
+    textElements[0]->text = std::format("FPS: {:.0f}", 1.0f / deltaTime);
 }
 
 void UIRenderer::render() const {
@@ -28,6 +40,7 @@ void UIRenderer::render() const {
     crosshairTexture->bind();
 
     for (const auto& element : elements) {
+        if (element->hidden) continue;
         element->generateVertices(batch);
     }
     batch->flush();
@@ -36,6 +49,7 @@ void UIRenderer::render() const {
     shader->setInteger("isText", 1);
 
     for (const auto& element : textElements) {
+        if (element->hidden) continue;
         element->generateVertices(batch);
     }
     batch->flush();

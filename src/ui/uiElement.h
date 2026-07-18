@@ -24,12 +24,15 @@ public:
 
     void setSize(float x, float y);
 
+    // Adds all quad vertices to UI batch buffer
     virtual void generateVertices(const unique_ptr<UIBatch>& batch) const;
 
     virtual void updateWindowSize(int width, int height);
 
     vec2 position;
     vec2 size;
+
+    bool hidden = false;
 };
 
 

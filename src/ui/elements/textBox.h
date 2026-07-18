@@ -9,8 +9,9 @@ public:
     explicit TextBox(string text, const shared_ptr<Font>& font);
 
     void generateVertices(const unique_ptr<UIBatch>& batch) const override;
-private:
+
     string text;
+private:
     shared_ptr<Font> font;
 };
 

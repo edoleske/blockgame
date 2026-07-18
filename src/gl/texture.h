@@ -8,6 +8,7 @@ class Texture {
 public:
     explicit Texture(const string& path);
 
+    // Creates font bitmap texture from packed font atlas (from stb_truetype)
     explicit Texture(const vector<unsigned char>& atlasData, GLsizei width, GLsizei height);
 
     ~Texture();

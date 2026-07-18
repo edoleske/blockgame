@@ -26,7 +26,7 @@ private:
     unique_ptr<World> world;
     InputState input;
 
-    unique_ptr<UIRenderer> uiManager;
+    unique_ptr<UIRenderer> uiRenderer;
 
     void handleInput();
 

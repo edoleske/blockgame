@@ -8,7 +8,8 @@ enum class InputEvent {
     MOVE_FRONT, MOVE_BACK,
     MOVE_UP, MOVE_DOWN,
     SPRINT, TOGGLE_FLY,
-    MINE_BLOCK, PLACE_BLOCK
+    MINE_BLOCK, PLACE_BLOCK,
+    TOGGLE_DEBUG
 };
 
 static unordered_map<int, InputEvent> InputEventMap = {
@@ -21,7 +22,8 @@ static unordered_map<int, InputEvent> InputEventMap = {
         {GLFW_KEY_SPACE,          InputEvent::MOVE_UP},
         {GLFW_KEY_LEFT_SHIFT,     InputEvent::MOVE_DOWN},
         {GLFW_KEY_LEFT_CONTROL,   InputEvent::SPRINT},
-        {GLFW_KEY_F,              InputEvent::TOGGLE_FLY}
+        {GLFW_KEY_F,              InputEvent::TOGGLE_FLY},
+        {GLFW_KEY_B,              InputEvent::TOGGLE_DEBUG},
 };
 
 #endif //BLOCKGAME_INPUTEVENT_H

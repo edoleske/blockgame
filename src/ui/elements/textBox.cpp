@@ -7,7 +7,9 @@
 TextBox::TextBox(string text, const shared_ptr<Font>& font) : text(std::move(text)), font(font) {}
 
 void TextBox::generateVertices(const unique_ptr<UIBatch>& batch) const {
-    vec2 origin = vec2(0.0f, 16.0f);
+    // origin starts as position adjusted for baseline and padding
+    auto origin = vec2(Font::PADDING, font->getBaseline()) + position;
+
     for (auto& c : text) {
         auto packedChar = font->getPackedChar(c);
         auto quad = font->getQuad(c);

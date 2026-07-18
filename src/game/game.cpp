@@ -36,8 +36,8 @@ Game::Game(int width, int height) : Window(width, height),
     world = make_unique<World>(shader);
     world->generateSpawnArea();
 
-    uiManager = make_unique<UIRenderer>();
-    uiManager->updateWindowSize(width, height);
+    uiRenderer = make_unique<UIRenderer>();
+    uiRenderer->updateWindowSize(width, height);
 
     InputState::registerCallbacks(window);
 }
@@ -60,6 +60,7 @@ void Game::loop() {
         handleInput();
 
         player.update(deltaTime, input, world);
+        uiRenderer->update(deltaTime, input);
 
         input.postUpdate();
 
@@ -73,7 +74,7 @@ void Game::loop() {
         world->renderWorld(shader.get(), player.getCamera());
 
         // Render UI
-        uiManager->render();
+        uiRenderer->render();
 
         glfwSwapBuffers(window);
     }
@@ -82,7 +83,7 @@ void Game::loop() {
 void Game::updateWindowSize(int w, int h) {
     Window::updateWindowSize(w, h);
     player.updateAspectRatio(aspectRatio);
-    uiManager->updateWindowSize(w, h);
+    uiRenderer->updateWindowSize(w, h);
 }
 
 void Game::handleInput() {}
