@@ -14,7 +14,7 @@ public:
 
     static constexpr size_t MAX_SPRITES = 100;
 
-    void insertQuad(vec2 position, vec2 size);
+    void insertQuad(vec2 position, vec2 size, vec2 uv0 = vec2(0.0f), vec2 uv1 = vec2(1.0f));
 
     void flush();
 private:

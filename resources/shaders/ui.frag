@@ -4,10 +4,13 @@ in vec2 TexCoord;
 out vec4 oColor;
 
 uniform sampler2D uTexture;
-uniform int uTexWidth;
-uniform int uTexHeight;
+uniform bool isText;
 
 void main() {
-//    vec2 calcTexCoords = vec2(vTexCoords.x / uTexWidth, vTexCoords.y / uTexHeight);
+    if (isText) {
+        oColor = vec4(texture(uTexture, TexCoord).r);
+        return;
+    }
+
     oColor = texture(uTexture, TexCoord);
 }

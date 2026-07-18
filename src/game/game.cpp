@@ -36,7 +36,7 @@ Game::Game(int width, int height) : Window(width, height),
     world = make_unique<World>(shader);
     world->generateSpawnArea();
 
-    uiManager = make_unique<UIManager>();
+    uiManager = make_unique<UIRenderer>();
     uiManager->updateWindowSize(width, height);
 
     InputState::registerCallbacks(window);
@@ -73,7 +73,7 @@ void Game::loop() {
         world->renderWorld(shader.get(), player.getCamera());
 
         // Render UI
-        uiManager->render(width, height);
+        uiManager->render();
 
         glfwSwapBuffers(window);
     }

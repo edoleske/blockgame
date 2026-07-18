@@ -8,6 +8,8 @@ class Texture {
 public:
     explicit Texture(const string& path);
 
+    explicit Texture(const vector<unsigned char>& atlasData, GLsizei width, GLsizei height);
+
     ~Texture();
 
     void bind() const;

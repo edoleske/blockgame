@@ -11,7 +11,7 @@
 #include "world.h"
 #include "player/player.h"
 #include "inputState.h"
-#include "ui/uiManager.h"
+#include "ui/uiRenderer.h"
 
 class Game : public Window {
 public:
@@ -26,7 +26,7 @@ private:
     unique_ptr<World> world;
     InputState input;
 
-    unique_ptr<UIManager> uiManager;
+    unique_ptr<UIRenderer> uiManager;
 
     void handleInput();
 

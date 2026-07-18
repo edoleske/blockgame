@@ -10,12 +10,12 @@ UIBatch::UIBatch() {
     VertexArray::unbind();
 }
 
-void UIBatch::insertQuad(vec2 position, vec2 size) {
+void UIBatch::insertQuad(const vec2 position, const vec2 size, const vec2 uv0, const vec2 uv1) {
     if (count >= MAX_SPRITES) flush();
 
     for (auto i = 0; i < std::size(QUAD_VERTICES); i++) {
         auto vertex = QUAD_VERTICES[i];
-        vertexBuffer[i + 4 * count] = {(vertex.position * size) + position, vertex.uv};
+        vertexBuffer[i + 4 * count] = {vertex.position * size + position, vertex.uv * (uv1 - uv0) + uv0};
     }
     count++;
 }

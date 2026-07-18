@@ -87,14 +87,18 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/inputState.cpp
         src/game/inputState.h
         src/game/inputEvent.h
-        src/ui/uiManager.cpp
-        src/ui/uiManager.h
+        src/ui/uiRenderer.cpp
+        src/ui/uiRenderer.h
         src/ui/uiElement.cpp
         src/ui/uiElement.h
         src/ui/elements/crosshair.cpp
         src/ui/elements/crosshair.h
         src/ui/uiBatch.cpp
         src/ui/uiBatch.h
+        src/ui/font.cpp
+        src/ui/font.h
+        src/ui/elements/textBox.cpp
+        src/ui/elements/textBox.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
