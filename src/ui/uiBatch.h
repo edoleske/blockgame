@@ -26,10 +26,10 @@ private:
     std::array<UIVertex, MAX_SPRITES * 4> vertexBuffer = {};
 
     inline static UIVertex QUAD_VERTICES[4] = {
-        {{1.0f, 0.0f}, {1.0f, 0.0f}}, // TOP RIGHT
-        {{1.0f, 1.0f}, {1.0f, 1.0f}}, // BOTTOM RIGHT
-        {{0.0f, 1.0f}, {0.0f, 1.0f}}, // BOTTOM LEFT
-        {{0.0f, 0.0f}, {0.0f, 0.0f}}, // TOP LEFT
+        {.position = {1.0f, 0.0f}, .uv = {1.0f, 0.0f}}, // TOP RIGHT
+        {.position = {1.0f, 1.0f}, .uv = {1.0f, 1.0f}}, // BOTTOM RIGHT
+        {.position = {0.0f, 1.0f}, .uv = {0.0f, 1.0f}}, // BOTTOM LEFT
+        {.position = {0.0f, 0.0f}, .uv = {0.0f, 0.0f}}, // TOP LEFT
     };
 
     void submitBatch() const;

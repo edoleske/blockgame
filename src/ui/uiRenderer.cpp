@@ -8,26 +8,35 @@
 
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");
-    crosshairTexture = make_shared<Texture>("../resources/img/crosshair.png");
+    uiTexture = make_shared<Texture>("../resources/img/ui_texture.png");
     font = make_shared<Font>("../resources/font/ponderosa.ttf");
 
-    elements.emplace_back(make_unique<Crosshair>(vec2(0.0f), vec2(16.0f)));
-    elements.emplace_back(make_unique<UIElement>(vec2(100.0f), vec2(16.0f)));
+    elements.emplace_back(make_unique<Crosshair>());
+    elements.emplace_back(make_unique<UIElement>("toolbar", UIT_TOOLBAR, vec2(100.0f), vec2(200.0f, 20.0f), false));
 
-    textElements.emplace_back(make_unique<TextBox>("FPS: ", font));
-    textElements[0]->setPosition(1.0f, 1.0f);
+    auto fpsCounter = make_unique<TextBox>("fpsCounter", font);
+    fpsCounter->setPosition(1.0f, 1.0f);
+    elements.push_back(std::move(fpsCounter));
 
     batch = make_unique<UIBatch>();
-
 }
 
 void UIRenderer::update(const float deltaTime, const InputState& input) const {
-    const auto toggleDebug = input.getState(InputEvent::TOGGLE_DEBUG);
-    if (toggleDebug.current == true && !toggleDebug.previous) {
-        textElements[0]->hidden = !textElements[0]->hidden;
-    }
+    const auto [current, previous] = input.getState(InputEvent::TOGGLE_DEBUG);
+    const auto doFlip = current == true && !previous;
 
-    textElements[0]->text = std::format("FPS: {:.0f}", 1.0f / deltaTime);
+    for (auto& element : elements) {
+        if (element->getID() == "fpsCounter") {
+            if (doFlip) element->hidden = !element->hidden;
+            if (element->hidden) continue;
+
+            if (const auto counter = dynamic_cast<TextBox*>(element.get()); counter != nullptr) {
+                counter->text = std::format("FPS: {:.0f}", 1.0f / deltaTime);
+            }
+
+            break;
+        }
+    }
 }
 
 void UIRenderer::render() const {
@@ -37,9 +46,10 @@ void UIRenderer::render() const {
     shader->use();
     shader->setInteger("isText", 0);
 
-    crosshairTexture->bind();
+    uiTexture->bind();
 
     for (const auto& element : elements) {
+        if (element->getID() == "fpsCounter") continue;
         if (element->hidden) continue;
         element->generateVertices(batch);
     }
@@ -48,7 +58,8 @@ void UIRenderer::render() const {
     font->getTexture()->bind();
     shader->setInteger("isText", 1);
 
-    for (const auto& element : textElements) {
+    for (const auto& element : elements) {
+        if (element->getID() != "fpsCounter") continue;
         if (element->hidden) continue;
         element->generateVertices(batch);
     }
@@ -58,8 +69,8 @@ void UIRenderer::render() const {
     glEnable(GL_DEPTH_TEST);
 }
 
-void UIRenderer::updateWindowSize(int width, int height) const {
-    mat4 projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
+void UIRenderer::updateWindowSize(const int width, const int height) const {
+    const mat4 projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
 
     shader->use();
     shader->setMatrix4("projection", projection);

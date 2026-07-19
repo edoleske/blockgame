@@ -4,7 +4,7 @@ UIBatch::UIBatch() {
     quadVAO.bind();
     quadVBO.bind();
     quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
-    quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(2 * sizeof(float)));
+    quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, reinterpret_cast<void*>(2 * sizeof(float)));
     quadVBO.bufferData(sizeof(float) * 16 * MAX_SPRITES, vertexBuffer.data(), GL_DYNAMIC_DRAW);
     precalculateElementBuffer(quadEBO);
     VertexArray::unbind();

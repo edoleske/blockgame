@@ -4,7 +4,10 @@
 
 #include "ui/uiBatch.h"
 
-TextBox::TextBox(string text, const shared_ptr<Font>& font) : text(std::move(text)), font(font) {}
+TextBox::TextBox(string id, const shared_ptr<Font>& font) : UIElement(std::move(id)), font(font) {}
+
+TextBox::TextBox(string id, const vec2& position, const vec2& size, const bool hidden, const shared_ptr<Font>& font)
+    : UIElement(std::move(id), UIT_NONE, position, size, hidden), font(font) {}
 
 void TextBox::generateVertices(const unique_ptr<UIBatch>& batch) const {
     // origin starts as position adjusted for baseline and padding

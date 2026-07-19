@@ -5,9 +5,9 @@
 
 class Crosshair : public UIElement {
 public:
-    Crosshair() = default;
+    Crosshair();
 
-    Crosshair(const vec2& position, const vec2& size) : UIElement(position, size) {}
+    explicit Crosshair(string id, const vec2& position, const vec2& size, bool hidden);
 
     void updateWindowSize(int width, int height) override;
 };
