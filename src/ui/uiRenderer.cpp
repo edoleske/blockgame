@@ -14,8 +14,10 @@ UIRenderer::UIRenderer() {
 
     elements.emplace_back(make_unique<Crosshair>());
 
-    auto highlight = make_unique<UIElement>("toolbarHighlight", UIT_HIGHLIGHT, vec2(0.0f), vec2(60.0f),
-                                            vec2(0.0f, 1.0f), false);
+    auto highlight = make_unique<UIElement>(UIElementConfig{
+        .id = "toolbarHighlight", .textureName = UIT_HIGHLIGHT, .position = vec2(0.0f), .size = vec2(20.0f),
+        .scale = 3.0f, .origin = vec2(0.0f, 1.0f), .hidden = false
+    });
     elements.emplace_back(make_unique<Toolbar>(highlight.get()));
     elements.push_back(std::move(highlight));
 
@@ -46,7 +48,8 @@ void UIRenderer::update(const float deltaTime, const InputState& input) const {
 
             if (input.isPressed(InputEvent::SCROLL_UP)) {
                 toolbar->setSelected((toolbar->getSelected() + 1) % 10);
-            } if (input.isPressed(InputEvent::SCROLL_DOWN)) {
+            }
+            if (input.isPressed(InputEvent::SCROLL_DOWN)) {
                 const auto newIndex = toolbar->getSelected() - 1;
                 toolbar->setSelected(newIndex < 0 ? newIndex + 10 : newIndex);
             }

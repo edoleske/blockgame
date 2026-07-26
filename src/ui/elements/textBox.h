@@ -8,7 +8,7 @@ class TextBox : public UIElement {
 public:
     explicit TextBox(string id, const shared_ptr<Font>& font);
 
-    explicit TextBox(string id, const vec2& position, const vec2& size, const vec2& origin, bool hidden, const shared_ptr<Font>& font);
+    explicit TextBox(UIElementConfig config, const shared_ptr<Font>& font);
 
     void generateVertices(const unique_ptr<UIBatch>& batch, const unique_ptr<UITextureAtlas>& _) const override;
 

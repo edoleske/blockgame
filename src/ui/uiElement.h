@@ -6,8 +6,32 @@
 
 class UIBatch;
 
-enum UI_RENDERPASS {
+enum UIRenderPass {
     UI_MAIN, UI_TEXT
+};
+
+
+struct UIElementConfig {
+    // Mandatory string ID for identifying elements
+    string id;
+    // Name for texture in UI texture atlas
+    UITextureName textureName = UIT_NONE;
+    // Position of element's origin
+    vec2 position = vec2(0.0f);
+    // Size of element (keep same as pixel size of texture)
+    vec2 size = vec2(0.0f);
+    // Scale of element (multiplies size)
+    float scale = 1.0f;
+    // Origin of position (0.0f to 1.0f for x and y)
+    vec2 origin = vec2(0.0f);
+    // Hidden flag for skipping rendering element
+    bool hidden = false;
+    // Centers origin horizontally
+    bool centerX = false;
+    // Centers origin vertically
+    bool centerY = false;
+    // Controls which render pass elements is rendered in
+    UIRenderPass renderPass = UI_MAIN;
 };
 
 
@@ -15,7 +39,7 @@ class UIElement {
 public:
     explicit UIElement(string id);
 
-    explicit UIElement(string id, UITextureName textureName, const vec2& position, const vec2& size, const vec2& origin, bool hidden);
+    explicit UIElement(UIElementConfig config);
 
     virtual ~UIElement() = default;
 
@@ -32,14 +56,15 @@ public:
 
     virtual void updateWindowSize(int width, int height);
 
-    UITextureName textureName = UIT_NONE;
+    UITextureName textureName;
     vec2 position;
     vec2 size;
-    vec2 origin { 0.0f, 0.0f };
-
-    bool hidden = false;
-
-    UI_RENDERPASS renderPass = UI_MAIN;
+    float scale;
+    vec2 origin;
+    bool centerX;
+    bool centerY;
+    bool hidden;
+    UIRenderPass renderPass;
 
 private:
     string id;

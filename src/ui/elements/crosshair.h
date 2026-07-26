@@ -7,9 +7,7 @@ class Crosshair : public UIElement {
 public:
     Crosshair();
 
-    explicit Crosshair(string id, const vec2& position, const vec2& size, bool hidden);
-
-    void updateWindowSize(int width, int height) override;
+    explicit Crosshair(UIElementConfig config);
 };
 
 
