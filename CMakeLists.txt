@@ -99,6 +99,10 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/font.h
         src/ui/elements/textBox.cpp
         src/ui/elements/textBox.h
+        src/ui/uiTextureAtlas.cpp
+        src/ui/uiTextureAtlas.h
+        src/ui/elements/toolbar.cpp
+        src/ui/elements/toolbar.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

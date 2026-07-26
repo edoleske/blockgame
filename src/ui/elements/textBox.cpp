@@ -4,12 +4,16 @@
 
 #include "ui/uiBatch.h"
 
-TextBox::TextBox(string id, const shared_ptr<Font>& font) : UIElement(std::move(id)), font(font) {}
+TextBox::TextBox(string id, const shared_ptr<Font>& font) : UIElement(std::move(id)), font(font) {
+    renderPass = UI_TEXT;
+}
 
-TextBox::TextBox(string id, const vec2& position, const vec2& size, const bool hidden, const shared_ptr<Font>& font)
-    : UIElement(std::move(id), UIT_NONE, position, size, hidden), font(font) {}
+TextBox::TextBox(string id, const vec2& position, const vec2& size, const vec2& origin, const bool hidden, const shared_ptr<Font>& font)
+    : UIElement(std::move(id), UIT_NONE, position, size, origin, hidden), font(font) {
+    renderPass = UI_TEXT;
+}
 
-void TextBox::generateVertices(const unique_ptr<UIBatch>& batch) const {
+void TextBox::generateVertices(const unique_ptr<UIBatch>& batch, const unique_ptr<UITextureAtlas>& _) const {
     // origin starts as position adjusted for baseline and padding
     auto origin = vec2(Font::PADDING, font->getBaseline()) + position;
 

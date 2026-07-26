@@ -14,6 +14,10 @@ public:
     InputState();
     ~InputState();
 
+    bool isPressed(InputEvent event) const;
+
+    bool isReleased(InputEvent event) const;
+
     ButtonState getState(InputEvent event) const;
 
     vec2 getCursorOffset();
@@ -21,6 +25,8 @@ public:
     void updateKey(int key, bool state);
 
     void updateCursor(double x, double y);
+
+    void updateScroll(double x, double y);
 
     // Called every frame to update keys so previous frame is accurate
     void postUpdate();
@@ -30,9 +36,12 @@ private:
     unordered_map<InputEvent, ButtonState> inputMap;
     vec<2, double> currentCursor, previousCursor;
 
+    void updateInputMap(InputEvent event, bool state);
+
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void cursorPositionCallback(GLFWwindow* window, double x, double y);
+    static void scrollCallback(GLFWwindow* window, double x, double y);
 
     // Created InputState instance for registering static callbacks with GLFW
     static InputState* _instance;

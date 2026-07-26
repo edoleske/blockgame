@@ -51,6 +51,7 @@ using glm::vec3;
 using glm::vec4;
 using glm::u16vec2;
 using glm::ivec3;
+using glm::ivec4;
 using glm::u8vec3;
 using glm::mat4;
 

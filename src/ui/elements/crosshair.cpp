@@ -1,9 +1,9 @@
 #include "crosshair.h"
 
-Crosshair::Crosshair() : UIElement("crosshair", UIT_CROSSHAIR, vec2(0.0f), vec2(16.0f), false) {}
+Crosshair::Crosshair() : UIElement("crosshair", UIT_CROSSHAIR, vec2(0.0f), vec2(16.0f), vec2(0.0f), false) {}
 
 Crosshair::Crosshair(string id, const vec2& position, const vec2& size, const bool hidden)
-    : UIElement(std::move(id), UIT_CROSSHAIR, position, size, hidden) {}
+    : UIElement(std::move(id), UIT_CROSSHAIR, position, size, vec2(0.0f), hidden) {}
 
 void Crosshair::updateWindowSize(const int width, const int height) {
     // Center crosshair

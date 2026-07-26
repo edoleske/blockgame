@@ -7,7 +7,6 @@
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
 #include "gl/shader.h"
-#include "gl/texture.h"
 #include "world.h"
 #include "player/player.h"
 #include "inputState.h"

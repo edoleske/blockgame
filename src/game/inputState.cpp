@@ -8,6 +8,10 @@ InputState::InputState() : currentCursor(0.0, 0.0), previousCursor(0.0, 0.0) {
     for (auto const& [key, event]: InputEventMap) {
         inputMap[event] = ButtonState();
     }
+
+    // Scroll inputs are not mapped to a GLFW button, so we track it more manually
+    inputMap[InputEvent::SCROLL_UP] = ButtonState();
+    inputMap[InputEvent::SCROLL_DOWN] = ButtonState();
 }
 
 InputState::~InputState() {
@@ -16,7 +20,17 @@ InputState::~InputState() {
     }
 }
 
-ButtonState InputState::getState(InputEvent event) const {
+bool InputState::isPressed(const InputEvent event) const {
+    auto [current, previous] = inputMap.at(event);
+    return current && !previous;
+}
+
+bool InputState::isReleased(const InputEvent event) const {
+    auto [current, previous] = inputMap.at(event);
+    return !current && previous;
+}
+
+ButtonState InputState::getState(const InputEvent event) const {
     return inputMap.at(event);
 }
 
@@ -32,18 +46,36 @@ void InputState::updateKey(int key, bool state) {
     if (!InputEventMap.contains(key)) return;
 
     auto event = InputEventMap[key];
-    inputMap[event].previous = inputMap[event].current;
-    inputMap[event].current = state;
+    updateInputMap(event, state);
 }
 
 void InputState::updateCursor(double x, double y) {
     currentCursor = glm::vec<2, double>(x, y);
 }
 
+void InputState::updateScroll(double x, double y) {
+    if (y > 0) {
+        updateInputMap(InputEvent::SCROLL_UP, true);
+        updateInputMap(InputEvent::SCROLL_DOWN, false);
+    } else if (y < 0) {
+        updateInputMap(InputEvent::SCROLL_UP, false);
+        updateInputMap(InputEvent::SCROLL_DOWN, true);
+    } else {
+        updateInputMap(InputEvent::SCROLL_UP, false);
+        updateInputMap(InputEvent::SCROLL_DOWN, false);
+    }
+}
+
 void InputState::registerCallbacks(GLFWwindow* window) {
     glfwSetKeyCallback(window, InputState::keyCallback);
     glfwSetMouseButtonCallback(window, InputState::mouseButtonCallback);
     glfwSetCursorPosCallback(window, InputState::cursorPositionCallback);
+    glfwSetScrollCallback(window, InputState::scrollCallback);
+}
+
+void InputState::updateInputMap(const InputEvent event, const bool state) {
+    inputMap[event].previous = inputMap[event].current;
+    inputMap[event].current = state;
 }
 
 void InputState::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -69,9 +101,18 @@ void InputState::cursorPositionCallback(GLFWwindow* window, double x, double y) 
     }
 }
 
+void InputState::scrollCallback(GLFWwindow* window, double x, double y) {
+    if (_instance != nullptr) {
+        _instance->updateScroll(x, y);
+    }
+}
+
 void InputState::postUpdate() {
     for (auto const& [key, event]: InputEventMap) {
         auto state = inputMap[event];
         inputMap[event] = ButtonState(state.current, state.current);
     }
+
+    inputMap[InputEvent::SCROLL_UP] = ButtonState(false, false);
+    inputMap[InputEvent::SCROLL_DOWN] = ButtonState(false, false);
 }

@@ -6,7 +6,6 @@
 #include "uiBatch.h"
 #include "game/inputState.h"
 #include "gl/shader.h"
-#include "gl/texture.h"
 
 class UIRenderer {
 public:
@@ -20,7 +19,7 @@ public:
 
 private:
     unique_ptr<Shader> shader;
-    shared_ptr<Texture> uiTexture;
+    unique_ptr<UITextureAtlas> textureAtlas;
     shared_ptr<Font> font;
 
     vector<unique_ptr<UIElement>> elements = {};

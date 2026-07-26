@@ -2,10 +2,15 @@
 #define BLOCKGAME_UIBATCH_H
 
 #include "common.h"
-#include "uiElement.h"
 #include "gl/elementBuffer.h"
 #include "gl/vertexArray.h"
 #include "gl/vertexBuffer.h"
+
+
+struct UIVertex {
+    vec2 position;
+    vec2 uv;
+};
 
 
 class UIBatch {
