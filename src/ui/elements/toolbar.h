@@ -9,13 +9,13 @@ public:
 
     void updateWindowSize(int width, int height) override;
 
-    int getSelected() const;
+    int getHighlightPosition() const;
 
-    void setSelected(int index);
+    void setHighlightPosition(int index);
 
 private:
     UIElement* toolbarHighlight;
-    int selected = 0;
+    int highlightPosition = 0;
 };
 
 

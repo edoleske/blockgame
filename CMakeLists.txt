@@ -103,6 +103,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/uiTextureAtlas.h
         src/ui/elements/toolbar.cpp
         src/ui/elements/toolbar.h
+        src/player/inventory.cpp
+        src/player/inventory.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

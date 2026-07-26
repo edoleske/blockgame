@@ -59,8 +59,8 @@ void Game::loop() {
 
         handleInput();
 
-        player.update(deltaTime, input, world);
-        uiRenderer->update(deltaTime, input);
+        player.update(deltaTime, world);
+        uiRenderer->update(deltaTime, player);
 
         input.postUpdate();
 

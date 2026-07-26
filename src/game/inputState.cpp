@@ -3,7 +3,7 @@
 InputState* InputState::_instance = nullptr;
 
 InputState::InputState() : currentCursor(0.0, 0.0), previousCursor(0.0, 0.0) {
-    InputState::_instance = this;
+    _instance = this;
 
     for (auto const& [key, event]: InputEventMap) {
         inputMap[event] = ButtonState();
@@ -18,6 +18,10 @@ InputState::~InputState() {
     if (_instance == this) {
         _instance = nullptr;
     }
+}
+
+InputState* InputState::getInstance() {
+    return _instance;
 }
 
 bool InputState::isPressed(const InputEvent event) const {

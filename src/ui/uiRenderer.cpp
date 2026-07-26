@@ -28,8 +28,9 @@ UIRenderer::UIRenderer() {
     batch = make_unique<UIBatch>();
 }
 
-void UIRenderer::update(const float deltaTime, const InputState& input) const {
-    const auto toggleDebug = input.isPressed(InputEvent::TOGGLE_DEBUG);
+void UIRenderer::update(const float deltaTime, const Player& player) const {
+    const auto input = InputState::getInstance();
+    const auto toggleDebug = input->isPressed(InputEvent::TOGGLE_DEBUG);
 
     for (auto& element : elements) {
         if (element->getID() == "fpsCounter") {
@@ -46,21 +47,9 @@ void UIRenderer::update(const float deltaTime, const InputState& input) const {
             const auto toolbar = dynamic_cast<Toolbar*>(element.get());
             if (toolbar == nullptr) continue;
 
-            if (input.isPressed(InputEvent::SCROLL_UP)) {
-                toolbar->setSelected((toolbar->getSelected() + 1) % 10);
-            }
-            if (input.isPressed(InputEvent::SCROLL_DOWN)) {
-                const auto newIndex = toolbar->getSelected() - 1;
-                toolbar->setSelected(newIndex < 0 ? newIndex + 10 : newIndex);
-            }
-
-            for (auto& event : {
-                     InputEvent::ITEM_1, InputEvent::ITEM_2, InputEvent::ITEM_3, InputEvent::ITEM_4, InputEvent::ITEM_5,
-                     InputEvent::ITEM_6, InputEvent::ITEM_7, InputEvent::ITEM_8, InputEvent::ITEM_9, InputEvent::ITEM_0
-                 }) {
-                if (input.isPressed(event)) {
-                    toolbar->setSelected(static_cast<int>(event) - static_cast<int>(InputEvent::ITEM_1));
-                }
+            if (const auto selected = player.getInventory().getSelected();
+                selected != toolbar->getHighlightPosition()) {
+                toolbar->setHighlightPosition(selected);
             }
         }
     }

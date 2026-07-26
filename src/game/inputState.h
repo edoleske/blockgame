@@ -14,6 +14,8 @@ public:
     InputState();
     ~InputState();
 
+    static InputState* getInstance();
+
     bool isPressed(InputEvent event) const;
 
     bool isReleased(InputEvent event) const;

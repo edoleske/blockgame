@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "camera.h"
+#include "inventory.h"
 #include "../game/inputState.h"
 
 class World;
@@ -14,11 +15,13 @@ public:
 
     const Camera& getCamera() const;
 
+    const Inventory& getInventory() const;
+
     const vec3& getSize() const;
 
     bool isFlying() const;
 
-    void update(float deltaTime, InputState& input, const unique_ptr<World>& world);
+    void update(float deltaTime, const unique_ptr<World>& world);
 
     void updateAspectRatio(float aspectRatio);
 
@@ -28,6 +31,7 @@ public:
 
 private:
     Camera camera;
+    Inventory inventory;
 
     vec3 size = vec3(0.6f, 1.8f, 0.6f);
     const vec3 CENTER_OFFSET = vec3(0.5f, 0.8f, 0.5f) * size;

@@ -4,14 +4,14 @@
 #include "font.h"
 #include "uiElement.h"
 #include "uiBatch.h"
-#include "game/inputState.h"
 #include "gl/shader.h"
+#include "player/player.h"
 
 class UIRenderer {
 public:
     UIRenderer();
 
-    void update(float deltaTime, const InputState& input) const;
+    void update(float deltaTime, const Player& player) const;
 
     void render() const;
 

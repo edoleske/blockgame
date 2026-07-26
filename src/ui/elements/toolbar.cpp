@@ -12,12 +12,12 @@ void Toolbar::updateWindowSize(const int width, const int height) {
     toolbarHighlight->position = vec2((width / 2) - (size.x * scale / 2), height);
 }
 
-int Toolbar::getSelected() const {
-    return selected;
+int Toolbar::getHighlightPosition() const {
+    return highlightPosition;
 }
 
-void Toolbar::setSelected(const int index) {
-    toolbarHighlight->position.x -= selected * toolbarHighlight->size.x * scale;
-    selected = index;
-    toolbarHighlight->position.x += selected * toolbarHighlight->size.x * scale;
+void Toolbar::setHighlightPosition(const int index) {
+    toolbarHighlight->position.x -= highlightPosition * toolbarHighlight->size.x * scale;
+    highlightPosition = index;
+    toolbarHighlight->position.x += highlightPosition * toolbarHighlight->size.x * scale;
 }

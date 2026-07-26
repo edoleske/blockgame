@@ -8,6 +8,10 @@ const Camera& Player::getCamera() const {
     return camera;
 }
 
+const Inventory& Player::getInventory() const {
+    return inventory;
+}
+
 const vec3& Player::getSize() const {
     return size;
 }
@@ -16,34 +20,36 @@ bool Player::isFlying() const {
     return flying;
 }
 
-void Player::update(float deltaTime, InputState& input, const unique_ptr<World>& world) {
-    auto fly = input.getState(InputEvent::TOGGLE_FLY);
+void Player::update(float deltaTime, const unique_ptr<World>& world) {
+    const auto input = InputState::getInstance();
+
+    auto fly = input->getState(InputEvent::TOGGLE_FLY);
     if (fly.current && !fly.previous) {
         flying = !flying;
     }
 
     vec3 movementVector = vec3(0.0f);
 
-    if (input.getState(InputEvent::MOVE_FRONT).current) {
+    if (input->getState(InputEvent::MOVE_FRONT).current) {
         movementVector.z += 1.0f;
     }
-    if (input.getState(InputEvent::MOVE_BACK).current) {
+    if (input->getState(InputEvent::MOVE_BACK).current) {
         movementVector.z -= 1.0f;
     }
-    if (input.getState(InputEvent::MOVE_LEFT).current) {
+    if (input->getState(InputEvent::MOVE_LEFT).current) {
         movementVector.x -= 1.0f;
     }
-    if (input.getState(InputEvent::MOVE_RIGHT).current) {
+    if (input->getState(InputEvent::MOVE_RIGHT).current) {
         movementVector.x += 1.0f;
     }
-    if (input.getState(InputEvent::MOVE_UP).current) {
+    if (input->getState(InputEvent::MOVE_UP).current) {
         if (flying) {
             movementVector.y += 1.0f;
-        } else if (!input.getState(InputEvent::MOVE_UP).previous && jumpVelocity.y == 0.0f) {
+        } else if (!input->getState(InputEvent::MOVE_UP).previous && jumpVelocity.y == 0.0f) {
             jumpVelocity.y = 0.95f;
         }
     }
-    if (input.getState(InputEvent::MOVE_DOWN).current && flying) {
+    if (input->getState(InputEvent::MOVE_DOWN).current && flying) {
         movementVector.y -= 1.0f;
     }
 
@@ -56,16 +62,31 @@ void Player::update(float deltaTime, InputState& input, const unique_ptr<World>&
 
     onMove(currentVelocity * deltaTime, world);
 
-    auto cursorOffset = input.getCursorOffset();
+    auto cursorOffset = input->getCursorOffset();
     onRotate(cursorOffset.x, cursorOffset.y);
 
-    auto mine = input.getState(InputEvent::MINE_BLOCK);
-    if (mine.current && !mine.previous) {
+    // Update Inventory
+    if (input->isPressed(InputEvent::SCROLL_UP)) {
+        inventory.setSelected(inventory.getSelected() + 1);
+    }
+    if (input->isPressed(InputEvent::SCROLL_DOWN)) {
+        inventory.setSelected(inventory.getSelected() - 1);
+    }
+
+    for (auto& event : {
+             InputEvent::ITEM_1, InputEvent::ITEM_2, InputEvent::ITEM_3, InputEvent::ITEM_4, InputEvent::ITEM_5,
+             InputEvent::ITEM_6, InputEvent::ITEM_7, InputEvent::ITEM_8, InputEvent::ITEM_9, InputEvent::ITEM_0
+         }) {
+        if (input->isPressed(event)) {
+            inventory.setSelected(static_cast<int>(event) - static_cast<int>(InputEvent::ITEM_1));
+        }
+    }
+
+    if (input->isPressed(InputEvent::MINE_BLOCK)) {
         world->mineBlock(camera.getPosition(), camera.getFront());
     }
 
-    auto place = input.getState(InputEvent::PLACE_BLOCK);
-    if (place.current && !place.previous) {
+    if (input->isPressed(InputEvent::PLACE_BLOCK)) {
         world->placeBlock(camera.getPosition(), camera.getFront());
     }
 }
