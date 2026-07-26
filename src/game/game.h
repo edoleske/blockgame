@@ -10,6 +10,7 @@
 #include "world.h"
 #include "player/player.h"
 #include "inputState.h"
+#include "settings.h"
 #include "ui/uiRenderer.h"
 
 class Game : public Window {
@@ -20,17 +21,17 @@ public:
 
     void updateWindowSize(int w, int h) override;
 private:
-    Player player;
-    unique_ptr<Shader> shader;
-    unique_ptr<World> world;
     InputState input;
+    Settings settings;
+    Player player;
 
+    unique_ptr<World> world;
     unique_ptr<UIRenderer> uiRenderer;
-
-    void handleInput();
 
     VertexArray vao;
     VertexBuffer vbo;
+
+    void update();
 };
 
 

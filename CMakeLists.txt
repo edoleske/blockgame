@@ -105,6 +105,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/elements/toolbar.h
         src/player/inventory.cpp
         src/player/inventory.h
+        src/game/settings.cpp
+        src/game/settings.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

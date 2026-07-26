@@ -1,6 +1,6 @@
 #include "game.h"
 
-Game::Game(int width, int height) : Window(width, height),
+Game::Game(const int width, const int height) : Window(width, height),
                                     player(45.0f, static_cast<float>(width) / static_cast<float>(height)) {
     // Turn on depth testing
     glEnable(GL_DEPTH_TEST);
@@ -28,12 +28,7 @@ Game::Game(int width, int height) : Window(width, height),
     // Wireframe for mesh debugging
     //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
-    shader->use();
-    shader->setInteger("renderDistance", RENDER_DISTANCE);
-    shader->setVector4f("uFogColor", vec4((vec3(190.0f, 220.0f, 245.0f) / 255.0f) * 1.1f, 1.0f));
-
-    world = make_unique<World>(shader);
+    world = make_unique<World>();
     world->generateSpawnArea();
 
     uiRenderer = make_unique<UIRenderer>();
@@ -56,22 +51,12 @@ void Game::loop() {
 
         // Poll input and update game based on input state
         glfwPollEvents();
-
-        handleInput();
-
-        player.update(deltaTime, world);
-        uiRenderer->update(deltaTime, player);
-
+        update();
         input.postUpdate();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Update shader with camera matrices
-        shader->use();
-        shader->setMatrix4("view", player.getCamera().getView());
-        shader->setMatrix4("projection", player.getCamera().getProjection());
-
-        world->renderWorld(shader.get(), player.getCamera());
+        world->renderWorld(player.getCamera());
 
         // Render UI
         uiRenderer->render();
@@ -86,4 +71,7 @@ void Game::updateWindowSize(int w, int h) {
     uiRenderer->updateWindowSize(w, h);
 }
 
-void Game::handleInput() {}
+void Game::update() {
+    player.update(deltaTime, world);
+    uiRenderer->update(deltaTime, player);
+}

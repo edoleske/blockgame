@@ -1,6 +1,13 @@
 #include "world.h"
 
-World::World(const unique_ptr<Shader>& shader) {
+#include "settings.h"
+
+World::World() {
+    shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
+    shader->use();
+    shader->setInteger("renderDistance", Settings::getInstance()->renderDistance);
+    shader->setVector4f("uFogColor", vec4((vec3(190.0f, 220.0f, 245.0f) / 255.0f) * 1.1f, 1.0f));
+
     // Initialize element buffer object shared between all chunks
     ebo = make_shared<ElementBuffer>();
     initializeEBO();
@@ -8,7 +15,7 @@ World::World(const unique_ptr<Shader>& shader) {
     // Initialize VAO for highlight vertices (single cube)
     highlightVAO.bind();
     highlightVBO.bind();
-    highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*) nullptr);
+    highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), nullptr);
     highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
 
     highlightVertices = vector<Vertex>();
@@ -120,9 +127,11 @@ void World::setBlock(const vec3 position, const Block block) {
 }
 
 void World::generateSpawnArea() {
+    const int spawnSize = Settings::getInstance()->renderDistance;
+
     // Create chunks
-    for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
-        for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
+    for (int x = -spawnSize; x <= spawnSize; ++x) {
+        for (int z = -spawnSize; z <= spawnSize; ++z) {
             chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
 
             auto chunk = chunkMap.at(make_pair(x, z)).get();
@@ -135,8 +144,8 @@ void World::generateSpawnArea() {
     }
 
     // Build chunk meshes
-    for (int x = -SPAWN_SIZE; x <= SPAWN_SIZE; ++x) {
-        for (int z = -SPAWN_SIZE; z <= SPAWN_SIZE; ++z) {
+    for (int x = -spawnSize; x <= spawnSize; ++x) {
+        for (int z = -spawnSize; z <= spawnSize; ++z) {
             auto chunk = chunkMap.at(make_pair(x, z)).get();
             chunk->buildMesh(chunkMap);
         }
@@ -227,11 +236,16 @@ void World::unloadChunk(int x, int z) {
     unbuildChunk(x, z + 1);
 }
 
-void World::renderWorld(Shader* shader, const Camera& playerCamera) {
+void World::renderWorld(const Camera& playerCamera) {
     auto playerPosition = playerCamera.getPosition();
     auto playerFront = playerCamera.getFront();
 
     shader->use();
+
+    // Update shader with camera matrices
+    shader->setMatrix4("view", playerCamera.getView());
+    shader->setMatrix4("projection", playerCamera.getProjection());
+
     blockTexture->getTexture()->bind();
 
     bool builtOne = false;

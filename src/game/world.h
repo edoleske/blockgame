@@ -10,7 +10,7 @@
 
 class World {
 public:
-    explicit World(const unique_ptr<Shader>& shader);
+    World();
 
     Chunk* getChunk(int x, int z) const;
 
@@ -36,7 +36,7 @@ public:
 
     void unloadChunk(int x, int z);
 
-    void renderWorld(Shader* shader, const Camera& playerCamera);
+    void renderWorld(const Camera& playerCamera);
 
 private:
     string name = "NewWorld";
@@ -44,7 +44,8 @@ private:
     unsigned seed;
     unique_ptr<WorldGenerator> worldGen;
 
-    const int SPAWN_SIZE = RENDER_DISTANCE;
+    // Shader for rendering world
+    unique_ptr<Shader> shader;
 
     // Shared block texture
     shared_ptr<BlockTexture> blockTexture;
