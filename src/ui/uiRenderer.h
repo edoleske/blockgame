@@ -5,7 +5,7 @@
 #include "uiElement.h"
 #include "uiBatch.h"
 #include "gl/shader.h"
-#include "player/player.h"
+#include "game/player/player.h"
 
 class UIRenderer {
 public:

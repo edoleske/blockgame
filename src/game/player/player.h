@@ -5,7 +5,6 @@
 #include "common.h"
 #include "camera.h"
 #include "inventory.h"
-#include "../game/inputState.h"
 
 class World;
 
@@ -25,7 +24,7 @@ public:
 
     void updateAspectRatio(float aspectRatio);
 
-    void onMove(const vec3 &velocity, const unique_ptr<World>& world);
+    void onMove(const vec3& velocity, const unique_ptr<World>& world);
 
     void onRotate(float xOffset, float yOffset);
 

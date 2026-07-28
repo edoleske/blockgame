@@ -6,7 +6,7 @@
 #include "chunk.h"
 #include "gl/shader.h"
 #include "worldGenerator.h"
-#include "player/camera.h"
+#include "game/player/camera.h"
 
 class World {
 public:

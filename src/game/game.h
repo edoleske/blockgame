@@ -7,7 +7,7 @@
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
 #include "gl/shader.h"
-#include "world.h"
+#include "world/world.h"
 #include "player/player.h"
 #include "inputState.h"
 #include "settings.h"
@@ -20,6 +20,7 @@ public:
     void loop() override;
 
     void updateWindowSize(int w, int h) override;
+
 private:
     InputState input;
     Settings settings;

@@ -64,26 +64,26 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/utils/vertex.h
         src/gl/shader.cpp
         src/gl/shader.h
-        src/player/camera.cpp
-        src/player/camera.h
-        src/game/block.cpp
-        src/game/block.h
-        src/game/chunk.cpp
-        src/game/chunk.h
-        src/game/world.cpp
-        src/game/world.h
+        src/game/player/camera.cpp
+        src/game/player/camera.h
+        src/game/block/block.cpp
+        src/game/block/block.h
+        src/game/world/chunk.cpp
+        src/game/world/chunk.h
+        src/game/world/world.cpp
+        src/game/world/world.h
         src/gl/texture.cpp
         src/gl/texture.h
         src/gl/elementBuffer.cpp
         src/gl/elementBuffer.h
-        src/game/blockTexture.cpp
-        src/game/blockTexture.h
+        src/game/block/blockTexture.cpp
+        src/game/block/blockTexture.h
         src/utils/noiseGenerator.cpp
         src/utils/noiseGenerator.h
-        src/player/player.cpp
-        src/player/player.h
-        src/game/worldGenerator.cpp
-        src/game/worldGenerator.h
+        src/game/player/player.cpp
+        src/game/player/player.h
+        src/game/world/worldGenerator.cpp
+        src/game/world/worldGenerator.h
         src/game/inputState.cpp
         src/game/inputState.h
         src/game/inputEvent.h
@@ -103,10 +103,16 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/uiTextureAtlas.h
         src/ui/elements/toolbar.cpp
         src/ui/elements/toolbar.h
-        src/player/inventory.cpp
-        src/player/inventory.h
+        src/game/player/inventory.cpp
+        src/game/player/inventory.h
         src/game/settings.cpp
         src/game/settings.h
+        src/game/item/item.cpp
+        src/game/item/item.h
+        src/game/item/itemStack.cpp
+        src/game/item/itemStack.h
+        src/game/item/itemBlock.cpp
+        src/game/item/itemBlock.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

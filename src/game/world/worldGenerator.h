@@ -4,7 +4,7 @@
 
 #include "common.h"
 #include "utils/noiseGenerator.h"
-#include "block.h"
+#include "game/block/block.h"
 #include "chunk.h"
 
 class WorldGenerator {
@@ -12,13 +12,14 @@ public:
     explicit WorldGenerator(unsigned seed);
 
     void generate(Chunk* chunk);
+
 private:
     unsigned seed;
     unique_ptr<NoiseGenerator> noise;
 
     // RNG for features like flowers
     std::mt19937 generator;
-    std::uniform_real_distribution<> distribution {0.0, 1.0 };
+    std::uniform_real_distribution<> distribution{0.0, 1.0};
 
     static const int seaLevel = 62;
     const int octaves = 5;

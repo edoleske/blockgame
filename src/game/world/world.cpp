@@ -1,6 +1,6 @@
 #include "world.h"
 
-#include "settings.h"
+#include "game/settings.h"
 
 World::World() {
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
@@ -16,7 +16,7 @@ World::World() {
     highlightVAO.bind();
     highlightVBO.bind();
     highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), nullptr);
-    highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*) offsetof(Vertex, uv));
+    highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
 
     highlightVertices = vector<Vertex>();
     highlightVertices.reserve(40);
@@ -32,7 +32,7 @@ World::World() {
         highlightVertices.insert(highlightVertices.end(), vertices.begin(), vertices.end());
     }
     highlightVBO.bufferData(highlightVertices.size() * sizeof(Vertex), &highlightVertices.front(),
-                                  GL_STATIC_DRAW);
+                            GL_STATIC_DRAW);
 
     VertexArray::unbind();
 
@@ -157,7 +157,7 @@ void World::updateChunks(const vec3& playerPosition) {
     auto pz = static_cast<int>(playerPosition.z) >> 4;
 
     // Unload chunks that are beyond render distance
-    for (auto& it: chunkMap) {
+    for (auto& it : chunkMap) {
         if (it.second->getChunkState() == ChunkState::UNLOADED) {
             continue;
         }
@@ -191,7 +191,7 @@ void World::updateChunks(const vec3& playerPosition) {
     }
 
     // To prevent long frames, we will load one chunk per update
-    for (auto& [xz, chunk]: chunkMap) {
+    for (auto& [xz, chunk] : chunkMap) {
         if (chunk->getChunkState() == ChunkState::EMPTY) {
             auto [x, z] = xz;
             loadFromRegionFile(x, z);
@@ -330,9 +330,9 @@ void World::unbuildChunk(int x, int z) {
 
 bool World::chunkNeighborsPopulated(int x, int z) const {
     return getChunk(x - 1, z) != nullptr &&
-           getChunk(x + 1, z) != nullptr &&
-           getChunk(x, z - 1) != nullptr &&
-           getChunk(x, z + 1) != nullptr;
+        getChunk(x + 1, z) != nullptr &&
+        getChunk(x, z - 1) != nullptr &&
+        getChunk(x, z + 1) != nullptr;
 }
 
 optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, bool place) const {
@@ -355,9 +355,9 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
         position += delta;
 
         auto block = getBlock(
-                std::floor(position.x),
-                std::floor(position.y),
-                std::floor(position.z)
+            std::floor(position.x),
+            std::floor(position.y),
+            std::floor(position.z)
         );
         if (block.has_value() && (block->isOpaque() || Block::isBlockTypeBillboard(block->getType()))) {
             // If placing a block, we retract position to the last block
@@ -385,7 +385,7 @@ void World::createLevel() {
     ofstream ofs;
     ofs.open(filename, std::ios::binary);
     if (ofs.is_open()) {
-        ofs.write((char*) &seed, sizeof(seed));
+        ofs.write((char*)&seed, sizeof(seed));
         ofs.close();
     }
 }
@@ -401,7 +401,7 @@ bool World::loadLevel() {
     if (!ifs.is_open()) {
         return false;
     }
-    ifs.read((char*) &seed, sizeof(seed));
+    ifs.read((char*)&seed, sizeof(seed));
     ifs.close();
 
     return true;
@@ -409,7 +409,7 @@ bool World::loadLevel() {
 
 string World::getRegionFilePath(int x, int z) const {
     return "saves/" + name + "/" +
-           "region." + std::to_string(x >> 5) + "." + std::to_string(z >> 5) + ".data";
+        "region." + std::to_string(x >> 5) + "." + std::to_string(z >> 5) + ".data";
 }
 
 void World::createRegionFile(const string& filepath) {
@@ -507,7 +507,7 @@ void World::loadFromRegionFile(int x, int z) {
     // Check if chunk data is missing
     ifs.seekg(headerOffset + REGION_SECTOR_SIZE);
     unsigned epochTime;
-    ifs.read((char*) &epochTime, sizeof(epochTime));
+    ifs.read((char*)&epochTime, sizeof(epochTime));
     if (epochTime == 0) {
         return;
     }

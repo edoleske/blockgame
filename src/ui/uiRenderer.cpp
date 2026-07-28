@@ -6,6 +6,7 @@
 #include "elements/crosshair.h"
 #include "elements/textBox.h"
 #include "elements/toolbar.h"
+#include "game/inputState.h"
 
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");

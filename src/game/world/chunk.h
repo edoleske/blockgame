@@ -7,7 +7,7 @@
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
 #include "gl/elementBuffer.h"
-#include "block.h"
+#include "../block/block.h"
 
 template<class T>
 using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;

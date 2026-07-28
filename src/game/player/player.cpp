@@ -1,6 +1,7 @@
 #include "player.h"
 
-#include "../game/world.h"
+#include "game/inputState.h"
+#include "game/world/world.h"
 
 Player::Player(float fov, float aspectRatio) : camera(fov, aspectRatio) {}
 
