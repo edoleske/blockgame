@@ -6,11 +6,20 @@
 
 class Item {
 public:
-    Item() = default;
+    explicit Item(string name);
+
+    virtual ~Item() = default;
+
+    virtual std::unique_ptr<Item> clone() const;
 
     virtual void onUse();
 
+    string getName() const;
+
     uint8_t STACK_SIZE = 64;
+
+private:
+    string name;
 };
 
 

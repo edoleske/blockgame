@@ -81,11 +81,16 @@ optional<Block> World::getBlock(const vec3 position) const {
     return getBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z));
 }
 
-void World::mineBlock(vec3 position, const vec3& front) {
-    auto hit = raycast(position, front, 6.0f);
+optional<Block> World::mineBlock(vec3 position, const vec3& front) {
+    const auto hit = raycast(position, front, 6.0f);
+
     if (hit.has_value()) {
+        const auto block = getBlock(hit.value());
         setBlock(hit.value(), Block(BlockType::AIR));
+        return block;
     }
+
+    return nullopt;
 }
 
 void World::placeBlock(glm::vec3 position, const glm::vec3& front) {

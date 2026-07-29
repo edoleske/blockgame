@@ -6,7 +6,9 @@
 
 class ItemBlock : public Item {
 public:
-    ItemBlock();
+    ItemBlock(Block block);
+
+    std::unique_ptr<Item> clone() const override;
 
     void onUse() override;
 

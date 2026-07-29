@@ -52,8 +52,10 @@ public:
     void setOrigin(float x, float y);
 
     // Adds all quad vertices to UI batch buffer
-    virtual void generateVertices(const unique_ptr<UIBatch>& batch, const unique_ptr<UITextureAtlas>& textureAtlas) const;
+    virtual void generateVertices(
+        const unique_ptr<UIBatch>& batch, const unique_ptr<UITextureAtlas>& textureAtlas) const;
 
+    // Updates UI element when screen size changes
     virtual void updateWindowSize(int width, int height);
 
     UITextureName textureName;

@@ -20,7 +20,7 @@ public:
 
     optional<Block> getBlock(vec3 position) const;
 
-    void mineBlock(vec3 position, const vec3& front);
+    optional<Block> mineBlock(vec3 position, const vec3& front);
 
     void placeBlock(vec3 position, const vec3& front);
 

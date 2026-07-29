@@ -1,6 +1,7 @@
 #include "player.h"
 
 #include "game/inputState.h"
+#include "game/item/itemBlock.h"
 #include "game/world/world.h"
 
 Player::Player(float fov, float aspectRatio) : camera(fov, aspectRatio) {}
@@ -84,7 +85,11 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     }
 
     if (input->isPressed(InputEvent::MINE_BLOCK)) {
-        world->mineBlock(camera.getPosition(), camera.getFront());
+        const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
+        if (block.has_value()) {
+            auto stack = ItemStack(make_unique<Item>(ItemBlock(block.value())), 1);
+            inventory.insert(stack);
+        }
     }
 
     if (input->isPressed(InputEvent::PLACE_BLOCK)) {
@@ -92,7 +97,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     }
 }
 
-void Player::updateAspectRatio(float aspectRatio) {
+void Player::updateAspectRatio(const float aspectRatio) {
     camera.setAspectRatio(aspectRatio);
 }
 
