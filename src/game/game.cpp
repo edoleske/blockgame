@@ -1,7 +1,7 @@
 #include "game.h"
 
 Game::Game(const int width, const int height) : Window(width, height),
-                                    player(45.0f, static_cast<float>(width) / static_cast<float>(height)) {
+                                                player(45.0f, static_cast<float>(width) / static_cast<float>(height)) {
     // Turn on depth testing
     glEnable(GL_DEPTH_TEST);
 

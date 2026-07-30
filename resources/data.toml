@@ -1,0 +1,35 @@
+[[block]]
+name = "Dirt"
+all = "dirt.png"
+
+[[block]]
+name = "Grass"
+top = "grass.png"
+side = "grassSide.png"
+bottom = "dirt.png"
+
+[[block]]
+name = "Stone"
+all = "stone.png"
+
+[[block]]
+name = "Water"
+opaque = false
+all = "water.png"
+
+[[block]]
+name = "Flower"
+opaque = false
+billboard = true
+all = "flower.png"
+
+[[block]]
+name = "Log"
+all = "log.png"
+top = "logEnd.png"
+bottom = "logEnd.png"
+
+[[block]]
+name = "Leaves"
+opaque = false
+all = "leaves.png"

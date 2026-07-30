@@ -39,13 +39,19 @@ FetchContent_Declare(
         FIND_PACKAGE_ARGS)
 
 FetchContent_Declare(
+        tomlplusplus
+        GIT_REPOSITORY https://github.com/marzer/tomlplusplus
+        GIT_TAG v3.4.0
+)
+
+FetchContent_Declare(
         stb_image
         GIT_REPOSITORY https://github.com/nothings/stb
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         FIND_PACKAGE_ARGS)
 
-FetchContent_MakeAvailable(glfw3 glad glm stb_image)
+FetchContent_MakeAvailable(glfw3 glad glm stb_image tomlplusplus)
 
 add_library(stb_image INTERFACE ${stb_image_SOURCE_DIR}/stb_image.h)
 target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
@@ -113,7 +119,9 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/item/itemStack.h
         src/game/item/itemBlock.cpp
         src/game/item/itemBlock.h
+        src/game/block/blockType.cpp
+        src/game/block/blockType.h
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm::glm glad stb_image)

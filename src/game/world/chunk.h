@@ -9,7 +9,7 @@
 #include "gl/elementBuffer.h"
 #include "../block/block.h"
 
-template<class T>
+template <class T>
 using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;
 
 class Chunk;
@@ -41,13 +41,13 @@ public:
 
     void setChunkState(ChunkState state);
 
-    const glm::ivec3& getChunkPosition() const;
+    const ivec3& getChunkPosition() const;
 
     static bool isValidBlockPosition(int x, int y, int z);
 
 private:
     ChunkState state = ChunkState::EMPTY;
-    glm::ivec3 chunkPosition;
+    ivec3 chunkPosition;
     ChunkData<Block> blocks;
 
     vector<Vertex> vertices;
@@ -62,6 +62,7 @@ private:
     shared_ptr<BlockTexture> blockTexture;
 
     void addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent = false);
+
     void addBillboard(const Block& block, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);

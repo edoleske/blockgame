@@ -6,12 +6,18 @@
 class Settings {
 public:
     Settings();
+
     ~Settings();
 
     static Settings* getInstance();
 
+    void load();
+
+    void save();
+
     // Chunk radius to load and render
     int renderDistance = 12;
+
 private:
     static Settings* _instance;
 };
