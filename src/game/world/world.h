@@ -22,7 +22,7 @@ public:
 
     optional<Block> mineBlock(vec3 position, const vec3& front);
 
-    void placeBlock(vec3 position, const vec3& front);
+    bool placeBlock(BlockType blockType, vec3 position, const vec3& front);
 
     void setBlock(int x, int y, int z, Block block);
 

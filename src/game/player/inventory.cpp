@@ -43,3 +43,12 @@ void Inventory::insert(ItemStack& itemIn) {
         }
     }
 }
+
+void Inventory::pop(int index) {
+    if (hotbar[index].amount == 0) return;
+
+    hotbar[index].amount -= 1;
+    if (hotbar[index].amount == 0) {
+        hotbar[index] = ItemStack(make_unique<Item>("0"), 0);
+    }
+}

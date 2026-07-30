@@ -9,3 +9,7 @@ std::unique_ptr<Item> ItemBlock::clone() const {
 void ItemBlock::onUse() {
     // Try to place block
 }
+
+BlockType ItemBlock::getBlockType() const {
+    return block.getType();
+}

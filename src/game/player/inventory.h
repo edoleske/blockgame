@@ -15,6 +15,8 @@ public:
 
     void insert(ItemStack& itemIn);
 
+    void pop(int index);
+
     const ItemStack* getItemStack(int index) const;
 
     void setItemStack(int index, const ItemStack& itemIn);

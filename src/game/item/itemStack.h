@@ -16,7 +16,7 @@ public:
     ItemStack& operator=(const ItemStack& other);
 
     unique_ptr<Item> item;
-    int amount;
+    mutable int amount;
 };
 
 

@@ -87,13 +87,24 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     if (input->isPressed(InputEvent::MINE_BLOCK)) {
         const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
         if (block.has_value()) {
-            auto stack = ItemStack(make_unique<Item>(ItemBlock(block.value())), 1);
+            auto stack = ItemStack(make_unique<ItemBlock>(block.value()), 1);
             inventory.insert(stack);
         }
     }
 
     if (input->isPressed(InputEvent::PLACE_BLOCK)) {
-        world->placeBlock(camera.getPosition(), camera.getFront());
+        auto held = inventory.getItemStack(inventory.getSelected());
+        if (held->item->getName() != "0" && held->amount > 0) {
+            const auto itemBlock = dynamic_cast<ItemBlock*>(held->item.get());
+            if (itemBlock != nullptr) {
+                const BlockType blockType = itemBlock->getBlockType();
+                auto result = world->placeBlock(blockType, camera.getPosition(), camera.getFront());
+
+                if (result) {
+                    inventory.pop(inventory.getSelected());
+                }
+            }
+        }
     }
 }
 

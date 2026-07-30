@@ -93,14 +93,16 @@ optional<Block> World::mineBlock(vec3 position, const vec3& front) {
     return nullopt;
 }
 
-void World::placeBlock(glm::vec3 position, const glm::vec3& front) {
+bool World::placeBlock(BlockType blockType, vec3 position, const vec3& front) {
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         auto frontBlock = getBlock(hit.value());
         if (frontBlock.has_value() && !frontBlock->isOpaque() && !Block::isBlockTypeBillboard(frontBlock->getType())) {
-            setBlock(hit.value(), Block(BlockType::STONE));
+            setBlock(hit.value(), Block(blockType));
+            return true;
         }
     }
+    return false;
 }
 
 void World::setBlock(int x, int y, int z, const Block block) {

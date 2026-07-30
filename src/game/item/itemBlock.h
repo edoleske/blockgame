@@ -12,6 +12,8 @@ public:
 
     void onUse() override;
 
+    BlockType getBlockType() const;
+
 private:
     Block block;
 };
