@@ -14,11 +14,11 @@ public:
 
     void setInteger(const GLchar* name, GLint value) const;
 
-    void setMatrix4(const GLchar* name, const glm::mat4 &matrix);
+    void setMatrix4(const GLchar* name, const glm::mat4 &matrix) const;
 
-    void setVector3f(const GLchar* name, const vec3& value);
+    void setVector3f(const GLchar* name, const vec3& value) const;
 
-    void setVector4f(const GLchar* name, const vec4& value);
+    void setVector4f(const GLchar* name, const vec4& value) const;
 private:
     GLuint program;
     bool compiled = false;

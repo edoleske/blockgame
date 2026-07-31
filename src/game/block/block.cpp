@@ -1,138 +1,89 @@
 #include "block.h"
 
-Block::Block(BlockType type) {
-    data = static_cast<uint16_t>(type) << 4;
-}
+#include "blockDictionary.h"
 
-Block::Block(BlockType type, uint8_t state) {
-    data = static_cast<uint16_t>(type) << 4;
-    data |= (state & 0xF);
+Block::Block(const BlockID id) : id(id) {}
+
+Block::Block(const BlockID id, const uint8_t state) : id(id), state(state) {}
+
+BlockID Block::getID() const {
+    return id;
 }
 
 BlockType Block::getType() const {
-    return static_cast<BlockType>(data >> 4);
+    return BlockDictionary::getInstance()->get(getID());
 }
 
 uint8_t Block::getState() const {
-    return data & 0xF;
-}
-
-bool Block::isOpaque() const {
-    auto type = getType();
-    return Block::isBlockTypeOpaque(type);
-}
-
-bool Block::isDifferentTransparent(const BlockType& otherType) const {
-    auto type = getType();
-    return !Block::isBlockTypeOpaque(type) && type != otherType;
-}
-
-bool Block::isBlockTypeOpaque(BlockType type) {
-    switch (type) {
-        case BlockType::AIR:
-        case BlockType::WATER:
-        case BlockType::LEAVES:
-        case BlockType::FLOWER:
-            return false;
-        default:
-            return true;
-    }
-}
-
-bool Block::isBlockTypeBillboard(BlockType type) {
-    return type == BlockType::FLOWER;
+    return state;
 }
 
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
-        {BlockFace::TOP,    {
-                                    {{0, 1, 0}, {0, 0}},
-                                    {{1, 1, 0}, {1, 0}},
-                                    {{1, 1, 1}, {1, 1}},
-                                    {{0, 1, 1}, {0, 1}},
-                            }},
-        {BlockFace::BOTTOM, {
-                                    {{0, 0, 0}, {0, 0}},
-                                    {{0, 0, 1}, {0, 1}},
-                                    {{1, 0, 1}, {1, 1}},
-                                    {{1, 0, 0}, {1, 0}},
-                            }},
-        {BlockFace::LEFT,   {
-                                    {{0, 1, 1}, {0, 0}},
-                                    {{0, 0, 1}, {0, 1}},
-                                    {{0, 0, 0}, {1, 1}},
-                                    {{0, 1, 0}, {1, 0}},
-                            }},
-        {BlockFace::RIGHT,  {
-                                    {{1, 0, 1}, {1, 1}},
-                                    {{1, 1, 1}, {1, 0}},
-                                    {{1, 1, 0}, {0, 0}},
-                                    {{1, 0, 0}, {0, 1}},
-                            }},
-        {BlockFace::FRONT,  {
-                                    {{0, 0, 1}, {0, 1}},
-                                    {{0, 1, 1}, {0, 0}},
-                                    {{1, 1, 1}, {1, 0}},
-                                    {{1, 0, 1}, {1, 1}},
-                            }},
-        {BlockFace::BACK,   {
-                                    {{0, 0, 0}, {1, 1}},
-                                    {{1, 0, 0}, {0, 1}},
-                                    {{1, 1, 0}, {0, 0}},
-                                    {{0, 1, 0}, {1, 0}},
-                            }}
+    {
+        BlockFace::TOP, {
+            {.position = {0, 1, 0}, .uv = {0, 0}},
+            {.position = {1, 1, 0}, .uv = {1, 0}},
+            {.position = {1, 1, 1}, .uv = {1, 1}},
+            {.position = {0, 1, 1}, .uv = {0, 1}},
+        }
+    },
+    {
+        BlockFace::BOTTOM, {
+            {.position = {0, 0, 0}, .uv = {0, 0}},
+            {.position = {0, 0, 1}, .uv = {0, 1}},
+            {.position = {1, 0, 1}, .uv = {1, 1}},
+            {.position = {1, 0, 0}, .uv = {1, 0}},
+        }
+    },
+    {
+        BlockFace::LEFT, {
+            {.position = {0, 1, 1}, .uv = {0, 0}},
+            {.position = {0, 0, 1}, .uv = {0, 1}},
+            {.position = {0, 0, 0}, .uv = {1, 1}},
+            {.position = {0, 1, 0}, .uv = {1, 0}},
+        }
+    },
+    {
+        BlockFace::RIGHT, {
+            {.position = {1, 0, 1}, .uv = {1, 1}},
+            {.position = {1, 1, 1}, .uv = {1, 0}},
+            {.position = {1, 1, 0}, .uv = {0, 0}},
+            {.position = {1, 0, 0}, .uv = {0, 1}},
+        }
+    },
+    {
+        BlockFace::FRONT, {
+            {.position = {0, 0, 1}, .uv = {0, 1}},
+            {.position = {0, 1, 1}, .uv = {0, 0}},
+            {.position = {1, 1, 1}, .uv = {1, 0}},
+            {.position = {1, 0, 1}, .uv = {1, 1}},
+        }
+    },
+    {
+        BlockFace::BACK, {
+            {.position = {0, 0, 0}, .uv = {1, 1}},
+            {.position = {1, 0, 0}, .uv = {0, 1}},
+            {.position = {1, 1, 0}, .uv = {0, 0}},
+            {.position = {0, 1, 0}, .uv = {1, 0}},
+        }
+    }
 };
 
 vector<Vertex> Block::billboardVertices = {
-        {{0, 0, 0}, {0, 1}},
-        {{0, 1, 0}, {0, 0}},
-        {{1, 1, 1}, {1, 0}},
-        {{1, 0, 1}, {1, 1}},
-        {{0, 0, 0}, {1, 1}},
-        {{1, 0, 1}, {0, 1}},
-        {{1, 1, 1}, {0, 0}},
-        {{0, 1, 0}, {1, 0}},
-        {{0, 1, 1}, {0, 0}},
-        {{0, 0, 1}, {0, 1}},
-        {{1, 0, 0}, {1, 1}},
-        {{1, 1, 0}, {1, 0}},
-        {{0, 1, 1}, {1, 0}},
-        {{1, 1, 0}, {0, 0}},
-        {{1, 0, 0}, {0, 1}},
-        {{0, 0, 1}, {1, 1}},
+    {.position = {0, 0, 0}, .uv = {0, 1}},
+    {.position = {0, 1, 0}, .uv = {0, 0}},
+    {.position = {1, 1, 1}, .uv = {1, 0}},
+    {.position = {1, 0, 1}, .uv = {1, 1}},
+    {.position = {0, 0, 0}, .uv = {1, 1}},
+    {.position = {1, 0, 1}, .uv = {0, 1}},
+    {.position = {1, 1, 1}, .uv = {0, 0}},
+    {.position = {0, 1, 0}, .uv = {1, 0}},
+    {.position = {0, 1, 1}, .uv = {0, 0}},
+    {.position = {0, 0, 1}, .uv = {0, 1}},
+    {.position = {1, 0, 0}, .uv = {1, 1}},
+    {.position = {1, 1, 0}, .uv = {1, 0}},
+    {.position = {0, 1, 1}, .uv = {1, 0}},
+    {.position = {1, 1, 0}, .uv = {0, 0}},
+    {.position = {1, 0, 0}, .uv = {0, 1}},
+    {.position = {0, 0, 1}, .uv = {1, 1}},
 };
-
-BlockTextureName Block::getBlockFaceTexture(BlockType type, BlockFace face) {
-    switch (type) {
-        case BlockType::DIRT:
-            return BlockTextureName::DIRT;
-        case BlockType::GRASS:
-            switch (face) {
-                case BlockFace::TOP:
-                    return BlockTextureName::GRASS;
-                case BlockFace::BOTTOM:
-                    return BlockTextureName::DIRT;
-                default:
-                    return BlockTextureName::GRASS_SIDE;
-            }
-        case BlockType::BEDROCK:
-            return BlockTextureName::BEDROCK;
-        case BlockType::STONE:
-            return BlockTextureName::STONE;
-        case BlockType::WATER:
-            return BlockTextureName::WATER;
-        case BlockType::LEAVES:
-            return BlockTextureName::LEAVES;
-        case BlockType::LOG:
-            switch (face) {
-                case BlockFace::TOP:
-                case BlockFace::BOTTOM:
-                    return BlockTextureName::LOG_CROSS;
-                default:
-                    return BlockTextureName::LOG_SIDE;
-            }
-        case BlockType::FLOWER:
-            return BlockTextureName::FLOWER;
-        default:
-            return BlockTextureName::NONE;
-    }
-}

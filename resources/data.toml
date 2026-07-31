@@ -1,4 +1,8 @@
 [[block]]
+name = "Error"
+all = "error.png"
+
+[[block]]
 name = "Dirt"
 all = "dirt.png"
 

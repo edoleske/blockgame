@@ -7,6 +7,7 @@
 #include "gl/shader.h"
 #include "worldGenerator.h"
 #include "game/player/camera.h"
+#include "gl/textureArray.h"
 
 class World {
 public:
@@ -18,11 +19,11 @@ public:
 
     optional<Block> getBlock(int x, int y, int z) const;
 
-    optional<Block> getBlock(vec3 position) const;
+    optional<Block> getBlock(const vec3& position) const;
 
-    optional<Block> mineBlock(vec3 position, const vec3& front);
+    optional<Block> mineBlock(const vec3& position, const vec3& front);
 
-    bool placeBlock(BlockType blockType, vec3 position, const vec3& front);
+    bool placeBlock(const BlockType& type, const vec3& position, const vec3& front);
 
     void setBlock(int x, int y, int z, Block block);
 
@@ -36,7 +37,7 @@ public:
 
     void unloadChunk(int x, int z);
 
-    void renderWorld(const Camera& playerCamera);
+    void renderWorld(const Camera& playerCamera, const TextureArray& textureArray);
 
 private:
     string name = "NewWorld";
@@ -47,13 +48,10 @@ private:
     // Shader for rendering world
     unique_ptr<Shader> shader;
 
-    // Shared block texture
-    shared_ptr<BlockTexture> blockTexture;
-
     // Element buffer object shared between all chunks
     shared_ptr<ElementBuffer> ebo;
 
-    void initializeEBO();
+    void initializeEBO() const;
 
     // Highlight mesh for player cursor
     vector<Vertex> highlightVertices;

@@ -4,43 +4,30 @@
 
 #include "common.h"
 #include "utils/vertex.h"
-#include "blockTexture.h"
+#include "blockType.h"
 
-enum class BlockFace : uint8_t {
-    TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
-};
-
-enum class BlockType : uint16_t {
-    AIR, DIRT, GRASS, BEDROCK, STONE, WATER, LEAVES, LOG, FLOWER
-};
 
 class Block {
 public:
     Block() = default;
 
-    explicit Block(BlockType type);
-    explicit Block(BlockType type, uint8_t state);
+    explicit Block(BlockID id);
+
+    explicit Block(BlockID id, uint8_t state);
+
+    BlockID getID() const;
 
     BlockType getType() const;
 
     uint8_t getState() const;
 
-    bool isOpaque() const;
-
-    bool isDifferentTransparent(const BlockType& otherType) const;
-
-    static bool isBlockTypeOpaque(BlockType type);
-
-    static bool isBlockTypeBillboard(BlockType type);
-
     static unordered_map<BlockFace, vector<Vertex>> blockFaceVertices;
 
     static vector<Vertex> billboardVertices;
 
-    static BlockTextureName getBlockFaceTexture(BlockType type, BlockFace face);
-
 private:
-    uint16_t data{ 0 };
+    uint16_t id{0};
+    uint8_t state{0};
 };
 
 

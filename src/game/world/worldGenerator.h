@@ -4,7 +4,6 @@
 
 #include "common.h"
 #include "utils/noiseGenerator.h"
-#include "game/block/block.h"
 #include "chunk.h"
 
 class WorldGenerator {
@@ -21,16 +20,22 @@ private:
     std::mt19937 generator;
     std::uniform_real_distribution<> distribution{0.0, 1.0};
 
-    static const int seaLevel = 62;
+    static constexpr int seaLevel = 62;
     const int octaves = 5;
     const float lacunarity = 1.75f;
     const float gain = 0.1f;
 
-    int getHeight(float x, float z);
+    BlockID waterID;
+    BlockID grassID;
+    BlockID dirtID;
+    BlockID stoneID;
+    BlockID bedrockID;
+
+    int getHeight(float x, float z) const;
 
     bool flowerMap(float x, float z);
 
-    static BlockType getBlockType(int blockHeight, int terrainHeight);
+    BlockID getBlockType(int blockHeight, int terrainHeight) const;
 };
 
 

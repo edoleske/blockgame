@@ -26,6 +26,7 @@ void Settings::load() {
         renderDistance = settings["renderDistance"].value_or(renderDistance);
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
+        save();
     }
 }
 

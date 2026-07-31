@@ -1,8 +1,10 @@
 #version 400
 layout (location = 0) in ivec3 aPos;
 layout (location = 1) in ivec2 aTexCoord;
+layout (location = 2) in int aLayer;
 
 out vec2 vTexCoords;
+out float vLayer;
 out float vVisibility;
 
 uniform mat4 view;
@@ -31,4 +33,5 @@ void main() {
     vVisibility = clamp(vVisibility, 0.0f, 1.0f);
 
     vTexCoords = aTexCoord;
+    vLayer = aLayer;
 }

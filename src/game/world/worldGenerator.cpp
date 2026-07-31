@@ -1,10 +1,20 @@
 #include "worldGenerator.h"
 
+#include "game/block/blockDictionary.h"
+
 WorldGenerator::WorldGenerator(unsigned int seed) : seed(seed), generator(seed) {
     noise = make_unique<NoiseGenerator>(seed);
+
+    waterID = BlockDictionary::getInstance()->lookup("Water");
+    grassID = BlockDictionary::getInstance()->lookup("Grass");
+    dirtID = BlockDictionary::getInstance()->lookup("Dirt");
+    stoneID = BlockDictionary::getInstance()->lookup("Stone");
+    bedrockID = BlockDictionary::getInstance()->lookup("Bedrock");
 }
 
 void WorldGenerator::generate(Chunk* chunk) {
+    auto flowerID = BlockDictionary::getInstance()->lookup("Flower");
+
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         auto fx = static_cast<float>(chunk->getChunkPosition().x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) +
                   1.0f / (2 * CHUNK_SIZE_X);
@@ -15,14 +25,14 @@ void WorldGenerator::generate(Chunk* chunk) {
 
             // Populate column
             for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
-                auto type = getBlockType(by, height);
+                auto blockID = getBlockType(by, height);
 
                 // Add flowers
-                if (by == height + 1 && type == BlockType::AIR) {
-                    type = flowerMap(fx, fz) ? BlockType::FLOWER : type;
+                if (by == height + 1 && blockID == 0) {
+                    blockID = flowerMap(fx, fz) ? flowerID : blockID;
                 }
 
-                chunk->setBlock(bx, by, bz, Block(type));
+                chunk->setBlock(bx, by, bz, Block(blockID));
             }
         }
     }
@@ -30,7 +40,7 @@ void WorldGenerator::generate(Chunk* chunk) {
     chunk->setChunkState(ChunkState::POPULATED);
 }
 
-int WorldGenerator::getHeight(float x, float z) {
+int WorldGenerator::getHeight(const float x, const float z) const {
     int height = 50;
     float amplitude = 0.75f;
     float frequency = 0.25f;
@@ -44,24 +54,24 @@ int WorldGenerator::getHeight(float x, float z) {
     return height;
 }
 
-bool WorldGenerator::flowerMap(float x, float z) {
+bool WorldGenerator::flowerMap(const float x, const float z) {
     auto value = noise->get(x * 2.02f, 2.02f, z * 2.02f);
 
     return value > 0.75f && distribution(generator) > 0.8f;
 }
 
-BlockType WorldGenerator::getBlockType(int blockHeight, int terrainHeight) {
+BlockID WorldGenerator::getBlockType(const int blockHeight, const int terrainHeight) const {
     if (blockHeight > terrainHeight) {
-        return blockHeight <= seaLevel ? BlockType::WATER : BlockType::AIR;
+        return blockHeight <= seaLevel ? waterID : 0;
     }
     if (blockHeight == terrainHeight) {
-        return terrainHeight > seaLevel - 1 ? BlockType::GRASS : BlockType::DIRT;
+        return terrainHeight > seaLevel - 1 ? grassID : dirtID;
     }
     if (blockHeight < terrainHeight && blockHeight > terrainHeight - 3) {
-        return BlockType::DIRT;
+        return dirtID;
     }
     if (blockHeight > 0 && blockHeight < terrainHeight - 2) {
-        return BlockType::STONE;
+        return stoneID;
     }
-    return BlockType::BEDROCK;
+    return bedrockID;
 }

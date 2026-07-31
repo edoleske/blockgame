@@ -21,15 +21,15 @@ enum class ChunkState : uint8_t {
 
 class Chunk {
 public:
-    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo, const shared_ptr<BlockTexture>& blockTexture);
+    Chunk(int x, int z, const shared_ptr<ElementBuffer>& ebo);
 
-    void render();
+    void render() const;
 
-    void renderTransparent();
+    void renderTransparent() const;
 
     void buildMesh(const ChunkMap& chunkMap);
 
-    void write(vector<char>& data);
+    void write(vector<char>& data) const;
 
     void load(ifstream& in);
 
@@ -39,7 +39,7 @@ public:
 
     ChunkState getChunkState() const;
 
-    void setChunkState(ChunkState state);
+    void setChunkState(ChunkState newState);
 
     const ivec3& getChunkPosition() const;
 
@@ -59,13 +59,14 @@ private:
     VertexBuffer transparentVBO;
 
     shared_ptr<ElementBuffer> ebo;
-    shared_ptr<BlockTexture> blockTexture;
 
-    void addFace(const Block& block, BlockFace face, const u8vec3& position, bool transparent = false);
+    void addFace(const BlockType& type, BlockFace face, const u8vec3& position);
 
-    void addBillboard(const Block& block, const u8vec3& position);
+    void addBillboard(const BlockType& type, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);
+
+    static inline bool isVisibleFace(const BlockType& a, const BlockType& b);
 };
 
 

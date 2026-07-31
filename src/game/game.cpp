@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include "toml++/toml.h"
+
 Game::Game(const int width, const int height) : Window(width, height),
                                                 player(45.0f, static_cast<float>(width) / static_cast<float>(height)) {
     // Turn on depth testing
@@ -27,6 +29,8 @@ Game::Game(const int width, const int height) : Window(width, height),
 
     // Wireframe for mesh debugging
     //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    initializeBlocks();
 
     world = make_unique<World>();
     world->generateSpawnArea();
@@ -56,7 +60,7 @@ void Game::loop() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        world->renderWorld(player.getCamera());
+        world->renderWorld(player.getCamera(), textureArray);
 
         // Render UI
         uiRenderer->render();
@@ -74,4 +78,83 @@ void Game::updateWindowSize(int w, int h) {
 void Game::update() {
     player.update(deltaTime, world);
     uiRenderer->update(deltaTime, player);
+}
+
+// Load textures and connect block types to those textures
+// Returns generated texture array for binding and destructing
+void Game::initializeBlocks() {
+    unordered_map<string, uint16_t> textureLayerMap = {};
+
+    const auto table = toml::parse_file("../resources/data.toml");
+
+    uint16_t id = 1;
+    if (auto blocks = table["block"].as_array()) {
+        for (auto& node : *blocks) {
+            if (auto blockTable = node.as_table()) {
+                BlockType type;
+
+                auto name = (*blockTable)["name"].value<string>();
+                auto opaque = (*blockTable)["opaque"].value_or(true);
+                auto billboard = (*blockTable)["billboard"].value_or(type.isBillboard);
+                auto all = (*blockTable)["all"].value<string>();
+                auto side = (*blockTable)["side"].value<string>();
+                auto top = (*blockTable)["top"].value<string>();
+                auto bottom = (*blockTable)["bottom"].value<string>();
+
+                auto isValid = name.has_value() && (all.has_value() ||
+                    (side.has_value() && top.has_value() && bottom.has_value()));
+                if (!isValid) throw std::runtime_error("Invalid block loaded");
+
+                for (auto filename : {all, side, top, bottom}) {
+                    if (filename.has_value() && !textureLayerMap.contains(filename.value())) {
+                        textureLayerMap[filename.value()] = textureLayerMap.size();
+                    }
+                }
+
+                type.id = id;
+                type.name = name.value();
+                type.opaque = opaque;
+                type.isBillboard = billboard;
+
+                if (all.has_value()) {
+                    for (auto& faceTexture : type.faceTextures) {
+                        faceTexture = textureLayerMap[all.value()];
+                    }
+                }
+
+                if (side.has_value()) {
+                    for (int i = 2; i < type.faceTextures.size(); i++) {
+                        type.faceTextures[i] = textureLayerMap[side.value()];
+                    }
+                }
+
+                if (top.has_value()) {
+                    type.faceTextures[0] = textureLayerMap[top.value()];
+                }
+
+                if (bottom.has_value()) {
+                    type.faceTextures[1] = textureLayerMap[bottom.value()];
+                }
+
+                blockDictionary.insert(type);
+                id++;
+            }
+        }
+    }
+
+    if (id == 1) {
+        std::cout << "No blocks loaded" << std::endl;
+    }
+
+    // Upload texture layers to GPU
+    textureArray.allocate(16, textureLayerMap.size());
+
+    vector<string> filenames(textureLayerMap.size());
+    for (const auto& [filename, index] : textureLayerMap) {
+        filenames[index] = filename;
+    }
+
+    for (const auto& filename : filenames) {
+        textureArray.addLayer("../resources/textures/" + filename);
+    }
 }

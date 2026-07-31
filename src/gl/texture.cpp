@@ -1,40 +1,38 @@
 #include "texture.h"
-
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 Texture::Texture(const string& path) {
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    bind();
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    auto data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!data) {
         std::cerr << "Failed to load texture " << path << std::endl;
         return;
     }
 
     auto format = channels == 4 ? GL_RGBA : GL_RGB;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexImage2D(target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(target);
 
     stbi_image_free(data);
 }
 
 Texture::Texture(const vector<unsigned char>& atlasData, const GLsizei width, const GLsizei height) {
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(target, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, atlasData.data());
+    glTexImage2D(target, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, atlasData.data());
 
     channels = 1;
     this->width = width;
@@ -46,11 +44,11 @@ Texture::~Texture() {
 }
 
 void Texture::bind() const {
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(target, texture);
 }
 
 void Texture::unbind() {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(target, 0);
 }
 
 GLuint Texture::getTexture() const {

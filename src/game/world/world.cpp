@@ -17,6 +17,7 @@ World::World() {
     highlightVBO.bind();
     highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), nullptr);
     highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    highlightVBO.vertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(Vertex, layer));
 
     highlightVertices = vector<Vertex>();
     highlightVertices.reserve(40);
@@ -49,12 +50,6 @@ World::World() {
     }
 
     worldGen = make_unique<WorldGenerator>(seed);
-
-    blockTexture = make_shared<BlockTexture>();
-    blockTexture->getTexture()->bind();
-
-    shader->setInteger("uTexWidth", blockTexture->getTexture()->getWidth());
-    shader->setInteger("uTexHeight", blockTexture->getTexture()->getHeight());
 }
 
 Chunk* World::getChunk(int x, int z) const {
@@ -77,28 +72,28 @@ optional<Block> World::getBlock(int x, int y, int z) const {
     return nullopt;
 }
 
-optional<Block> World::getBlock(const vec3 position) const {
+optional<Block> World::getBlock(const vec3& position) const {
     return getBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z));
 }
 
-optional<Block> World::mineBlock(vec3 position, const vec3& front) {
+optional<Block> World::mineBlock(const vec3& position, const vec3& front) {
     const auto hit = raycast(position, front, 6.0f);
 
     if (hit.has_value()) {
         const auto block = getBlock(hit.value());
-        setBlock(hit.value(), Block(BlockType::AIR));
+        setBlock(hit.value(), Block(0));
         return block;
     }
 
     return nullopt;
 }
 
-bool World::placeBlock(BlockType blockType, vec3 position, const vec3& front) {
+bool World::placeBlock(const BlockType& type, const vec3& position, const vec3& front) {
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         auto frontBlock = getBlock(hit.value());
-        if (frontBlock.has_value() && !frontBlock->isOpaque() && !Block::isBlockTypeBillboard(frontBlock->getType())) {
-            setBlock(hit.value(), Block(blockType));
+        if (frontBlock.has_value() && !frontBlock.value().getType().isCollidable()) {
+            setBlock(hit.value(), Block(type.id));
             return true;
         }
     }
@@ -139,7 +134,7 @@ void World::generateSpawnArea() {
     // Create chunks
     for (int x = -spawnSize; x <= spawnSize; ++x) {
         for (int z = -spawnSize; z <= spawnSize; ++z) {
-            chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo, blockTexture));
+            chunkMap.emplace(make_pair(x, z), make_unique<Chunk>(x, z, ebo));
 
             auto chunk = chunkMap.at(make_pair(x, z)).get();
             loadFromRegionFile(x, z);
@@ -163,6 +158,8 @@ void World::updateChunks(const vec3& playerPosition) {
     auto px = static_cast<int>(playerPosition.x) >> 4;
     auto pz = static_cast<int>(playerPosition.z) >> 4;
 
+    const auto distance = Settings::getInstance()->renderDistance;
+
     // Unload chunks that are beyond render distance
     for (auto& it : chunkMap) {
         if (it.second->getChunkState() == ChunkState::UNLOADED) {
@@ -172,7 +169,7 @@ void World::updateChunks(const vec3& playerPosition) {
         auto x = it.first.first;
         auto z = it.first.second;
 
-        if (std::abs(px - x) > RENDER_DISTANCE + 1 || std::abs(pz - z) > RENDER_DISTANCE + 1) {
+        if (std::abs(px - x) > distance + 1 || std::abs(pz - z) > distance + 1) {
             it.second->setChunkState(ChunkState::UNLOADED);
         }
     }
@@ -188,11 +185,11 @@ void World::updateChunks(const vec3& playerPosition) {
     }
 
     // Load new chunks
-    for (int z = pz - RENDER_DISTANCE - 1; z <= pz + RENDER_DISTANCE + 1; z++) {
-        for (int x = px - RENDER_DISTANCE - 1; x <= px + RENDER_DISTANCE + 1; x++) {
+    for (int z = pz - distance - 1; z <= pz + distance + 1; z++) {
+        for (int x = px - distance - 1; x <= px + distance + 1; x++) {
             auto xz = make_pair(x, z);
             if (chunkMap.find(xz) == chunkMap.end()) {
-                chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo, blockTexture));
+                chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo));
             }
         }
     }
@@ -214,7 +211,7 @@ void World::updateChunks(const vec3& playerPosition) {
 
 void World::loadChunk(int x, int z) {
     const auto xz = make_pair(x, z);
-    chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo, blockTexture));
+    chunkMap.emplace(xz, make_unique<Chunk>(x, z, ebo));
 
     auto chunk = chunkMap.at(xz).get();
     loadFromRegionFile(x, z);
@@ -243,7 +240,7 @@ void World::unloadChunk(int x, int z) {
     unbuildChunk(x, z + 1);
 }
 
-void World::renderWorld(const Camera& playerCamera) {
+void World::renderWorld(const Camera& playerCamera, const TextureArray& textureArray) {
     auto playerPosition = playerCamera.getPosition();
     auto playerFront = playerCamera.getFront();
 
@@ -253,15 +250,16 @@ void World::renderWorld(const Camera& playerCamera) {
     shader->setMatrix4("view", playerCamera.getView());
     shader->setMatrix4("projection", playerCamera.getProjection());
 
-    blockTexture->getTexture()->bind();
+    textureArray.bind();
 
     bool builtOne = false;
     auto px = static_cast<int>(playerPosition.x) >> 4;
     auto pz = static_cast<int>(playerPosition.z) >> 4;
+    const auto distance = Settings::getInstance()->renderDistance;
 
     // Render the mesh for each chunk
-    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
-        for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
+    for (int z = pz - distance; z <= pz + distance; z++) {
+        for (int x = px - distance; x <= px + distance; x++) {
             auto chunk = chunkMap.find(make_pair(x, z));
             if (chunk != chunkMap.end()) {
                 shader->setInteger("chunkX", x);
@@ -278,8 +276,8 @@ void World::renderWorld(const Camera& playerCamera) {
     }
 
     // Render the transparent mesh for each chunk, it must be done after the opaque mesh for blending
-    for (int z = pz - RENDER_DISTANCE; z <= pz + RENDER_DISTANCE; z++) {
-        for (int x = px - RENDER_DISTANCE; x <= px + RENDER_DISTANCE; x++) {
+    for (int z = pz - distance; z <= pz + distance; z++) {
+        for (int x = px - distance; x <= px + distance; x++) {
             auto chunk = chunkMap.find(make_pair(x, z));
             if (chunk != chunkMap.end()) {
                 shader->setInteger("chunkX", x);
@@ -308,7 +306,7 @@ void World::renderWorld(const Camera& playerCamera) {
     }
 }
 
-void World::initializeEBO() {
+void World::initializeEBO() const {
     // There are 2 triangles per face, so 6 indices per face
     auto faceCount = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6;
     auto data = new GLuint[faceCount * 6];
@@ -366,7 +364,7 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
             std::floor(position.y),
             std::floor(position.z)
         );
-        if (block.has_value() && (block->isOpaque() || Block::isBlockTypeBillboard(block->getType()))) {
+        if (block.has_value() && block.value().getType().isCollidable()) {
             // If placing a block, we retract position to the last block
             if (place) {
                 position -= delta;

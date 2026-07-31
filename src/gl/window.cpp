@@ -5,7 +5,7 @@ Window::Window(int width, int height) : width(width), height(height) {
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(width, height, "BlockGame", nullptr, nullptr);
@@ -18,13 +18,16 @@ Window::Window(int width, int height) : width(width), height(height) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSwapInterval(1);
 
-    // Load OpenGL functions, gladLoadGL returns the loaded version, 0 on error
-    version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    if (version == 0) {
+    // Load OpenGL functions
+    initialized = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+    if (!initialized) {
         std::cerr << "Failed to initialize OpenGL context" << std::endl;
         glfwTerminate();
         return;
     }
+
+    version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    std::cout << "Loaded OpenGL Version: " << version << std::endl;
 
     // Register user pointer for static callback
     glfwSetWindowUserPointer(window, this);
@@ -38,7 +41,7 @@ Window::~Window() {
 }
 
 bool Window::isInitialized() const {
-    return version != 0;
+    return !!initialized;
 }
 
 void Window::updateWindowSize(int w, int h) {

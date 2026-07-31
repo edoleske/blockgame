@@ -27,6 +27,7 @@ private:
     GLuint texture{};
     int width{}, height{}, channels{};
 
+    static inline GLenum target = GL_TEXTURE_2D;
 };
 
 

@@ -87,7 +87,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     if (input->isPressed(InputEvent::MINE_BLOCK)) {
         const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
         if (block.has_value()) {
-            auto stack = ItemStack(make_unique<ItemBlock>(block.value()), 1);
+            auto stack = ItemStack(make_unique<ItemBlock>(block.value().getID()), 1);
             inventory.insert(stack);
         }
     }
@@ -150,7 +150,7 @@ bool Player::testCollision(const vec3& position, const vec3& oldPosition, const 
         for (int y = floor(position.y); y < floor(position.y + size.y) + 1; y++) {
             for (int z = floor(position.z); z < floor(position.z + size.z) + 1; z++) {
                 auto block = world->getBlock(x, y, z);
-                if (block.has_value() && block->isOpaque()) {
+                if (block.has_value() && block->getType().opaque) {
                     // Ignore blocks already in bounding box (prevents player from getting stuck)
                     if (oldPosition.x < x + 1 && oldPosition.x + size.x > x &&
                         oldPosition.y < y + 1 && oldPosition.y + size.y > y &&

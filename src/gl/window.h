@@ -13,8 +13,9 @@ public:
     virtual void loop() = 0;
     virtual void updateWindowSize(int w, int h);
 protected:
-    int width, height, version;
+    int width, height, initialized;
     float aspectRatio, time = 0.0f, deltaTime = 0.0f;
+    string version;
     GLFWwindow* window;
 
     static void framebuffer_resize_callback(GLFWwindow* window, int width, int height);

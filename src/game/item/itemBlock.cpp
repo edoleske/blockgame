@@ -1,6 +1,8 @@
 #include "itemBlock.h"
 
-ItemBlock::ItemBlock(const Block block) : Item(std::to_string(static_cast<int>(block.getType()))), block(block) {}
+#include "game/block/blockDictionary.h"
+
+ItemBlock::ItemBlock(const BlockID id): Item(BlockDictionary::getInstance()->get(id).name), block(id) {}
 
 std::unique_ptr<Item> ItemBlock::clone() const {
     return make_unique<ItemBlock>(*this);
@@ -11,5 +13,5 @@ void ItemBlock::onUse() {
 }
 
 BlockType ItemBlock::getBlockType() const {
-    return block.getType();
+    return BlockDictionary::getInstance()->get(block);
 }

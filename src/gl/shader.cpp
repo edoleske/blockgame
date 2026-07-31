@@ -61,12 +61,12 @@ void Shader::setInteger(const GLchar* name, GLint value) const {
     glUniform1i(location, value);
 }
 
-void Shader::setMatrix4(const GLchar* name, const mat4 &matrix) {
+void Shader::setMatrix4(const GLchar* name, const mat4 &matrix) const {
     int location = getUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::setVector3f(const GLchar* name, const vec3& value) {
+void Shader::setVector3f(const GLchar* name, const vec3& value) const {
     int location = getUniformLocation(name);
     glUniform3f(location, value.x, value.y, value.z);
 }
@@ -83,7 +83,7 @@ string Shader::readFile(const string &path) {
     return buffer.str();
 }
 
-void Shader::setVector4f(const GLchar* name, const vec4& value) {
+void Shader::setVector4f(const GLchar* name, const vec4& value) const {
     int location = getUniformLocation(name);
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }

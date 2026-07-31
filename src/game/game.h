@@ -6,11 +6,12 @@
 #include "gl/window.h"
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
-#include "gl/shader.h"
+#include "gl/textureArray.h"
 #include "world/world.h"
 #include "player/player.h"
 #include "inputState.h"
 #include "settings.h"
+#include "block/blockDictionary.h"
 #include "ui/uiRenderer.h"
 
 class Game : public Window {
@@ -25,6 +26,8 @@ private:
     InputState input;
     Settings settings;
     Player player;
+    BlockDictionary blockDictionary;
+    TextureArray textureArray;
 
     unique_ptr<World> world;
     unique_ptr<UIRenderer> uiRenderer;
@@ -33,6 +36,8 @@ private:
     VertexBuffer vbo;
 
     void update();
+
+    void initializeBlocks();
 };
 
 

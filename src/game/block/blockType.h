@@ -16,10 +16,16 @@ class BlockType {
 public:
     uint16_t getLayer(BlockFace face) const;
 
+    bool operator==(int i) const;
+
+    bool isCollidable() const;
+
     uint16_t id = 0;
-    bool opaque = true;
+    string name;
+    bool opaque = false;
     bool isBillboard = false;
     // Texture Array Layer indexed by BlockFace
+    // Billboard textures expect these to be identical and use first index
     std::array<uint16_t, 6> faceTextures = {0, 0, 0, 0, 0, 0};
 };
 

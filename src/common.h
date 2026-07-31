@@ -63,9 +63,10 @@ using glm::mat4;
 constexpr int CHUNK_SIZE_X = 16;
 constexpr int CHUNK_SIZE_Y = 254;
 constexpr int CHUNK_SIZE_Z = 16;
-
 constexpr int REGION_SECTOR_SIZE = 4096;
-constexpr int RENDER_DISTANCE = 12;
+
+using BlockID = int;
+constexpr int MAXIMUM_BLOCK_TYPES = 255;
 
 struct IntPairHash {
             std::size_t operator() (const pair<int, int> &v) const {
