@@ -15,6 +15,7 @@ Font::Font(const string& filename) {
 
     vector<unsigned char> ttfBuffer(size);
     ifs.read(reinterpret_cast<char*>(ttfBuffer.data()), size);
+    ifs.close();
 
     // Get font data for metrics like ascent
     if (!stbtt_InitFont(&fontInfo, ttfBuffer.data(), 0)) {

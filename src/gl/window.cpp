@@ -37,6 +37,7 @@ Window::Window(int width, int height) : width(width), height(height) {
 }
 
 Window::~Window() {
+    glfwDestroyWindow(window);
     glfwTerminate();
 }
 

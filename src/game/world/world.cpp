@@ -309,7 +309,7 @@ void World::renderWorld(const Camera& playerCamera, const TextureArray& textureA
 void World::initializeEBO() const {
     // There are 2 triangles per face, so 6 indices per face
     auto faceCount = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6;
-    auto data = new GLuint[faceCount * 6];
+    vector<GLuint> data(faceCount * 6);
 
     int offset = 0;
     for (size_t i = 0; i < faceCount * 6; i += 6) {
@@ -323,7 +323,7 @@ void World::initializeEBO() const {
         offset += 4;
     }
 
-    ebo->bufferData(faceCount * 6 * sizeof(GLuint), data);
+    ebo->bufferData(faceCount * 6 * sizeof(GLuint), data.data());
 }
 
 void World::unbuildChunk(int x, int z) {
