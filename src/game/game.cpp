@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include "log.h"
 #include "toml++/toml.h"
 
 Game::Game(const int width, const int height) : Window(width, height),
@@ -38,7 +39,7 @@ Game::Game(const int width, const int height) : Window(width, height),
     uiRenderer = make_unique<UIRenderer>();
     uiRenderer->updateWindowSize(width, height);
 
-    InputState::registerCallbacks(window);
+    Input::registerCallbacks(window);
 }
 
 void Game::loop() {
@@ -83,6 +84,9 @@ void Game::update() {
 // Load textures and connect block types to those textures
 // Returns generated texture array for binding and destructing
 void Game::initializeBlocks() {
+    LOG_DEBUG("Initializing block definitions");
+
+    std::hash<BlockType> blockHasher;
     unordered_map<string, uint16_t> textureLayerMap = {};
 
     const auto table = toml::parse_file("../resources/data.toml");
@@ -111,8 +115,8 @@ void Game::initializeBlocks() {
                     }
                 }
 
-                type.id = id;
                 type.name = name.value();
+                type.id = blockHasher(type);
                 type.opaque = opaque;
                 type.isBillboard = billboard;
 
@@ -147,6 +151,7 @@ void Game::initializeBlocks() {
     }
 
     // Upload texture layers to GPU
+    LOG_DEBUG("Creating texture array with {} layers", textureLayerMap.size());
     textureArray.allocate(16, textureLayerMap.size());
 
     vector<string> filenames(textureLayerMap.size());

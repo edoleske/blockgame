@@ -20,7 +20,7 @@ public:
     BlockID lookup(const string& name);
 
 private:
-    array<BlockType, MAXIMUM_BLOCK_TYPES> blockTypes{};
+    unordered_map<BlockID, BlockType> blockTypes{};
     unordered_map<string, BlockID> blockDictionary{};
 
     static BlockDictionary* _instance;

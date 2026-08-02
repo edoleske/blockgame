@@ -1,6 +1,6 @@
 #include "player.h"
 
-#include "game/inputState.h"
+#include "game/input.h"
 #include "game/item/itemBlock.h"
 #include "game/world/world.h"
 
@@ -23,35 +23,35 @@ bool Player::isFlying() const {
 }
 
 void Player::update(float deltaTime, const unique_ptr<World>& world) {
-    const auto input = InputState::getInstance();
+    const auto input = Input::getInstance();
 
-    auto fly = input->getState(InputEvent::TOGGLE_FLY);
+    auto fly = input->getState(Input::Event::TOGGLE_FLY);
     if (fly.current && !fly.previous) {
         flying = !flying;
     }
 
     vec3 movementVector = vec3(0.0f);
 
-    if (input->getState(InputEvent::MOVE_FRONT).current) {
+    if (input->getState(Input::Event::MOVE_FRONT).current) {
         movementVector.z += 1.0f;
     }
-    if (input->getState(InputEvent::MOVE_BACK).current) {
+    if (input->getState(Input::Event::MOVE_BACK).current) {
         movementVector.z -= 1.0f;
     }
-    if (input->getState(InputEvent::MOVE_LEFT).current) {
+    if (input->getState(Input::Event::MOVE_LEFT).current) {
         movementVector.x -= 1.0f;
     }
-    if (input->getState(InputEvent::MOVE_RIGHT).current) {
+    if (input->getState(Input::Event::MOVE_RIGHT).current) {
         movementVector.x += 1.0f;
     }
-    if (input->getState(InputEvent::MOVE_UP).current) {
+    if (input->getState(Input::Event::MOVE_UP).current) {
         if (flying) {
             movementVector.y += 1.0f;
-        } else if (!input->getState(InputEvent::MOVE_UP).previous && jumpVelocity.y == 0.0f) {
+        } else if (!input->getState(Input::Event::MOVE_UP).previous && jumpVelocity.y == 0.0f) {
             jumpVelocity.y = 0.95f;
         }
     }
-    if (input->getState(InputEvent::MOVE_DOWN).current && flying) {
+    if (input->getState(Input::Event::MOVE_DOWN).current && flying) {
         movementVector.y -= 1.0f;
     }
 
@@ -68,23 +68,23 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     onRotate(cursorOffset.x, cursorOffset.y);
 
     // Update Inventory
-    if (input->isPressed(InputEvent::SCROLL_UP)) {
+    if (input->isPressed(Input::Event::SCROLL_UP)) {
         inventory.setSelected(inventory.getSelected() + 1);
     }
-    if (input->isPressed(InputEvent::SCROLL_DOWN)) {
+    if (input->isPressed(Input::Event::SCROLL_DOWN)) {
         inventory.setSelected(inventory.getSelected() - 1);
     }
 
     for (auto& event : {
-             InputEvent::ITEM_1, InputEvent::ITEM_2, InputEvent::ITEM_3, InputEvent::ITEM_4, InputEvent::ITEM_5,
-             InputEvent::ITEM_6, InputEvent::ITEM_7, InputEvent::ITEM_8, InputEvent::ITEM_9, InputEvent::ITEM_0
+             Input::Event::ITEM_1, Input::Event::ITEM_2, Input::Event::ITEM_3, Input::Event::ITEM_4, Input::Event::ITEM_5,
+             Input::Event::ITEM_6, Input::Event::ITEM_7, Input::Event::ITEM_8, Input::Event::ITEM_9, Input::Event::ITEM_0
          }) {
         if (input->isPressed(event)) {
-            inventory.setSelected(static_cast<int>(event) - static_cast<int>(InputEvent::ITEM_1));
+            inventory.setSelected(static_cast<int>(event) - static_cast<int>(Input::Event::ITEM_1));
         }
     }
 
-    if (input->isPressed(InputEvent::MINE_BLOCK)) {
+    if (input->isPressed(Input::Event::MINE_BLOCK)) {
         const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
         if (block.has_value()) {
             auto stack = ItemStack(make_unique<ItemBlock>(block.value().getID()), 1);
@@ -92,7 +92,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
         }
     }
 
-    if (input->isPressed(InputEvent::PLACE_BLOCK)) {
+    if (input->isPressed(Input::Event::PLACE_BLOCK)) {
         auto held = inventory.getItemStack(inventory.getSelected());
         if (held->item->getName() != "0" && held->amount > 0) {
             const auto itemBlock = dynamic_cast<ItemBlock*>(held->item.get());

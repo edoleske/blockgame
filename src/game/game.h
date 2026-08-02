@@ -9,7 +9,7 @@
 #include "gl/textureArray.h"
 #include "world/world.h"
 #include "player/player.h"
-#include "inputState.h"
+#include "input.h"
 #include "settings.h"
 #include "block/blockDictionary.h"
 #include "ui/uiRenderer.h"
@@ -23,7 +23,7 @@ public:
     void updateWindowSize(int w, int h) override;
 
 private:
-    InputState input;
+    Input input;
     Settings settings;
     Player player;
     BlockDictionary blockDictionary;

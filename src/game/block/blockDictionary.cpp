@@ -6,6 +6,8 @@ BlockDictionary* BlockDictionary::_instance = nullptr;
 
 BlockDictionary::BlockDictionary() {
     _instance = this;
+
+    blockTypes[0] = BlockType();
 }
 
 BlockDictionary::~BlockDictionary() {
@@ -24,7 +26,7 @@ void BlockDictionary::insert(const BlockType& type) {
 }
 
 BlockType BlockDictionary::get(const BlockID id) const {
-    return blockTypes[id];
+    return blockTypes.at(id);
 }
 
 BlockID BlockDictionary::lookup(const string& name) {

@@ -25,17 +25,15 @@ private:
     const float lacunarity = 1.75f;
     const float gain = 0.1f;
 
-    BlockID waterID;
-    BlockID grassID;
-    BlockID dirtID;
-    BlockID stoneID;
-    BlockID bedrockID;
+    BlockID waterID, grassID, dirtID, stoneID, bedrockID, flowerID;
 
     int getHeight(float x, float z) const;
 
     bool flowerMap(float x, float z);
 
     BlockID getBlockType(int blockHeight, int terrainHeight) const;
+
+    static BlockID lookupRequiredBlock(const string& name);
 };
 
 

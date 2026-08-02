@@ -1,8 +1,6 @@
 #include "chunk.h"
 
-Chunk::Chunk(
-    const int x, const int z, const shared_ptr<ElementBuffer>& ebo)
-    : chunkPosition(x, 0, z), ebo(ebo) {
+Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z), ebo(ebo) {
     // Initialize VertexBuffer attributes
     vao.bind();
     vbo.bind();

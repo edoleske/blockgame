@@ -92,9 +92,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/player/player.h
         src/game/world/worldGenerator.cpp
         src/game/world/worldGenerator.h
-        src/game/inputState.cpp
-        src/game/inputState.h
-        src/game/inputEvent.h
+        src/game/input.cpp
+        src/game/input.h
         src/ui/uiRenderer.cpp
         src/ui/uiRenderer.h
         src/ui/uiElement.cpp

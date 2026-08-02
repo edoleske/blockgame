@@ -1,20 +1,21 @@
 #include "worldGenerator.h"
 
+#include "log.h"
 #include "game/block/blockDictionary.h"
 
 WorldGenerator::WorldGenerator(unsigned int seed) : seed(seed), generator(seed) {
+    LOG_DEBUG("Initializing world with seed {}", seed);
     noise = make_unique<NoiseGenerator>(seed);
 
-    waterID = BlockDictionary::getInstance()->lookup("Water");
-    grassID = BlockDictionary::getInstance()->lookup("Grass");
-    dirtID = BlockDictionary::getInstance()->lookup("Dirt");
-    stoneID = BlockDictionary::getInstance()->lookup("Stone");
-    bedrockID = BlockDictionary::getInstance()->lookup("Bedrock");
+    waterID = lookupRequiredBlock("Water");
+    grassID = lookupRequiredBlock("Grass");
+    dirtID = lookupRequiredBlock("Dirt");
+    stoneID = lookupRequiredBlock("Stone");
+    bedrockID = lookupRequiredBlock("Bedrock");
+    flowerID = lookupRequiredBlock("Flower");
 }
 
 void WorldGenerator::generate(Chunk* chunk) {
-    auto flowerID = BlockDictionary::getInstance()->lookup("Flower");
-
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         auto fx = static_cast<float>(chunk->getChunkPosition().x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) +
                   1.0f / (2 * CHUNK_SIZE_X);
@@ -74,4 +75,14 @@ BlockID WorldGenerator::getBlockType(const int blockHeight, const int terrainHei
         return stoneID;
     }
     return bedrockID;
+}
+
+BlockID WorldGenerator::lookupRequiredBlock(const string& name) {
+    auto id = BlockDictionary::getInstance()->lookup(name);
+
+    if (!id) {
+        LOG_WARN("Required block {} could not be found", name);
+    }
+
+    return id;
 }

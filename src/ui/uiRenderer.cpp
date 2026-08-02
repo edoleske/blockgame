@@ -6,7 +6,7 @@
 #include "elements/crosshair.h"
 #include "elements/textBox.h"
 #include "elements/toolbar.h"
-#include "game/inputState.h"
+#include "game/input.h"
 
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");
@@ -46,8 +46,8 @@ UIRenderer::UIRenderer() {
 }
 
 void UIRenderer::update(const float deltaTime, const Player& player) const {
-    const auto input = InputState::getInstance();
-    const auto toggleDebug = input->isPressed(InputEvent::TOGGLE_DEBUG);
+    const auto input = Input::getInstance();
+    const auto toggleDebug = input->isPressed(Input::Event::TOGGLE_DEBUG);
 
     for (auto& element : elements) {
         if (element->getID() == "fpsCounter") {

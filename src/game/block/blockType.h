@@ -16,6 +16,7 @@ class BlockType {
 public:
     uint16_t getLayer(BlockFace face) const;
 
+    bool operator==(const BlockType& other) const;
     bool operator==(int i) const;
 
     bool isCollidable() const;
@@ -27,7 +28,22 @@ public:
     // Texture Array Layer indexed by BlockFace
     // Billboard textures expect these to be identical and use first index
     std::array<uint16_t, 6> faceTextures = {0, 0, 0, 0, 0, 0};
+
+    static constexpr BlockID fnv1a(const string& s) {
+        BlockID hash = -2128831035;
+        for (auto c : s) {
+            hash ^= static_cast<BlockID>(c);
+            hash *= 16777619;
+        }
+        return (hash >> 16) ^ (hash & 0xFFFF);
+    }
 };
 
+template <>
+struct std::hash<BlockType> {
+    BlockID operator()(const BlockType& type) const noexcept {
+        return BlockType::fnv1a(type.name);
+    }
+};
 
 #endif //BLOCKGAME_BLOCKTYPE_H

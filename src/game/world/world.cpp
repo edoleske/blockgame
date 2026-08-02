@@ -1,8 +1,11 @@
 #include "world.h"
 
+#include "log.h"
 #include "game/settings.h"
 
 World::World() {
+    LOG_DEBUG("Initializing world");
+
     shader = make_unique<Shader>("../resources/shaders/withTexture.vert", "../resources/shaders/withTexture.frag");
     shader->use();
     shader->setInteger("renderDistance", Settings::getInstance()->renderDistance);

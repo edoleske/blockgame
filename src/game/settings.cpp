@@ -6,11 +6,13 @@
 Settings* Settings::_instance = nullptr;
 
 Settings::Settings() {
+    LOG_DEBUG("Initializing settings system");
     _instance = this;
     load();
 }
 
 Settings::~Settings() {
+    LOG_DEBUG("Destructing settings system");
     if (_instance == this) {
         _instance = nullptr;
     }
@@ -36,8 +38,8 @@ void Settings::load() {
 }
 
 void Settings::save() {
-    auto table = toml::table{
-        {"renderDistance", renderDistance},
+    toml::table table {
+        {"renderDistance", renderDistance}
     };
 
     std::ofstream out("settings.toml");

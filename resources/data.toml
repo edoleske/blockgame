@@ -17,6 +17,10 @@ name = "Stone"
 all = "stone.png"
 
 [[block]]
+name = "Bedrock"
+all = "bedrock.png"
+
+[[block]]
 name = "Water"
 opaque = false
 all = "water.png"
