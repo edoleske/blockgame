@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
         glfw3
         GIT_REPOSITORY https://github.com/glfw/glfw
-        GIT_TAG deeadd3c30185bf69f6c4ea86fba53b424a4a8df
+        GIT_TAG d9d6f0f1f967807ffade6598ea9a631ebaf37a56
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         #FIND_PACKAGE_ARGS
@@ -52,6 +52,10 @@ FetchContent_Declare(
         FIND_PACKAGE_ARGS)
 
 FetchContent_MakeAvailable(glfw3 glad glm stb_image tomlplusplus)
+
+if (NOT TARGET spdlog)
+    find_package(spdlog REQUIRED)
+endif()
 
 add_library(stb_image INTERFACE ${stb_image_SOURCE_DIR}/stb_image.h)
 target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
@@ -123,7 +127,9 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/gl/textureArray.h
         src/game/block/blockDictionary.cpp
         src/game/block/blockDictionary.h
+        src/log.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm::glm glad stb_image)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm::glm glad stb_image spdlog::spdlog)
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:DEBUG>)

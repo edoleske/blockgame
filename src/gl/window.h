@@ -18,7 +18,8 @@ protected:
     string version;
     GLFWwindow* window;
 
-    static void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
+    static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+    static void messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 };
 
 

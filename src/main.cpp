@@ -1,4 +1,5 @@
 #include "common.h"
+#include "log.h"
 #include "game/game.h"
 
 // STB_IMAGE_IMPLEMENTATION must be imported once in a source file
@@ -7,10 +8,13 @@
 #include "stb_image.h"
 
 int main() {
+    Log::instance();
+    LOG_INFO("Initializing game");
+
     Game game(800, 600);
 
     if (!game.isInitialized()) {
-        std::cerr << "Failed to initialize game" << std::endl;
+        LOG_ERROR("Failed to initialize game");
         return 1;
     }
 

@@ -1,5 +1,7 @@
 #include "shader.h"
 
+#include "log.h"
+
 Shader::Shader(const string &vertexPath, const string &fragmentPath) {
     string vertexShaderString = readFile(vertexPath);
     string fragmentShaderString = readFile(fragmentPath);
@@ -17,7 +19,8 @@ Shader::Shader(const string &vertexPath, const string &fragmentPath) {
     glGetShaderiv(vs, GL_COMPILE_STATUS, &vertexSuccess);
     if (!vertexSuccess) {
         glGetShaderInfoLog(vs, 512, nullptr, infoLog);
-        std::cerr << infoLog << std::endl;
+        LOG_ERROR("Failed to create vertex shader {}", vertexPath);
+        LOG_ERROR(infoLog);
     }
 
     int fs = glCreateShader(GL_FRAGMENT_SHADER);
@@ -27,7 +30,8 @@ Shader::Shader(const string &vertexPath, const string &fragmentPath) {
     glGetShaderiv(fs, GL_COMPILE_STATUS, &fragmentSuccess);
     if (!fragmentSuccess) {
         glGetShaderInfoLog(fs, 512, nullptr, infoLog);
-        std::cerr << infoLog << std::endl;
+        LOG_ERROR("Failed to create fragment shader {}", fragmentPath);
+        LOG_ERROR(infoLog);
     }
 
     program = glCreateProgram();
@@ -38,7 +42,7 @@ Shader::Shader(const string &vertexPath, const string &fragmentPath) {
     glGetProgramiv(program, GL_LINK_STATUS, &linkSuccess);
     if (!linkSuccess) {
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
-        std::cerr << infoLog << std::endl;
+        LOG_ERROR("Failed to link shader: {}", infoLog);
     }
 
     compiled = vertexSuccess && fragmentSuccess && linkSuccess;

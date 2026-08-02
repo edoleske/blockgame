@@ -1,7 +1,7 @@
 #include "settings.h"
 
-#include <iostream>
 #include <toml++/toml.h>
+#include "log.h"
 
 Settings* Settings::_instance = nullptr;
 
@@ -21,12 +21,17 @@ Settings* Settings::getInstance() {
 }
 
 void Settings::load() {
+    if (!fs::exists("settings.toml")) {
+        LOG_DEBUG("Creating default settings.toml file");
+        save();
+        return;
+    }
+
     try {
         auto settings = toml::parse_file("settings.toml");
         renderDistance = settings["renderDistance"].value_or(renderDistance);
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        save();
+        LOG_ERROR("Error parsing settings: {}", e.what());
     }
 }
 
@@ -40,6 +45,6 @@ void Settings::save() {
         out << table;
         out.close();
     } else {
-        std::cerr << "Failed to open settings.toml" << std::endl;
+        LOG_ERROR("Unable to open settings.toml for writing");
     }
 }

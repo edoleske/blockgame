@@ -1,4 +1,6 @@
 #include "texture.h"
+
+#include "log.h"
 #include "stb_image.h"
 
 Texture::Texture(const string& path) {
@@ -12,7 +14,7 @@ Texture::Texture(const string& path) {
 
     auto data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!data) {
-        std::cerr << "Failed to load texture " << path << std::endl;
+        LOG_ERROR("Failed to load texture {}", path);
         return;
     }
 

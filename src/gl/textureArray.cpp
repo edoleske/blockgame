@@ -1,4 +1,6 @@
 #include "textureArray.h"
+
+#include "log.h"
 #include "stb_image.h"
 
 TextureArray::TextureArray() {
@@ -18,10 +20,6 @@ TextureArray::~TextureArray() {
 void TextureArray::allocate(const int resolution, const int layers) {
     bind();
     glTexStorage3D(target, 1, GL_RGBA8, resolution, resolution, layers);
-    if (auto error = glGetError()) {
-        std::cerr << "Failed to generate texture array storage: " << error << std::endl;
-        return;
-    }
 
     width = resolution;
     height = resolution;
@@ -30,28 +28,25 @@ void TextureArray::allocate(const int resolution, const int layers) {
 
 void TextureArray::addLayer(const string& path) {
     if (layerIndex >= layerCount) {
-        std::cerr << "Cannot add layer to texture array due to exceeding allocated layers" << std::endl;
+        LOG_ERROR("Cannot add layer to texture array due to exceeding allocated layers");
         return;
     }
 
     int w, h, channels;
     unsigned char* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
     if (!data) {
-        std::cerr << "Failed to load texture " << path << std::endl;
+        LOG_ERROR("Failed to load texture {}", path);
         return;
     }
 
     if (w != width || h != height) {
-        std::cerr << path << " resolution is invalid" << std::endl;
+        LOG_ERROR("{} cannot be added due to mismatched resolution: {}x{}", path, w, h);
         return;
     }
 
     auto format = channels == 4 ? GL_RGBA : GL_RGB;
     bind();
     glTexSubImage3D(target, 0, 0, 0, layerIndex, width, height, 1, format, GL_UNSIGNED_BYTE, data);
-    if (auto error = glGetError()) {
-        std::cerr << "Failed to generate texture array subimage " << layerIndex << ": " << error << std::endl;
-    }
     layerIndex++;
 
     stbi_image_free(data);
@@ -59,9 +54,6 @@ void TextureArray::addLayer(const string& path) {
 
 void TextureArray::bind() const {
     glBindTexture(target, texture);
-    if (auto error = glGetError()) {
-        std::cerr << "Failed to bind texture: " << error << std::endl;
-    }
 }
 
 void TextureArray::unbind() {

@@ -10,7 +10,6 @@
 #include <map>
 #include <unordered_map>
 #include <string>
-#include <sstream>
 #include <fstream>
 #include <random>
 #include <algorithm>
@@ -59,6 +58,18 @@ using glm::mat4;
 // Ensure GLAD is included before GLFW
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+
+// DEBUGBREAK macro for breaking on OpenGL debug context errors
+#if defined(_MSC_VER)
+#define DEBUGBREAK() __debugbreak()
+#elif defined(__clang__)
+#define DEBUGBREAK() __builtin_debugtrap()
+#elif defined(__GNUC__)
+#define DEBUGBREAK() __builtin_trap()
+#else
+#include <signal.h>
+#define DEBUGBREAK() raise(SIGTRAP)
+#endif
 
 // Global constants
 constexpr int CHUNK_SIZE_X = 16;
