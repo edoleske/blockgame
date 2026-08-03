@@ -10,10 +10,6 @@ bool BlockType::operator==(const BlockType& other) const {
     return id == other.id;
 }
 
-bool BlockType::operator==(const int i) const {
-    return static_cast<int>(id) == i;
-}
-
 bool BlockType::isCollidable() const {
     return opaque || isBillboard;
 }

@@ -17,7 +17,6 @@ public:
     uint16_t getLayer(BlockFace face) const;
 
     bool operator==(const BlockType& other) const;
-    bool operator==(int i) const;
 
     bool isCollidable() const;
 

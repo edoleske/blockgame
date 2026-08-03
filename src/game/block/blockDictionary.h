@@ -15,9 +15,9 @@ public:
 
     void insert(const BlockType& type);
 
-    BlockType get(BlockID id) const;
+    BlockType get(BlockID id);
 
-    BlockID lookup(const string& name);
+    BlockID lookup(const string& name) const;
 
     size_t count() const;
 

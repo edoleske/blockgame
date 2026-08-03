@@ -25,13 +25,12 @@ void BlockDictionary::insert(const BlockType& type) {
     blockDictionary[type.name] = type.id;
 }
 
-BlockType BlockDictionary::get(const BlockID id) const {
-    return blockTypes.at(id);
+BlockType BlockDictionary::get(const BlockID id) {
+    return blockTypes.find(id)->second;
 }
 
-BlockID BlockDictionary::lookup(const string& name) {
-    if (!blockDictionary.contains(name)) return 0;
-    return blockDictionary[name];
+BlockID BlockDictionary::lookup(const string& name) const {
+    return blockDictionary.find(name)->second;
 }
 
 size_t BlockDictionary::count() const {

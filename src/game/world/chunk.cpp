@@ -1,6 +1,6 @@
 #include "chunk.h"
 
-Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z), ebo(ebo) {
+Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z) {
     // Initialize VertexBuffer attributes
     vao.bind();
     vbo.bind();
@@ -57,13 +57,14 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto type = blocks[getIndex(bx, by, bz)].getType();
+                auto block = blocks[getIndex(bx, by, bz)];
 
                 // Generate no geometry for air blocks
-                if (type == 0) {
+                if (block.getID() == 0) {
                     continue;
                 }
 
+                auto type = block.getType();
                 auto localPosition = u8vec3(bx, by, bz);
 
                 // Check if transparent block is a billboard
@@ -76,36 +77,36 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
                 // We could calculate world position, then use methods in world to get these much cleaner
                 // The issue is the bounds check makes it significantly slower to build a mesh
                 auto leftBlock = bx > 0
-                                     ? getBlock(bx - 1, by, bz).getType()
-                                     : leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz).getType();
+                                     ? getBlock(bx - 1, by, bz)
+                                     : leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz);
                 auto rightBlock = bx < CHUNK_SIZE_X - 1
-                                      ? getBlock(bx + 1, by, bz).getType()
-                                      : rightChunk->getBlock(0, by, bz).getType();
+                                      ? getBlock(bx + 1, by, bz)
+                                      : rightChunk->getBlock(0, by, bz);
                 auto backBlock = bz > 0
-                                     ? getBlock(bx, by, bz - 1).getType()
-                                     : backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1).getType();
+                                     ? getBlock(bx, by, bz - 1)
+                                     : backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1);
                 auto frontBlock = bz < CHUNK_SIZE_Z - 1
-                                      ? getBlock(bx, by, bz + 1).getType()
-                                      : frontChunk->getBlock(bx, by, 0).getType();
-                auto bottomBlock = by > 0 ? getBlock(bx, by - 1, bz).getType() : BlockType();
-                auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz).getType() : BlockType();
+                                      ? getBlock(bx, by, bz + 1)
+                                      : frontChunk->getBlock(bx, by, 0);
+                auto bottomBlock = by > 0 ? getBlock(bx, by - 1, bz) : Block();
+                auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz) : Block();
 
-                if (isVisibleFace(type, leftBlock)) {
+                if (leftBlock.getID() != block.getID() && isVisibleFace(type, leftBlock.getType())) {
                     addFace(type, BlockFace::LEFT, localPosition);
                 }
-                if (isVisibleFace(type, rightBlock)) {
+                if (rightBlock.getID() != block.getID() &&isVisibleFace(type, rightBlock.getType())) {
                     addFace(type, BlockFace::RIGHT, localPosition);
                 }
-                if (isVisibleFace(type, backBlock)) {
+                if (backBlock.getID() != block.getID() &&isVisibleFace(type, backBlock.getType())) {
                     addFace(type, BlockFace::BACK, localPosition);
                 }
-                if (isVisibleFace(type, frontBlock)) {
+                if (frontBlock.getID() != block.getID() &&isVisibleFace(type, frontBlock.getType())) {
                     addFace(type, BlockFace::FRONT, localPosition);
                 }
-                if (isVisibleFace(type, bottomBlock)) {
+                if (bottomBlock.getID() != block.getID() &&isVisibleFace(type, bottomBlock.getType())) {
                     addFace(type, BlockFace::BOTTOM, localPosition);
                 }
-                if (isVisibleFace(type, topBlock)) {
+                if (topBlock.getID() != block.getID() &&isVisibleFace(type, topBlock.getType())) {
                     addFace(type, BlockFace::TOP, localPosition);
                 }
             }
@@ -114,18 +115,12 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
     // Copy vertices to VBO
     if (!vertices.empty()) {
-        vao.bind();
-        vbo.bind();
         vbo.bufferData(vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
-        VertexArray::unbind();
     }
 
     if (!transparentVertices.empty()) {
-        transparentVAO.bind();
-        transparentVBO.bind();
         transparentVBO.bufferData(transparentVertices.size() * sizeof(Vertex), &transparentVertices.front(),
                                   GL_STATIC_DRAW);
-        VertexArray::unbind();
     }
 
     state = ChunkState::BUILT;

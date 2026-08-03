@@ -58,8 +58,6 @@ private:
     VertexArray transparentVAO;
     VertexBuffer transparentVBO;
 
-    shared_ptr<ElementBuffer> ebo;
-
     void addFace(const BlockType& type, BlockFace face, const u8vec3& position);
 
     void addBillboard(const BlockType& type, const u8vec3& position);
