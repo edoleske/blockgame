@@ -4,6 +4,30 @@
 #include "stb_truetype.h"
 
 Font::Font(const string& filename) {
+    loadFontFile(filename);
+}
+
+Font::Font(const string& filename, const GLint slot) : texture(slot) {
+    loadFontFile(filename);
+}
+
+float Font::getBaseline() const {
+    return static_cast<float>(ascent) * getScale();
+}
+
+stbtt_packedchar Font::getPackedChar(const char c) const {
+    return chars[getCharIndex(c)];
+}
+
+stbtt_aligned_quad Font::getQuad(const char c) const {
+    return quads[getCharIndex(c)];
+}
+
+const Texture2D* Font::getTexture() const {
+    return &texture;
+}
+
+void Font::loadFontFile(const string& filename) {
     // Read font from file
     std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
     if (!ifs.is_open()) {
@@ -38,24 +62,11 @@ Font::Font(const string& filename) {
         stbtt_GetPackedQuad(chars.data(), ATLAS_WIDTH, ATLAS_HEIGHT, i, &x, &y, &quads[i], 0);
     }
 
-    // Copy to texture
-    texture = make_unique<Texture>(atlasBuffer, ATLAS_WIDTH, ATLAS_HEIGHT);
-}
-
-float Font::getBaseline() const {
-    return static_cast<float>(ascent) * getScale();
-}
-
-stbtt_packedchar Font::getPackedChar(const char c) const {
-    return chars[getCharIndex(c)];
-}
-
-stbtt_aligned_quad Font::getQuad(const char c) const {
-    return quads[getCharIndex(c)];
-}
-
-Texture* Font::getTexture() const {
-    return texture.get();
+    texture.load(atlasBuffer.data(), ATLAS_WIDTH, ATLAS_HEIGHT, 1);
+    Texture2D::setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    Texture2D::setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    Texture2D::setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    Texture2D::setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 int Font::getCharIndex(const char c) {

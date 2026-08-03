@@ -33,3 +33,7 @@ BlockID BlockDictionary::lookup(const string& name) {
     if (!blockDictionary.contains(name)) return 0;
     return blockDictionary[name];
 }
+
+size_t BlockDictionary::count() const {
+    return blockDictionary.size();
+}

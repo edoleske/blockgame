@@ -38,6 +38,8 @@ private:
     void update();
 
     void initializeBlocks();
+
+    void initializeTextureArray(const unordered_map<string, uint16_t>& textureLayerMap);
 };
 
 

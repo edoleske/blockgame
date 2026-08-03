@@ -19,6 +19,8 @@ public:
 
     BlockID lookup(const string& name);
 
+    size_t count() const;
+
 private:
     unordered_map<BlockID, BlockType> blockTypes{};
     unordered_map<string, BlockID> blockDictionary{};

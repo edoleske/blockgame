@@ -2,7 +2,7 @@
 #define BLOCKGAME_UITEXTUREATLAS_H
 
 #include "common.h"
-#include "gl/texture.h"
+#include "gl/texture2D.h"
 
 enum UITextureName {
     UIT_NONE, UIT_TOOLBAR, UIT_CROSSHAIR, UIT_HIGHLIGHT, UIT_PLACEHOLDER
@@ -22,11 +22,14 @@ class UITextureAtlas {
 public:
     explicit UITextureAtlas(const string& filename);
 
-    Texture* getTexture() const;
+    explicit UITextureAtlas(const string& filename, GLint slot);
+
+    const Texture2D* getTexture() const;
 
     vec4 getUV(UITextureName textureName) const;
 private:
-    unique_ptr<Texture> texture;
+    Texture2D texture;
+    void initializeTexture(const string& filename);
 
     map<UITextureName, vec4> uvMap;
     void calculateTextureCoordinates();

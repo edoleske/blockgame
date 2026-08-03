@@ -127,6 +127,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/block/blockDictionary.cpp
         src/game/block/blockDictionary.h
         src/log.h
+        src/gl/texture2D.cpp
+        src/gl/texture2D.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include)

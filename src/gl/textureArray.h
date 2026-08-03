@@ -2,18 +2,14 @@
 #define BLOCKGAME_TEXTUREARRAY_H
 
 #include "common.h"
+#include "texture.h"
 
 
-class TextureArray {
+class TextureArray : public Texture {
 public:
-     TextureArray();
+     TextureArray() = default;
 
-    ~TextureArray();
-
-    // Copying object deletes texture
-    TextureArray(const TextureArray&) = delete;
-    TextureArray(TextureArray&&) = delete;
-    TextureArray& operator=(const TextureArray&) = delete;
+    explicit TextureArray(GLenum slot);
 
     void allocate(int resolution, int layers);
 
@@ -21,9 +17,10 @@ public:
 
     void bind() const;
 
-    static void unbind();
+    void unbind() const;
 
-    GLuint getTexture() const;
+    // Sets texture parameter (must bind to texture before use)
+    static void setParameter(GLenum param, GLint value);
 
     int getLayerCount() const;
 
@@ -32,7 +29,7 @@ public:
     int getHeight() const;
 
 private:
-    GLuint texture{};
+    GLenum slot = GL_TEXTURE0;
     int width{}, height{}, layerCount{}, layerIndex{};
 
     static inline GLenum target = GL_TEXTURE_2D_ARRAY;

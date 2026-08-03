@@ -91,7 +91,6 @@ void Game::initializeBlocks() {
 
     const auto table = toml::parse_file("../resources/data.toml");
 
-    uint16_t id = 1;
     if (auto blocks = table["block"].as_array()) {
         for (auto& node : *blocks) {
             if (auto blockTable = node.as_table()) {
@@ -141,18 +140,26 @@ void Game::initializeBlocks() {
                 }
 
                 blockDictionary.insert(type);
-                id++;
             }
         }
     }
 
-    if (id == 1) {
-        std::cout << "No blocks loaded" << std::endl;
+    if (auto blockCount = blockDictionary.count(); blockCount > 0) {
+        LOG_INFO("Loaded {} blocks into dictionary", blockCount);
+    } else {
+        LOG_ERROR("Failed to load any blocks");
     }
 
-    // Upload texture layers to GPU
+    initializeTextureArray(textureLayerMap);
+}
+
+void Game::initializeTextureArray(const unordered_map<string, uint16_t>& textureLayerMap) {
     LOG_DEBUG("Creating texture array with {} layers", textureLayerMap.size());
-    textureArray.allocate(16, textureLayerMap.size());
+    textureArray.allocate(16, static_cast<int>(textureLayerMap.size()));
+    TextureArray::setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    TextureArray::setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    TextureArray::setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    TextureArray::setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     vector<string> filenames(textureLayerMap.size());
     for (const auto& [filename, index] : textureLayerMap) {

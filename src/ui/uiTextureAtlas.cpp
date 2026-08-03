@@ -1,22 +1,37 @@
 #include "uiTextureAtlas.h"
 
 UITextureAtlas::UITextureAtlas(const string& filename) {
-    texture = make_unique<Texture>(filename);
-    calculateTextureCoordinates();
+    initializeTexture(filename);
 }
 
-Texture* UITextureAtlas::getTexture() const {
-    return texture.get();
+UITextureAtlas::UITextureAtlas(const string& filename, const GLint slot): texture(slot) {
+    initializeTexture(filename);
+}
+
+const Texture2D* UITextureAtlas::getTexture() const {
+    return &texture;
 }
 
 vec4 UITextureAtlas::getUV(const UITextureName textureName) const {
     return uvMap.at(textureName);
 }
 
+void UITextureAtlas::initializeTexture(const string& filename) {
+    texture.load(filename);
+
+    // Set parameters on texture we just bound and uploaded data to
+    Texture2D::setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    Texture2D::setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    Texture2D::setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    Texture2D::setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    calculateTextureCoordinates();
+}
+
 void UITextureAtlas::calculateTextureCoordinates() {
     uvMap = map<UITextureName, vec4>();
-    const auto textureWidth = texture->getWidth();
-    const auto textureHeight = texture->getHeight();
+    const auto textureWidth = texture.getWidth();
+    const auto textureHeight = texture.getHeight();
 
     for (size_t index = 0; auto const& info : UI_TEXTURES_INFO) {
         auto textureName = static_cast<UITextureName>(index);

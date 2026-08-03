@@ -6,28 +6,35 @@
 
 class Texture {
 public:
-    explicit Texture(const string& path);
+    Texture();
 
     // Creates font bitmap texture from packed font atlas (from stb_truetype)
     explicit Texture(const vector<unsigned char>& atlasData, GLsizei width, GLsizei height);
 
-    ~Texture();
+    virtual ~Texture();
 
-    void bind() const;
-
-    static void unbind();
+    // Disallow copy/move
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
+    Texture(const Texture&&) = delete;
+    Texture& operator=(const Texture&&) = delete;
 
     GLuint getTexture() const;
 
-    int getWidth() const;
-
-    int getHeight() const;
-
-private:
+protected:
     GLuint texture{};
-    int width{}, height{}, channels{};
 
-    static inline GLenum target = GL_TEXTURE_2D;
+    void bind(GLenum slot, GLenum target) const;
+
+    static void unbind(GLenum slot, GLenum target);
+
+    static void setParameter(GLenum target, GLenum name, GLint value);
+
+    static GLint getInternalFormat(int channels);
+
+    static GLenum getFormat(int channels);
+
+    static unsigned char* loadFile(const string& path, int& width, int& height, int& channels);
 };
 
 
