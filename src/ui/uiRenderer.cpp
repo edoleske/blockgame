@@ -8,6 +8,10 @@
 #include "elements/toolbar.h"
 #include "game/input.h"
 
+#if defined(DEBUG)
+#include "utils/debug.h"
+#endif
+
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");
     textureAtlas = make_unique<UITextureAtlas>("../resources/img/ui_texture.png");
@@ -42,6 +46,12 @@ UIRenderer::UIRenderer() {
     fpsCounter->setPosition(1.0f, 1.0f);
     elements.push_back(std::move(fpsCounter));
 
+#if defined(DEBUG)
+    auto memCounter = make_unique<TextBox>("memCounter", font);
+    memCounter->setPosition(1.0f, 16.0f);
+    elements.push_back(std::move(memCounter));
+#endif
+
     batch = make_unique<UIBatch>();
 }
 
@@ -58,8 +68,20 @@ void UIRenderer::update(const float deltaTime, const Player& player) const {
                 counter->text = std::format("FPS: {:.0f}", 1.0f / deltaTime);
             }
 
-            break;
+            continue;
         }
+#if defined(DEBUG)
+        if (element->getID() == "memCounter") {
+            if (toggleDebug) element->hidden = !element->hidden;
+            if (element->hidden) continue;
+
+            if (const auto counter = dynamic_cast<TextBox*>(element.get()); counter != nullptr) {
+                counter->text = std::format("Mem: {}", formatBytes(GetAllocatedMemory()));
+            }
+
+            continue;
+        }
+#endif
         if (element->getID() == "toolbar") {
             const auto toolbar = dynamic_cast<Toolbar*>(element.get());
             if (toolbar == nullptr) continue;
@@ -79,7 +101,7 @@ void UIRenderer::render() const {
     textureAtlas->getTexture()->bind();
 
     for (const auto& element : elements) {
-        if (element->getID() == "fpsCounter") continue;
+        if (element->renderPass != UI_MAIN) continue;
         if (element->hidden || element->textureName == UIT_NONE) continue;
         element->generateVertices(batch, textureAtlas);
     }
@@ -89,7 +111,7 @@ void UIRenderer::render() const {
     shader->setInteger("isText", 1);
 
     for (const auto& element : elements) {
-        if (element->getID() != "fpsCounter") continue;
+        if (element->renderPass != UI_TEXT) continue;
         if (element->hidden) continue;
         element->generateVertices(batch, textureAtlas);
     }

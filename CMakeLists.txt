@@ -129,6 +129,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/log.h
         src/gl/texture2D.cpp
         src/gl/texture2D.h
+        src/utils/debug.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include)
