@@ -51,8 +51,8 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     }
 
     state = ChunkState::POPULATED;
-    vertices.clear();
-    transparentVertices.clear();
+    vector<Vertex> vertices(vertexCount);
+    vector<Vertex> transparentVertices(transparentVertexCount);
 
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
@@ -69,7 +69,7 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 
                 // Check if transparent block is a billboard
                 if (type.isBillboard) {
-                    addBillboard(type, localPosition);
+                    addBillboard(vertices, transparentVertices, type, localPosition);
                     continue;
                 }
 
@@ -92,34 +92,37 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
                 auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz) : Block();
 
                 if (leftBlock.getID() != block.getID() && isVisibleFace(type, leftBlock.getType())) {
-                    addFace(type, BlockFace::LEFT, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::LEFT, localPosition);
                 }
                 if (rightBlock.getID() != block.getID() &&isVisibleFace(type, rightBlock.getType())) {
-                    addFace(type, BlockFace::RIGHT, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::RIGHT, localPosition);
                 }
                 if (backBlock.getID() != block.getID() &&isVisibleFace(type, backBlock.getType())) {
-                    addFace(type, BlockFace::BACK, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::BACK, localPosition);
                 }
                 if (frontBlock.getID() != block.getID() &&isVisibleFace(type, frontBlock.getType())) {
-                    addFace(type, BlockFace::FRONT, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::FRONT, localPosition);
                 }
                 if (bottomBlock.getID() != block.getID() &&isVisibleFace(type, bottomBlock.getType())) {
-                    addFace(type, BlockFace::BOTTOM, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::BOTTOM, localPosition);
                 }
                 if (topBlock.getID() != block.getID() &&isVisibleFace(type, topBlock.getType())) {
-                    addFace(type, BlockFace::TOP, localPosition);
+                    addFace(vertices, transparentVertices, type, BlockFace::TOP, localPosition);
                 }
             }
         }
     }
 
+    vertexCount = static_cast<int>(vertices.size());
+    transparentVertexCount = static_cast<int>(transparentVertices.size());
+
     // Copy vertices to VBO
     if (!vertices.empty()) {
-        vbo.bufferData(vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
+        vbo.bufferData(vertexCount * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
     }
 
     if (!transparentVertices.empty()) {
-        transparentVBO.bufferData(transparentVertices.size() * sizeof(Vertex), &transparentVertices.front(),
+        transparentVBO.bufferData(transparentVertexCount * sizeof(Vertex), &transparentVertices.front(),
                                   GL_STATIC_DRAW);
     }
 
@@ -127,17 +130,17 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
 }
 
 void Chunk::render() const {
-    if (state == ChunkState::BUILT && !vertices.empty()) {
+    if (state == ChunkState::BUILT && vertexCount > 0) {
         vao.bind();
-        glDrawElements(GL_TRIANGLES, static_cast<int>(vertices.size() / 4) * 6, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, vertexCount / 4 * 6, GL_UNSIGNED_INT, nullptr);
         VertexArray::unbind();
     }
 }
 
 void Chunk::renderTransparent() const {
-    if (state == ChunkState::BUILT && !transparentVertices.empty()) {
+    if (state == ChunkState::BUILT && transparentVertexCount > 0) {
         transparentVAO.bind();
-        glDrawElements(GL_TRIANGLES, static_cast<int>(transparentVertices.size() / 4) * 6, GL_UNSIGNED_INT,
+        glDrawElements(GL_TRIANGLES, transparentVertexCount / 4 * 6, GL_UNSIGNED_INT,
                        nullptr);
         VertexArray::unbind();
     }
@@ -202,7 +205,7 @@ bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
         z >= 0 && z < CHUNK_SIZE_Z;
 }
 
-void Chunk::addFace(const BlockType& type, const BlockFace face, const u8vec3& position) {
+void Chunk::addFace(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const BlockFace face, const u8vec3& position) {
     for (const auto& vertex : Block::blockFaceVertices[face]) {
         auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(face));
 
@@ -214,7 +217,7 @@ void Chunk::addFace(const BlockType& type, const BlockFace face, const u8vec3& p
     }
 }
 
-void Chunk::addBillboard(const BlockType& type, const u8vec3& position) {
+void Chunk::addBillboard(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position) {
     for (const auto& vertex : Block::billboardVertices) {
         auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(BlockFace::FRONT));
 

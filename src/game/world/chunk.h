@@ -50,17 +50,17 @@ private:
     ivec3 chunkPosition;
     ChunkData<Block> blocks;
 
-    vector<Vertex> vertices;
     VertexArray vao;
     VertexBuffer vbo;
+    int vertexCount = 0;
 
-    vector<Vertex> transparentVertices;
     VertexArray transparentVAO;
     VertexBuffer transparentVBO;
+    int transparentVertexCount = 0;
 
-    void addFace(const BlockType& type, BlockFace face, const u8vec3& position);
+    static void addFace(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, BlockFace face, const u8vec3& position);
 
-    void addBillboard(const BlockType& type, const u8vec3& position);
+    static void addBillboard(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);
 
