@@ -4,18 +4,12 @@
 
 Block::Block(const BlockID id) : id(id) {}
 
-Block::Block(const BlockID id, const uint8_t state) : id(id), state(state) {}
-
 BlockID Block::getID() const {
     return id;
 }
 
 BlockType Block::getType() const {
     return BlockDictionary::getInstance()->get(getID());
-}
-
-uint8_t Block::getState() const {
-    return state;
 }
 
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {

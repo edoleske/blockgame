@@ -13,13 +13,9 @@ public:
 
     explicit Block(BlockID id);
 
-    explicit Block(BlockID id, uint8_t state);
-
     BlockID getID() const;
 
     BlockType getType() const;
-
-    uint8_t getState() const;
 
     static unordered_map<BlockFace, vector<Vertex>> blockFaceVertices;
 
@@ -27,7 +23,6 @@ public:
 
 private:
     uint16_t id{0};
-    uint8_t state{0};
 };
 
 

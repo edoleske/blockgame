@@ -152,11 +152,9 @@ void Chunk::write(vector<char>& data) const {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
                 const auto block = blocks[getIndex(x, y, z)];
                 auto id = block.getID();
-                auto st = block.getState();
 
-                auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 3;
+                auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 2;
                 std::memcpy(data.data() + index, &id, sizeof(id));
-                std::memcpy(data.data() + index + sizeof(id), &st, sizeof(st));
             }
         }
     }
@@ -172,10 +170,8 @@ void Chunk::load(ifstream& in) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
                 uint16_t id;
                 in.read(reinterpret_cast<char*>(&id), sizeof(id));
-                uint8_t blockState;
-                in.read(reinterpret_cast<char*>(&blockState), sizeof(blockState));
 
-                blocks[getIndex(x, y, z)] = Block(id, blockState);
+                blocks[getIndex(x, y, z)] = Block(id);
             }
         }
     }
