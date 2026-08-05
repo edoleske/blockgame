@@ -22,8 +22,11 @@ public:
 
     // Delete copy/move/assignment
     Log(const Log&) = delete;
+
     Log(Log&&) = delete;
+
     Log& operator=(const Log&) = delete;
+
     Log& operator=(Log&&) = delete;
 
 private:

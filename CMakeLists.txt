@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.24)
 project(blockgame
         VERSION 0.0.0
         DESCRIPTION "Minecraft-inspired OpenGL game"
@@ -49,13 +49,19 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/nothings/stb
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
-        FIND_PACKAGE_ARGS)
+        FIND_PACKAGE_ARGS
+)
 
-FetchContent_MakeAvailable(glfw3 glad glm stb_image tomlplusplus)
+FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog
+        GIT_TAG v1.x
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        FIND_PACKAGE_ARGS
+)
 
-if (NOT TARGET spdlog)
-    find_package(spdlog REQUIRED)
-endif()
+FetchContent_MakeAvailable(glfw3 glad glm stb_image spdlog tomlplusplus)
 
 add_library(stb_image INTERFACE ${stb_image_SOURCE_DIR}/stb_image.h)
 target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
@@ -132,6 +138,6 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/utils/debug.h
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include ${spdlog_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm::glm glad stb_image spdlog::spdlog)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:DEBUG>)

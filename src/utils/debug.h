@@ -33,7 +33,7 @@ inline size_t GetAllocatedMemory() {
 #if defined(_WIN32)
     PROCESS_MEMORY_COUNTERS memCounter;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter))) {
-        return memCounter.WorkingSet;
+        return memCounter.WorkingSetSize;
     }
     return 0;
 #elif defined(__linux__)
