@@ -136,6 +136,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/gl/texture2D.cpp
         src/gl/texture2D.h
         src/utils/debug.h
+        src/game/block/palettedBlockData.cpp
+        src/game/block/palettedBlockData.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include ${spdlog_SOURCE_DIR}/include)
