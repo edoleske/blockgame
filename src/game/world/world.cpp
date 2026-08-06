@@ -2,6 +2,7 @@
 
 #include "log.h"
 #include "game/settings.h"
+#include "game/block/blockDictionary.h"
 
 World::World() {
     LOG_DEBUG("Initializing world");
@@ -67,7 +68,7 @@ bool World::chunkExists(int x, int z) const {
     return chunkMap.find(make_pair(x, z)) != chunkMap.end();
 }
 
-optional<Block> World::getBlock(int x, int y, int z) const {
+optional<BlockID> World::getBlock(int x, int y, int z) const {
     auto chunk = getChunk(x >> 4, z >> 4);
     if (chunk != nullptr && Chunk::isValidBlockPosition(x & 0xF, y, z & 0xF)) {
         return chunk->getBlock(x & 0xF, y, z & 0xF);
@@ -75,16 +76,16 @@ optional<Block> World::getBlock(int x, int y, int z) const {
     return nullopt;
 }
 
-optional<Block> World::getBlock(const vec3& position) const {
+optional<BlockID> World::getBlock(const vec3& position) const {
     return getBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z));
 }
 
-optional<Block> World::mineBlock(const vec3& position, const vec3& front) {
+optional<BlockID> World::mineBlock(const vec3& position, const vec3& front) {
     const auto hit = raycast(position, front, 6.0f);
 
     if (hit.has_value()) {
         const auto block = getBlock(hit.value());
-        setBlock(hit.value(), Block(0));
+        setBlock(hit.value(), 0);
         return block;
     }
 
@@ -95,15 +96,15 @@ bool World::placeBlock(const BlockType& type, const vec3& position, const vec3& 
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         auto frontBlock = getBlock(hit.value());
-        if (frontBlock.has_value() && !frontBlock.value().getType().isCollidable()) {
-            setBlock(hit.value(), Block(type.id));
+        if (frontBlock.has_value() && !BlockDictionary::getInstance()->get(frontBlock.value()).isCollidable()) {
+            setBlock(hit.value(), type.id);
             return true;
         }
     }
     return false;
 }
 
-void World::setBlock(int x, int y, int z, const Block block) {
+void World::setBlock(int x, int y, int z, const BlockID block) {
     auto cx = x >> 4, cz = z >> 4;
     auto chunk = getChunk(cx, cz);
 
@@ -127,7 +128,7 @@ void World::setBlock(int x, int y, int z, const Block block) {
     }
 }
 
-void World::setBlock(const vec3 position, const Block block) {
+void World::setBlock(const vec3 position, const BlockID block) {
     setBlock(std::floor(position.x), std::floor(position.y), std::floor(position.z), block);
 }
 
@@ -367,7 +368,7 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
             std::floor(position.y),
             std::floor(position.z)
         );
-        if (block.has_value() && block.value().getType().isCollidable()) {
+        if (block.has_value() && BlockDictionary::getInstance()->get(block.value()).isCollidable()) {
             // If placing a block, we retract position to the last block
             if (place) {
                 position -= delta;

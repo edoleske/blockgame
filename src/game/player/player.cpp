@@ -1,6 +1,7 @@
 #include "player.h"
 
 #include "game/input.h"
+#include "game/block/blockDictionary.h"
 #include "game/item/itemBlock.h"
 #include "game/world/world.h"
 
@@ -76,8 +77,10 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     }
 
     for (auto& event : {
-             Input::Event::ITEM_1, Input::Event::ITEM_2, Input::Event::ITEM_3, Input::Event::ITEM_4, Input::Event::ITEM_5,
-             Input::Event::ITEM_6, Input::Event::ITEM_7, Input::Event::ITEM_8, Input::Event::ITEM_9, Input::Event::ITEM_0
+             Input::Event::ITEM_1, Input::Event::ITEM_2, Input::Event::ITEM_3, Input::Event::ITEM_4,
+             Input::Event::ITEM_5,
+             Input::Event::ITEM_6, Input::Event::ITEM_7, Input::Event::ITEM_8, Input::Event::ITEM_9,
+             Input::Event::ITEM_0
          }) {
         if (input->isPressed(event)) {
             inventory.setSelected(static_cast<int>(event) - static_cast<int>(Input::Event::ITEM_1));
@@ -87,7 +90,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     if (input->isPressed(Input::Event::MINE_BLOCK)) {
         const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
         if (block.has_value()) {
-            auto stack = ItemStack(make_unique<ItemBlock>(block.value().getID()), 1);
+            auto stack = ItemStack(make_unique<ItemBlock>(block.value()), 1);
             inventory.insert(stack);
         }
     }
@@ -150,7 +153,7 @@ bool Player::testCollision(const vec3& position, const vec3& oldPosition, const 
         for (int y = floor(position.y); y < floor(position.y + size.y) + 1; y++) {
             for (int z = floor(position.z); z < floor(position.z + size.z) + 1; z++) {
                 auto block = world->getBlock(x, y, z);
-                if (block.has_value() && block->getType().opaque) {
+                if (block.has_value() && BlockDictionary::getInstance()->get(block.value()).opaque) {
                     // Ignore blocks already in bounding box (prevents player from getting stuck)
                     if (oldPosition.x < x + 1 && oldPosition.x + size.x > x &&
                         oldPosition.y < y + 1 && oldPosition.y + size.y > y &&

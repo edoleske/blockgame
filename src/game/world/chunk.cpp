@@ -1,5 +1,7 @@
 #include "chunk.h"
 
+#include "game/block/blockDictionary.h"
+
 Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z) {
     // Initialize VertexBuffer attributes
     vao.bind();
@@ -53,18 +55,19 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     state = ChunkState::POPULATED;
     vector<Vertex> vertices(vertexCount);
     vector<Vertex> transparentVertices(transparentVertexCount);
+    auto dictionary = BlockDictionary::getInstance();
 
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto block = blocks[getIndex(bx, by, bz)];
+                auto block = data.get(getIndex(bx, by, bz));
 
                 // Generate no geometry for air blocks
-                if (block.getID() == 0) {
+                if (block == 0) {
                     continue;
                 }
 
-                auto type = block.getType();
+                auto type = dictionary->get(block);
                 auto localPosition = u8vec3(bx, by, bz);
 
                 // Check if transparent block is a billboard
@@ -88,25 +91,25 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
                 auto frontBlock = bz < CHUNK_SIZE_Z - 1
                                       ? getBlock(bx, by, bz + 1)
                                       : frontChunk->getBlock(bx, by, 0);
-                auto bottomBlock = by > 0 ? getBlock(bx, by - 1, bz) : Block();
-                auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz) : Block();
+                auto bottomBlock = by > 0 ? getBlock(bx, by - 1, bz) : 0;
+                auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz) : 0;
 
-                if (leftBlock.getID() != block.getID() && isVisibleFace(type, leftBlock.getType())) {
+                if (leftBlock != block && isVisibleFace(type, dictionary->get(leftBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::LEFT, localPosition);
                 }
-                if (rightBlock.getID() != block.getID() &&isVisibleFace(type, rightBlock.getType())) {
+                if (rightBlock != block && isVisibleFace(type, dictionary->get(rightBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::RIGHT, localPosition);
                 }
-                if (backBlock.getID() != block.getID() &&isVisibleFace(type, backBlock.getType())) {
+                if (backBlock != block && isVisibleFace(type, dictionary->get(backBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::BACK, localPosition);
                 }
-                if (frontBlock.getID() != block.getID() &&isVisibleFace(type, frontBlock.getType())) {
+                if (frontBlock != block && isVisibleFace(type, dictionary->get(frontBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::FRONT, localPosition);
                 }
-                if (bottomBlock.getID() != block.getID() &&isVisibleFace(type, bottomBlock.getType())) {
+                if (bottomBlock != block && isVisibleFace(type, dictionary->get(bottomBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::BOTTOM, localPosition);
                 }
-                if (topBlock.getID() != block.getID() &&isVisibleFace(type, topBlock.getType())) {
+                if (topBlock != block && isVisibleFace(type, dictionary->get(topBlock))) {
                     addFace(vertices, transparentVertices, type, BlockFace::TOP, localPosition);
                 }
             }
@@ -146,15 +149,13 @@ void Chunk::renderTransparent() const {
     }
 }
 
-void Chunk::write(vector<char>& data) const {
+void Chunk::write(vector<char>& byteData) const {
     for (int x = 0; x < CHUNK_SIZE_X; ++x) {
         for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
-                const auto block = blocks[getIndex(x, y, z)];
-                auto id = block.getID();
-
+                const auto block = data.get(getIndex(x, y, z));
                 auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 2;
-                std::memcpy(data.data() + index, &id, sizeof(id));
+                std::memcpy(byteData.data() + index, &block, sizeof(block));
             }
         }
     }
@@ -170,8 +171,7 @@ void Chunk::load(ifstream& in) {
             for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
                 uint16_t id;
                 in.read(reinterpret_cast<char*>(&id), sizeof(id));
-
-                blocks[getIndex(x, y, z)] = Block(id);
+                data.set(getIndex(x, y, z), id);
             }
         }
     }
@@ -179,12 +179,12 @@ void Chunk::load(ifstream& in) {
     state = ChunkState::POPULATED;
 }
 
-Block Chunk::getBlock(int x, int y, int z) const {
-    return blocks[getIndex(x, y, z)];
+BlockID Chunk::getBlock(int x, int y, int z) const {
+    return data.get(getIndex(x, y, z));
 }
 
-void Chunk::setBlock(int x, int y, int z, const Block& block) {
-    blocks[getIndex(x, y, z)] = block;
+void Chunk::setBlock(int x, int y, int z, const BlockID& block) {
+    data.set(getIndex(x, y, z), block);
 }
 
 ChunkState Chunk::getChunkState() const {
@@ -201,7 +201,9 @@ bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
         z >= 0 && z < CHUNK_SIZE_Z;
 }
 
-void Chunk::addFace(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const BlockFace face, const u8vec3& position) {
+void Chunk::addFace(
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const BlockFace face,
+    const u8vec3& position) {
     for (const auto& vertex : Block::blockFaceVertices[face]) {
         auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(face));
 
@@ -213,7 +215,8 @@ void Chunk::addFace(vector<Vertex>& vertices, vector<Vertex>& transparentVertice
     }
 }
 
-void Chunk::addBillboard(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position) {
+void Chunk::addBillboard(
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position) {
     for (const auto& vertex : Block::billboardVertices) {
         auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(BlockFace::FRONT));
 

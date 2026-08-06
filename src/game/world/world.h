@@ -17,17 +17,17 @@ public:
 
     bool chunkExists(int x, int z) const;
 
-    optional<Block> getBlock(int x, int y, int z) const;
+    optional<BlockID> getBlock(int x, int y, int z) const;
 
-    optional<Block> getBlock(const vec3& position) const;
+    optional<BlockID> getBlock(const vec3& position) const;
 
-    optional<Block> mineBlock(const vec3& position, const vec3& front);
+    optional<BlockID> mineBlock(const vec3& position, const vec3& front);
 
     bool placeBlock(const BlockType& type, const vec3& position, const vec3& front);
 
-    void setBlock(int x, int y, int z, Block block);
+    void setBlock(int x, int y, int z, BlockID block);
 
-    void setBlock(vec3 position, Block block);
+    void setBlock(vec3 position, BlockID block);
 
     void generateSpawnArea();
 

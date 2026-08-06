@@ -7,10 +7,8 @@
 #include "gl/vertexBuffer.h"
 #include "gl/vertexArray.h"
 #include "gl/elementBuffer.h"
-#include "../block/block.h"
-
-template <class T>
-using ChunkData = array<T, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>;
+#include "game/block/block.h"
+#include "game/block/palettedBlockData.h"
 
 class Chunk;
 typedef unordered_map<pair<int, int>, unique_ptr<Chunk>, IntPairHash> ChunkMap;
@@ -29,13 +27,13 @@ public:
 
     void buildMesh(const ChunkMap& chunkMap);
 
-    void write(vector<char>& data) const;
+    void write(vector<char>& byteData) const;
 
     void load(ifstream& in);
 
-    Block getBlock(int x, int y, int z) const;
+    BlockID getBlock(int x, int y, int z) const;
 
-    void setBlock(int x, int y, int z, const Block& block);
+    void setBlock(int x, int y, int z, const BlockID& block);
 
     ChunkState getChunkState() const;
 
@@ -48,7 +46,7 @@ public:
 private:
     ChunkState state = ChunkState::EMPTY;
     ivec3 chunkPosition;
-    ChunkData<Block> blocks;
+    PalettedBlockData data;
 
     VertexArray vao;
     VertexBuffer vbo;
@@ -58,9 +56,12 @@ private:
     VertexBuffer transparentVBO;
     int transparentVertexCount = 0;
 
-    static void addFace(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, BlockFace face, const u8vec3& position);
+    static void addFace(
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, BlockFace face,
+        const u8vec3& position);
 
-    static void addBillboard(vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position);
+    static void addBillboard(
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);
 

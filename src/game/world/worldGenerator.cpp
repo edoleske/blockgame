@@ -18,10 +18,10 @@ WorldGenerator::WorldGenerator(unsigned int seed) : seed(seed), generator(seed) 
 void WorldGenerator::generate(Chunk* chunk) {
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         auto fx = static_cast<float>(chunk->getChunkPosition().x) + (static_cast<float>(bx + 1) / CHUNK_SIZE_X) +
-                  1.0f / (2 * CHUNK_SIZE_X);
+            1.0f / (2 * CHUNK_SIZE_X);
         for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
             auto fz = static_cast<float>(chunk->getChunkPosition().z) + (static_cast<float>(bz + 1) / CHUNK_SIZE_Z) +
-                      1.0f / (2 * CHUNK_SIZE_X);
+                1.0f / (2 * CHUNK_SIZE_X);
             auto height = getHeight(fx, fz);
 
             // Populate column
@@ -33,7 +33,7 @@ void WorldGenerator::generate(Chunk* chunk) {
                     blockID = flowerMap(fx, fz) ? flowerID : blockID;
                 }
 
-                chunk->setBlock(bx, by, bz, Block(blockID));
+                chunk->setBlock(bx, by, bz, blockID);
             }
         }
     }
