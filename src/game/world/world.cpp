@@ -3,6 +3,7 @@
 #include "log.h"
 #include "game/settings.h"
 #include "game/block/blockDictionary.h"
+#include "utils/regionFile.h"
 
 World::World() {
     LOG_DEBUG("Initializing world");
@@ -410,118 +411,37 @@ bool World::loadLevel() {
     if (!ifs.is_open()) {
         return false;
     }
-    ifs.read((char*)&seed, sizeof(seed));
+    ifs.read(reinterpret_cast<char*>(&seed), sizeof(seed));
     ifs.close();
 
     return true;
 }
 
-string World::getRegionFilePath(int x, int z) const {
-    return "saves/" + name + "/" +
-        "region." + std::to_string(x >> 5) + "." + std::to_string(z >> 5) + ".data";
-}
-
-void World::createRegionFile(const string& filepath) {
-    if (fs::exists(filepath)) {
-        return;
+void World::updateRegionFile(int x, int z) {
+    auto path = RegionFile::getRegionFilePath(name, x, z);
+    auto pFile = regionFiles.get(path);
+    if (pFile == nullptr) {
+        auto f = make_shared<RegionFile>(name, x, z);
+        regionFiles.add(path, f);
+        pFile = regionFiles.get(path);
     }
 
-    const int sectorCount = 32 * 32 * 48 + 2;
-    vector<char> fileData(sectorCount * REGION_SECTOR_SIZE);
-
-    // Populate header
-    int offset = 2;
-    const uint8_t chunkSectors = 48;
-    const char chunkSectorsByte = static_cast<char>(chunkSectors);
-
-    for (int i = 0; i < REGION_SECTOR_SIZE; i += 4) {
-        fileData[i] = static_cast<char>(offset);
-        fileData[i + 1] = static_cast<char>(offset >> 8);
-        fileData[i + 2] = static_cast<char>(offset >> 16);
-        fileData[i + 3] = chunkSectorsByte;
-
-        offset += chunkSectors;
+    if (auto chunk = getChunk(x, z)) {
+        chunk->write(pFile);
     }
-
-    ofstream of;
-    of.open(filepath, std::ios::binary);
-    if (of.is_open()) {
-        of.write(fileData.data(), fileData.size());
-    }
-    of.close();
-}
-
-void World::updateRegionFile(int x, int z) const {
-    auto chunk = getChunk(x, z);
-    if (chunk == nullptr) {
-        return;
-    }
-
-    auto byteCount = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 3;
-    byteCount += 4096 - (byteCount % 4096);
-    vector<char> chunkData(byteCount);
-
-    const int headerOffset = 4 * ((x & 31) + (z & 31) * 32);
-    chunk->write(chunkData);
-
-    // Create shell for region file if it doesn't exist
-    auto regionPath = getRegionFilePath(x, z);
-    if (!fs::exists(regionPath)) {
-        createRegionFile(regionPath);
-    }
-
-    fstream fs;
-    fs.open(regionPath, std::ios::binary | std::ios::in | std::ios::out);
-    if (!fs.is_open()) {
-        std::cerr << "Unable to open file " << getRegionFilePath(x, z) << std::endl;
-        return;
-    }
-
-    fs.seekg(headerOffset);
-    uint8_t byte0 = fs.get();
-    uint8_t byte1 = fs.get();
-    uint8_t byte2 = fs.get();
-    int chunkOffset = byte0 | (byte1 << 8) | (byte2 << 16);
-
-    fs.seekg(headerOffset + REGION_SECTOR_SIZE);
-    unsigned epochTime = std::time(nullptr);
-    fs.write(reinterpret_cast<const char*>(&epochTime), sizeof(epochTime));
-
-    fs.seekg(chunkOffset * REGION_SECTOR_SIZE);
-    fs.write(chunkData.data(), chunkData.size());
-    fs.close();
 }
 
 void World::loadFromRegionFile(int x, int z) {
-    auto chunk = getChunk(x, z);
-    if (chunk == nullptr) {
-        return;
+    auto path = RegionFile::getRegionFilePath(name, x, z);
+    auto pFile = regionFiles.get(path);
+
+    if (pFile == nullptr) {
+        auto f = make_shared<RegionFile>(name, x, z);
+        regionFiles.add(path, f);
+        pFile = regionFiles.get(path);
     }
 
-    const int headerOffset = 4 * ((x & 31) + (z & 31) * 32);
-
-    ifstream ifs;
-    ifs.open(getRegionFilePath(x, z), std::ios::binary);
-    if (!ifs.is_open()) {
-        std::cerr << "Unable to open file " << getRegionFilePath(x, z) << std::endl;
-        return;
+    if (auto chunk = getChunk(x, z)) {
+        chunk->load(pFile);
     }
-
-    ifs.seekg(headerOffset);
-    uint8_t byte0 = ifs.get();
-    uint8_t byte1 = ifs.get();
-    uint8_t byte2 = ifs.get();
-    int chunkOffset = byte0 | (byte1 << 8) | (byte2 << 16);
-
-    // Check if chunk data is missing
-    ifs.seekg(headerOffset + REGION_SECTOR_SIZE);
-    unsigned epochTime;
-    ifs.read((char*)&epochTime, sizeof(epochTime));
-    if (epochTime == 0) {
-        return;
-    }
-
-    ifs.seekg(chunkOffset * REGION_SECTOR_SIZE);
-    chunk->load(ifs);
-    ifs.close();
 }

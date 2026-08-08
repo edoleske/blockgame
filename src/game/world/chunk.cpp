@@ -1,5 +1,6 @@
 #include "chunk.h"
 
+#include "log.h"
 #include "game/block/blockDictionary.h"
 
 Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z) {
@@ -149,34 +150,21 @@ void Chunk::renderTransparent() const {
     }
 }
 
-void Chunk::write(vector<char>& byteData) const {
-    for (int x = 0; x < CHUNK_SIZE_X; ++x) {
-        for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
-            for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
-                const auto block = data.get(getIndex(x, y, z));
-                auto index = (x * CHUNK_SIZE_Z * CHUNK_SIZE_Y + y * CHUNK_SIZE_Z + z) * 2;
-                std::memcpy(byteData.data() + index, &block, sizeof(block));
-            }
-        }
-    }
+void Chunk::write(RegionFile* regionFile) const {
+    regionFile->write(chunkPosition.x, chunkPosition.z, data);
 }
 
-void Chunk::load(ifstream& in) {
+void Chunk::load(RegionFile* regionFile) {
     if (state != ChunkState::EMPTY) {
+        LOG_WARN("Attempted to load chunk {} {} twice", chunkPosition.x, chunkPosition.z);
         return;
     }
 
-    for (int x = 0; x < CHUNK_SIZE_X; ++x) {
-        for (int y = 0; y < CHUNK_SIZE_Y; ++y) {
-            for (int z = 0; z < CHUNK_SIZE_Z; ++z) {
-                uint16_t id;
-                in.read(reinterpret_cast<char*>(&id), sizeof(id));
-                data.set(getIndex(x, y, z), id);
-            }
-        }
+    auto loaded = regionFile->load(chunkPosition.x, chunkPosition.z);
+    if (loaded.has_value()) {
+        data = loaded.value();
+        state = ChunkState::POPULATED;
     }
-
-    state = ChunkState::POPULATED;
 }
 
 BlockID Chunk::getBlock(int x, int y, int z) const {

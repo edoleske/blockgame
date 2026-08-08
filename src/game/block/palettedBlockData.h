@@ -8,11 +8,17 @@ class PalettedBlockData {
 public:
     PalettedBlockData();
 
+    PalettedBlockData(const vector<char>& data);
+
     void setPalette(const vector<BlockID>& newPalette);
 
     BlockID get(int blockIndex) const;
 
     void set(int blockIndex, BlockID newBlock);
+
+    void write(vector<char>& byteData) const;
+
+    unsigned long size() const;
 
 private:
     vector<BlockID> palette{0};

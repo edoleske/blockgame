@@ -1,6 +1,21 @@
 #include "palettedBlockData.h"
 
-PalettedBlockData::PalettedBlockData() {}
+PalettedBlockData::PalettedBlockData() = default;
+
+PalettedBlockData::PalettedBlockData(const vector<char>& data) {
+    uint32_t paletteSize, dataSize;
+    auto index = 0;
+
+    std::memcpy(&paletteSize, data.data() + index, sizeof(paletteSize));
+    index += sizeof(paletteSize);
+    std::memcpy(&dataSize, data.data() + index, sizeof(dataSize));
+    index += sizeof(dataSize);
+    std::memcpy(palette.data(), data.data() + index, paletteSize * sizeof(BlockID));
+    index += paletteSize * sizeof(BlockID);
+    std::memcpy(&dataSize, data.data() + index, dataSize * sizeof(uint64_t));
+
+    bitsPerEntry = calculateBitsPerEntry(palette.size());
+}
 
 void PalettedBlockData::setPalette(const vector<BlockID>& newPalette) {
     auto newBitsPerEntry = calculateBitsPerEntry(newPalette.size());
@@ -47,6 +62,29 @@ void PalettedBlockData::set(const int blockIndex, const BlockID newBlock) {
     auto word = data[blockIndex / blocksPerRow];
     auto offset = blockIndex % blocksPerRow * bitsPerEntry;
     data[blockIndex / blocksPerRow] = (word & ~(entryMask() << offset)) | ((value & entryMask()) << offset);
+}
+
+void PalettedBlockData::write(vector<char>& byteData) const {
+    auto paletteSize = static_cast<uint32_t>(palette.size());
+    auto dataSize = static_cast<uint32_t>(data.size());
+
+    // Resize input vector to allow appending data to end
+    auto size = byteData.size();
+    byteData.resize(size + sizeof(paletteSize) + sizeof(dataSize) +
+        paletteSize * sizeof(BlockID) + dataSize * sizeof(uint64_t));
+
+    auto index = byteData.data() + size;
+    std::memcpy(index, &paletteSize, sizeof(paletteSize));
+    index += sizeof(paletteSize);
+    std::memcpy(index , &dataSize, sizeof(dataSize));
+    index += sizeof(dataSize);
+    std::memcpy(index, palette.data(), paletteSize * sizeof(BlockID));
+    index += paletteSize * sizeof(BlockID);
+    std::memcpy(index, data.data(), dataSize * sizeof(uint64_t));
+}
+
+unsigned long PalettedBlockData::size() const {
+    return 2 * sizeof(uint32_t) + palette.size() * sizeof(BlockID) + data.size() * sizeof(uint64_t);
 }
 
 int PalettedBlockData::getLocalIndex(const vector<BlockID>& palette, const BlockID block) {

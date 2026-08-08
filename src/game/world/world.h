@@ -8,6 +8,8 @@
 #include "worldGenerator.h"
 #include "game/player/camera.h"
 #include "gl/textureArray.h"
+#include "utils/lruCache.h"
+#include "utils/regionFile.h"
 
 class World {
 public:
@@ -67,15 +69,13 @@ private:
     inline void rebuildChunk(int x, int z);
 
     // Region file management
+    LRUCache<string, RegionFile> regionFiles { 6 };
+
     void createLevel();
 
     bool loadLevel();
 
-    inline string getRegionFilePath(int x, int z) const;
-
-    static void createRegionFile(const string& filepath);
-
-    void updateRegionFile(int x, int z) const;
+    void updateRegionFile(int x, int z);
 
     void loadFromRegionFile(int x, int z);
 };

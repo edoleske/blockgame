@@ -138,6 +138,9 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/utils/debug.h
         src/game/block/palettedBlockData.cpp
         src/game/block/palettedBlockData.h
+        src/utils/regionFile.cpp
+        src/utils/regionFile.h
+        src/utils/lruCache.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include ${spdlog_SOURCE_DIR}/include)

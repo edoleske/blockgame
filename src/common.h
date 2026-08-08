@@ -9,6 +9,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <list>
 #include <string>
 #include <fstream>
 #include <random>
@@ -29,6 +30,7 @@ using std::shared_ptr;
 using std::make_shared;
 using std::map;
 using std::unordered_map;
+using std::list;
 using std::array;
 using std::vector;
 using std::set;
@@ -75,7 +77,6 @@ using glm::mat4;
 constexpr int CHUNK_SIZE_X = 16;
 constexpr int CHUNK_SIZE_Y = 254;
 constexpr int CHUNK_SIZE_Z = 16;
-constexpr int REGION_SECTOR_SIZE = 4096;
 
 using BlockID = int;
 constexpr int MAXIMUM_BLOCK_TYPES = 255;

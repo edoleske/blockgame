@@ -9,6 +9,7 @@
 #include "gl/elementBuffer.h"
 #include "game/block/block.h"
 #include "game/block/palettedBlockData.h"
+#include "utils/regionFile.h"
 
 class Chunk;
 typedef unordered_map<pair<int, int>, unique_ptr<Chunk>, IntPairHash> ChunkMap;
@@ -27,9 +28,9 @@ public:
 
     void buildMesh(const ChunkMap& chunkMap);
 
-    void write(vector<char>& byteData) const;
+    void write(RegionFile* regionFile) const;
 
-    void load(ifstream& in);
+    void load(RegionFile* regionFile);
 
     BlockID getBlock(int x, int y, int z) const;
 
