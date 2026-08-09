@@ -2,17 +2,20 @@
 
 PalettedBlockData::PalettedBlockData() = default;
 
-PalettedBlockData::PalettedBlockData(const vector<char>& data) {
+PalettedBlockData::PalettedBlockData(const vector<char>& buffer) {
     uint32_t paletteSize, dataSize;
     auto index = 0;
 
-    std::memcpy(&paletteSize, data.data() + index, sizeof(paletteSize));
+    std::memcpy(&paletteSize, buffer.data() + index, sizeof(paletteSize));
     index += sizeof(paletteSize);
-    std::memcpy(&dataSize, data.data() + index, sizeof(dataSize));
+    palette.resize(paletteSize);
+    std::memcpy(&dataSize, buffer.data() + index, sizeof(dataSize));
     index += sizeof(dataSize);
-    std::memcpy(palette.data(), data.data() + index, paletteSize * sizeof(BlockID));
+    data.resize(dataSize);
+
+    std::memcpy(palette.data(), buffer.data() + index, paletteSize * sizeof(BlockID));
     index += paletteSize * sizeof(BlockID);
-    std::memcpy(&dataSize, data.data() + index, dataSize * sizeof(uint64_t));
+    std::memcpy(data.data(), buffer.data() + index, dataSize * sizeof(uint64_t));
 
     bitsPerEntry = calculateBitsPerEntry(palette.size());
 }
@@ -70,10 +73,11 @@ void PalettedBlockData::write(vector<char>& byteData) const {
 
     // Resize input vector to allow appending data to end
     auto size = byteData.size();
-    byteData.resize(size + sizeof(paletteSize) + sizeof(dataSize) +
-        paletteSize * sizeof(BlockID) + dataSize * sizeof(uint64_t));
+    if (size < this->size()) {
+        byteData.resize(this->size());
+    }
 
-    auto index = byteData.data() + size;
+    auto index = byteData.data();
     std::memcpy(index, &paletteSize, sizeof(paletteSize));
     index += sizeof(paletteSize);
     std::memcpy(index , &dataSize, sizeof(dataSize));

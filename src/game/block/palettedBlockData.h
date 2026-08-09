@@ -8,7 +8,7 @@ class PalettedBlockData {
 public:
     PalettedBlockData();
 
-    PalettedBlockData(const vector<char>& data);
+    explicit PalettedBlockData(const vector<char>& buffer);
 
     void setPalette(const vector<BlockID>& newPalette);
 
