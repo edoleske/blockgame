@@ -2,8 +2,8 @@
 #define BLOCKGAME_UIRENDERER_H
 
 #include "font.h"
-#include "uiElement.h"
 #include "uiBatch.h"
+#include "uiElement.h"
 #include "gl/shader.h"
 #include "game/player/player.h"
 
@@ -16,6 +16,10 @@ public:
     void render() const;
 
     void updateWindowSize(int width, int height) const;
+
+    UITextureAtlas* getTextureAtlas() const;
+
+    UIBatch* getBatch() const;
 
 private:
     unique_ptr<Shader> shader;

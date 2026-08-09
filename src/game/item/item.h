@@ -12,6 +12,8 @@ public:
 
     virtual std::unique_ptr<Item> clone() const;
 
+    virtual int getTexture() const;
+
     virtual void onUse();
 
     string getName() const;

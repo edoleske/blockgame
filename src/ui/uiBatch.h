@@ -10,6 +10,15 @@
 struct UIVertex {
     vec2 position;
     vec2 uv;
+    float layer;
+};
+
+struct QuadConfig {
+    vec2 position = vec2(0.0f);
+    vec2 size = vec2(1.0f);
+    vec2 uvMin = vec2(0.0f);
+    vec2 uvMax = vec2(1.0f);
+    float layer = 0.0f;
 };
 
 
@@ -19,7 +28,7 @@ public:
 
     static constexpr size_t MAX_SPRITES = 100;
 
-    void insertQuad(vec2 position, vec2 size, vec2 uv0 = vec2(0.0f), vec2 uv1 = vec2(1.0f));
+    void insertQuad(const QuadConfig& config);
 
     void flush();
 private:

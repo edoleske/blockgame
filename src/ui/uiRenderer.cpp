@@ -14,33 +14,13 @@
 
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");
-    textureAtlas = make_unique<UITextureAtlas>("../resources/img/ui_texture.png");
-    font = make_shared<Font>("../resources/font/ponderosa.ttf");
+    textureAtlas = make_unique<UITextureAtlas>("../resources/img/ui_texture.png", GL_TEXTURE1);
+    shader->setInteger("uAtlas", 1);
+    font = make_shared<Font>("../resources/font/ponderosa.ttf", GL_TEXTURE2);
+    shader->setInteger("uFont", 2);
 
     elements.emplace_back(make_unique<Crosshair>());
-
-    std::array<UIElement*, Inventory::MAX_HOTBAR_SLOTS> toolbarItemSprites{};
-    for (int i = 0; i < Inventory::MAX_HOTBAR_SLOTS; i++) {
-        toolbarItemSprites[i] = new UIElement(UIElementConfig{
-            .id = "toolbarItemSprite" + std::to_string(i),
-            .textureName = UIT_NONE,
-            .size = vec2(20.0f),
-            .scale = 3.0f,
-            .origin = vec2(0.0f, 1.0f)
-        });
-    }
-
-    auto highlight = make_unique<UIElement>(UIElementConfig{
-        .id = "toolbarHighlight", .textureName = UIT_HIGHLIGHT, .position = vec2(0.0f), .size = vec2(20.0f),
-        .scale = 3.0f, .origin = vec2(0.0f, 1.0f)
-    });
-    elements.emplace_back(make_unique<Toolbar>(highlight.get(), toolbarItemSprites));
-
-    // Save toolbar's sub elements
-    elements.push_back(std::move(highlight));
-    for (const auto element : toolbarItemSprites) {
-        elements.push_back(unique_ptr<UIElement>(element));
-    }
+    elements.emplace_back(make_unique<Toolbar>(font));
 
     auto fpsCounter = make_unique<TextBox>("fpsCounter", font);
     fpsCounter->setPosition(1.0f, 1.0f);
@@ -96,24 +76,27 @@ void UIRenderer::render() const {
     glDisable(GL_CULL_FACE);
 
     shader->use();
-    shader->setInteger("isText", 0);
 
+    // Main UI render pass with UI texture atlas
     textureAtlas->getTexture()->bind();
-
+    shader->setInteger("uMode", 0);
     for (const auto& element : elements) {
-        if (element->renderPass != UI_MAIN) continue;
-        if (element->hidden || element->textureName == UIT_NONE) continue;
-        element->generateVertices(batch, textureAtlas);
+        element->onRender(*this, UI_MAIN);
     }
     batch->flush();
 
-    font->getTexture()->bind();
-    shader->setInteger("isText", 1);
-
+    // Block and item render pass that uses main texture array painted over UI
+    shader->setInteger("uMode", 1);
     for (const auto& element : elements) {
-        if (element->renderPass != UI_TEXT) continue;
-        if (element->hidden) continue;
-        element->generateVertices(batch, textureAtlas);
+        element->onRender(*this, UI_ITEM);
+    }
+    batch->flush();
+
+    // Text UI render pass that uses bitmap font
+    font->getTexture()->bind();
+    shader->setInteger("uMode", 2);
+    for (const auto& element : elements) {
+        element->onRender(*this, UI_TEXT);
     }
     batch->flush();
 
@@ -130,4 +113,12 @@ void UIRenderer::updateWindowSize(const int width, const int height) const {
     for (const auto& element : elements) {
         element->updateWindowSize(width, height);
     }
+}
+
+UITextureAtlas* UIRenderer::getTextureAtlas() const {
+    return textureAtlas.get();
+}
+
+UIBatch* UIRenderer::getBatch() const {
+    return batch.get();
 }

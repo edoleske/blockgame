@@ -11,6 +11,8 @@ public:
 
     std::unique_ptr<Item> clone() const override;
 
+    int getTexture() const override;
+
     void onUse() override;
 
     BlockType getBlockType() const;

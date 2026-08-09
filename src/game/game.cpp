@@ -64,6 +64,7 @@ void Game::loop() {
         world->renderWorld(player.getCamera(), textureArray);
 
         // Render UI
+        textureArray.bind();
         uiRenderer->render();
 
         glfwSwapBuffers(window);

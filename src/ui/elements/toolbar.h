@@ -2,13 +2,16 @@
 #define BLOCKGAME_TOOLBAR_H
 
 #include "common.h"
+#include "itemSprite.h"
 #include "game/player/inventory.h"
 #include "ui/uiElement.h"
 
 
 class Toolbar : public UIElement {
 public:
-    explicit Toolbar(UIElement* highlight, const std::array<UIElement*, Inventory::MAX_HOTBAR_SLOTS>& itemSprites);
+    explicit Toolbar(const shared_ptr<Font>& font);
+
+    void onRender(const UIRenderer& renderer, UIRenderPass pass) const override;
 
     void updateFromInventory(const Inventory& inventory);
 
@@ -19,8 +22,8 @@ public:
     void setHighlightPosition(int index);
 
 private:
-    std::array<UIElement*, Inventory::MAX_HOTBAR_SLOTS> itemSprites{};
-    UIElement* toolbarHighlight;
+    std::array<unique_ptr<ItemSprite>, Inventory::MAX_HOTBAR_SLOTS> itemSprites{};
+    unique_ptr<UIElement> highlight;
     int highlightPosition = 0;
 };
 

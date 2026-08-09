@@ -255,8 +255,6 @@ void World::renderWorld(const Camera& playerCamera, const TextureArray& textureA
     shader->setMatrix4("view", playerCamera.getView());
     shader->setMatrix4("projection", playerCamera.getProjection());
 
-    textureArray.bind();
-
     bool builtOne = false;
     auto px = static_cast<int>(playerPosition.x) >> 4;
     auto pz = static_cast<int>(playerPosition.z) >> 4;

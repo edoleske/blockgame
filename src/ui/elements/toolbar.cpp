@@ -1,11 +1,37 @@
 #include "toolbar.h"
 
-Toolbar::Toolbar(UIElement* highlight, const std::array<UIElement*, Inventory::MAX_HOTBAR_SLOTS>& itemSprites)
+Toolbar::Toolbar(const shared_ptr<Font>& font)
     : UIElement(UIElementConfig{
           .id = "toolbar", .textureName = UIT_TOOLBAR, .position = vec2(0.0f),
           .size = vec2(200.0f, 20.0f), .scale = 3.0f, .origin = vec2(0.5f, 1.0f), .hidden = false,
           .centerX = true
-      }), itemSprites(itemSprites), toolbarHighlight(highlight) {}
+      }) {
+    std::array<UIElement*, Inventory::MAX_HOTBAR_SLOTS> toolbarItemSprites{};
+    for (int i = 0; i < itemSprites.size(); i++) {
+        itemSprites[i] = make_unique<ItemSprite>(UIElementConfig{
+            .id = "toolbarItemSprite" + std::to_string(i),
+            .textureName = UIT_NONE,
+            .size = vec2(20.0f),
+            .scale = 3.0f,
+            .origin = vec2(0.0f, 1.0f),
+            .font = font
+        });
+    }
+
+    highlight = make_unique<UIElement>(UIElementConfig{
+        .id = "toolbarHighlight", .textureName = UIT_HIGHLIGHT, .position = vec2(0.0f), .size = vec2(20.0f),
+        .scale = 3.0f, .origin = vec2(0.0f, 1.0f)
+    });
+}
+
+void Toolbar::onRender(const UIRenderer& renderer, const UIRenderPass pass) const {
+    UIElement::onRender(renderer, pass);
+
+    for (const auto& sprite : itemSprites) {
+        sprite->onRender(renderer, pass);
+    }
+    highlight->onRender(renderer, pass);
+}
 
 void Toolbar::updateFromInventory(const Inventory& inventory) {
     if (const auto selected = inventory.getSelected();
@@ -15,9 +41,11 @@ void Toolbar::updateFromInventory(const Inventory& inventory) {
 
     for (int i = 0; i < itemSprites.size(); i++) {
         const auto stack = inventory.getItemStack(i);
-        if (stack == nullptr) continue;
+        const auto item = stack == nullptr ? nullptr : stack->item.get();
+        const auto amount = stack == nullptr ? 0 : stack->amount;
 
-        itemSprites[i]->textureName = stack->item->getName() != "0" ? UIT_PLACEHOLDER : UIT_NONE;
+        itemSprites[i]->setItem(item);
+        itemSprites[i]->amount = amount;
     }
 }
 
@@ -28,12 +56,12 @@ void Toolbar::updateWindowSize(const int width, const int height) {
     position.y = height;
 
     // Adjust highlight position
-    toolbarHighlight->position = vec2((width / 2) - (size.x * scale / 2), height);
+    highlight->position = vec2((width / 2) - (size.x * scale / 2), height);
 
     // Recalculate all toolbar item sprite positions
     for (int i = 0; i < itemSprites.size(); i++) {
-        const auto item = itemSprites[i];
-        item->position = vec2((width / 2) - (size.x * scale / 2) + (i * item->size.x * item->scale), height);
+        auto x = (width / 2) - (size.x * scale / 2) + (i * itemSprites[i]->size.x * itemSprites[i]->scale);
+        itemSprites[i]->updatePosition(vec2(x, height));
     }
 }
 
@@ -42,7 +70,7 @@ int Toolbar::getHighlightPosition() const {
 }
 
 void Toolbar::setHighlightPosition(const int index) {
-    toolbarHighlight->position.x -= highlightPosition * toolbarHighlight->size.x * scale;
+    highlight->position.x -= highlightPosition * highlight->size.x * scale;
     highlightPosition = index;
-    toolbarHighlight->position.x += highlightPosition * toolbarHighlight->size.x * scale;
+    highlight->position.x += highlightPosition * highlight->size.x * scale;
 }

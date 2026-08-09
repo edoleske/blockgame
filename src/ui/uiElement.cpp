@@ -1,14 +1,16 @@
 #include "uiElement.h"
 
 #include <utility>
-#include "uiBatch.h"
+
+#include "uiRenderer.h"
 
 UIElement::UIElement(string id) : UIElement(UIElementConfig(id = std::move(id))) {}
 
 UIElement::UIElement(UIElementConfig config) : textureName(config.textureName), position(config.position),
-                                               size(config.size), scale(config.scale), origin(config.origin),
-                                               centerX(config.centerX), centerY(config.centerY), hidden(config.hidden),
-                                               renderPass(config.renderPass), id(std::move(config.id)) {}
+                                                      size(config.size), scale(config.scale), origin(config.origin),
+                                                      centerX(config.centerX), centerY(config.centerY),
+                                                      hidden(config.hidden),
+                                                      renderPass(config.renderPass), id(std::move(config.id)) {}
 
 string UIElement::getID() const {
     return id;
@@ -26,12 +28,14 @@ void UIElement::setOrigin(const float x, const float y) {
     origin = vec2(x, y);
 }
 
-void UIElement::generateVertices(
-    const unique_ptr<UIBatch>& batch,
-    const unique_ptr<UITextureAtlas>& textureAtlas) const {
+void UIElement::onRender(const UIRenderer& renderer, const UIRenderPass pass) const {
+    if (pass != UI_MAIN || hidden || textureName == UIT_NONE) return;
+
     const auto topLeft = position - origin * (size * scale);
-    const auto uv = textureAtlas->getUV(textureName);
-    batch->insertQuad(topLeft, size * scale, vec2(uv.x, uv.y), vec2(uv.z, uv.w));
+    const auto uv = renderer.getTextureAtlas()->getUV(textureName);
+    renderer.getBatch()->insertQuad({
+        .position = topLeft, .size = size * scale, .uvMin = vec2(uv.x, uv.y), .uvMax = vec2(uv.z, uv.w)
+    });
 }
 
 void UIElement::updateWindowSize(const int width, const int height) {

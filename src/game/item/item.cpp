@@ -10,4 +10,8 @@ std::unique_ptr<Item> Item::clone() const {
     return std::make_unique<Item>(name);
 }
 
+int Item::getTexture() const {
+    return 0;
+}
+
 void Item::onUse() {}

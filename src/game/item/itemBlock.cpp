@@ -8,6 +8,10 @@ std::unique_ptr<Item> ItemBlock::clone() const {
     return make_unique<ItemBlock>(*this);
 }
 
+int ItemBlock::getTexture() const {
+    return getBlockType().faceTextures[0];
+}
+
 void ItemBlock::onUse() {
     // Try to place block
 }

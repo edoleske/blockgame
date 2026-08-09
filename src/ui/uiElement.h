@@ -2,13 +2,14 @@
 #define BLOCKGAME_UIELEMENT_H
 
 #include "common.h"
+#include "font.h"
 #include "uiTextureAtlas.h"
 
-class UIBatch;
-
 enum UIRenderPass {
-    UI_MAIN, UI_TEXT
+    UI_MAIN, UI_ITEM, UI_TEXT
 };
+
+class UIRenderer;
 
 
 struct UIElementConfig {
@@ -32,6 +33,8 @@ struct UIElementConfig {
     bool centerY = false;
     // Controls which render pass elements is rendered in
     UIRenderPass renderPass = UI_MAIN;
+    // Shared font among all elements
+    shared_ptr<Font> font = nullptr;
 };
 
 
@@ -52,8 +55,7 @@ public:
     void setOrigin(float x, float y);
 
     // Adds all quad vertices to UI batch buffer
-    virtual void generateVertices(
-        const unique_ptr<UIBatch>& batch, const unique_ptr<UITextureAtlas>& textureAtlas) const;
+    virtual void onRender(const UIRenderer& renderer, UIRenderPass pass) const;
 
     // Updates UI element when screen size changes
     virtual void updateWindowSize(int width, int height);

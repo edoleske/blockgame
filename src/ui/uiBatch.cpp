@@ -3,19 +3,26 @@
 UIBatch::UIBatch() {
     quadVAO.bind();
     quadVBO.bind();
-    quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
-    quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, reinterpret_cast<void*>(2 * sizeof(float)));
-    quadVBO.bufferData(sizeof(float) * 16 * MAX_SPRITES, vertexBuffer.data(), GL_DYNAMIC_DRAW);
+    quadVBO.vertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(UIVertex), nullptr);
+    quadVBO.vertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(UIVertex),
+                                reinterpret_cast<void*>(offsetof(UIVertex, uv)));
+    quadVBO.vertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(UIVertex),
+                                reinterpret_cast<void*>(offsetof(UIVertex, layer)));
+    quadVBO.bufferData(sizeof(UIVertex) * 4 * MAX_SPRITES, vertexBuffer.data(), GL_DYNAMIC_DRAW);
     precalculateElementBuffer(quadEBO);
     VertexArray::unbind();
 }
 
-void UIBatch::insertQuad(const vec2 position, const vec2 size, const vec2 uv0, const vec2 uv1) {
+void UIBatch::insertQuad(const QuadConfig& config) {
     if (count >= MAX_SPRITES) flush();
 
     for (auto i = 0; i < std::size(QUAD_VERTICES); i++) {
         auto vertex = QUAD_VERTICES[i];
-        vertexBuffer[i + 4 * count] = {vertex.position * size + position, vertex.uv * (uv1 - uv0) + uv0};
+        vertexBuffer[i + 4 * count] = {
+            .position = vertex.position * config.size + config.position,
+            .uv = vertex.uv * (config.uvMax - config.uvMin) + config.uvMin,
+            .layer = config.layer
+        };
     }
     count++;
 }
