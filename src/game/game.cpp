@@ -159,7 +159,7 @@ void Game::initializeTextureArray(const unordered_map<string, uint16_t>& texture
     textureArray.allocate(16, static_cast<int>(textureLayerMap.size()));
     TextureArray::setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
     TextureArray::setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-    TextureArray::setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    TextureArray::setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
     TextureArray::setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     vector<string> filenames(textureLayerMap.size());
@@ -170,4 +170,6 @@ void Game::initializeTextureArray(const unordered_map<string, uint16_t>& texture
     for (const auto& filename : filenames) {
         textureArray.addLayer("../resources/textures/" + filename);
     }
+
+    TextureArray::generateMipmap();
 }

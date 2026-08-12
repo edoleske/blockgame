@@ -22,6 +22,9 @@ public:
     // Sets texture parameter (must bind to texture before use)
     static void setParameter(GLenum param, GLint value);
 
+    // Generates mipmaps for all layers
+    static void generateMipmap();
+
     int getLayerCount() const;
 
     int getWidth() const;

@@ -7,7 +7,7 @@ TextureArray::TextureArray(const GLenum slot) : slot(slot) {}
 
 void TextureArray::allocate(const int resolution, const int layers) {
     bind();
-    glTexStorage3D(target, 1, GL_RGBA8, resolution, resolution, layers);
+    glTexStorage3D(target, 5, GL_RGBA8, resolution, resolution, layers);
 
     width = resolution;
     height = resolution;
@@ -57,6 +57,10 @@ void TextureArray::unbind() const {
 
 void TextureArray::setParameter(GLenum param, GLint value) {
     Texture::setParameter(target, param, value);
+}
+
+void TextureArray::generateMipmap() {
+    glGenerateMipmap(target);
 }
 
 int TextureArray::getLayerCount() const {
