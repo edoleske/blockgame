@@ -53,7 +53,6 @@ void RegionFile::write(const int x, const int z, const PalettedBlockData& blockD
     uint32_t offset = getOffset(x, z);
     uint32_t sectorOffset = offset >> 8;
     auto sectorsNeeded = (blockData.size() + SECTOR_SIZE - 1) / SECTOR_SIZE;
-    LOG_DEBUG("Writing {} sector(s) to {}", sectorsNeeded, path.string());
 
     if (sectorOffset == 0 || (offset & 0xFF) != sectorsNeeded) {
         sectorOffset = sectorCount;
@@ -111,7 +110,6 @@ optional<PalettedBlockData> RegionFile::load(const int x, const int z) {
         return std::nullopt;
     }
 
-    LOG_DEBUG("Loading {} sectors to chunk {} {}", offset & 0xFF, x, z);
     vector<char> buffer((offset & 0xFF) * SECTOR_SIZE);
     file.seekg((offset >> 8) * SECTOR_SIZE);
     file.read(buffer.data(), (offset & 0xFF) * SECTOR_SIZE);
@@ -133,5 +131,5 @@ void RegionFile::updateSectorCount() {
 
 string RegionFile::getRegionFilePath(const string& worldName, const int x, const int z) {
     auto filename = std::format("region.{}.{}.data", x >> 5, z >> 5);
-    return fs::current_path() / "saves" / worldName / filename;
+    return (fs::current_path() / "saves" / worldName / filename).string();
 }

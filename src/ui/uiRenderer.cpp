@@ -4,13 +4,9 @@
 
 #include "font.h"
 #include "elements/crosshair.h"
-#include "elements/textBox.h"
+#include "elements/debugOverlay.h"
 #include "elements/toolbar.h"
 #include "game/input.h"
-
-#if defined(DEBUG)
-#include "utils/debug.h"
-#endif
 
 UIRenderer::UIRenderer() {
     shader = make_unique<Shader>("../resources/shaders/ui.vert", "../resources/shaders/ui.frag");
@@ -21,16 +17,7 @@ UIRenderer::UIRenderer() {
 
     elements.emplace_back(make_unique<Crosshair>());
     elements.emplace_back(make_unique<Toolbar>(font));
-
-    auto fpsCounter = make_unique<TextBox>("fpsCounter", font);
-    fpsCounter->setPosition(1.0f, 1.0f);
-    elements.push_back(std::move(fpsCounter));
-
-#if defined(DEBUG)
-    auto memCounter = make_unique<TextBox>("memCounter", font);
-    memCounter->setPosition(1.0f, 16.0f);
-    elements.push_back(std::move(memCounter));
-#endif
+    elements.emplace_back(make_unique<DebugOverlay>(font));
 
     batch = make_unique<UIBatch>();
 }
@@ -40,28 +27,16 @@ void UIRenderer::update(const float deltaTime, const Player& player) const {
     const auto toggleDebug = input->isPressed(Input::Event::TOGGLE_DEBUG);
 
     for (auto& element : elements) {
-        if (element->getID() == "fpsCounter") {
+        if (element->getID() == "debugOverlay") {
             if (toggleDebug) element->hidden = !element->hidden;
             if (element->hidden) continue;
 
-            if (const auto counter = dynamic_cast<TextBox*>(element.get()); counter != nullptr) {
-                counter->text = std::format("FPS: {:.0f}", 1.0f / deltaTime);
+            if (const auto overlay = dynamic_cast<DebugOverlay*>(element.get()); overlay != nullptr) {
+                overlay->update(deltaTime);
             }
 
             continue;
         }
-#if defined(DEBUG)
-        if (element->getID() == "memCounter") {
-            if (toggleDebug) element->hidden = !element->hidden;
-            if (element->hidden) continue;
-
-            if (const auto counter = dynamic_cast<TextBox*>(element.get()); counter != nullptr) {
-                counter->text = std::format("Mem: {}", formatBytes(GetAllocatedMemory()));
-            }
-
-            continue;
-        }
-#endif
         if (element->getID() == "toolbar") {
             const auto toolbar = dynamic_cast<Toolbar*>(element.get());
             if (toolbar == nullptr) continue;

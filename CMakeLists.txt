@@ -143,6 +143,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/utils/lruCache.h
         src/ui/elements/itemSprite.cpp
         src/ui/elements/itemSprite.h
+        src/ui/elements/debugOverlay.cpp
+        src/ui/elements/debugOverlay.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include ${spdlog_SOURCE_DIR}/include)
