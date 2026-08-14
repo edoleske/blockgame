@@ -12,6 +12,8 @@ public:
     bool isInitialized() const;
     virtual void loop() = 0;
     virtual void updateWindowSize(int w, int h);
+
+    float getDeltaTime() const;
 protected:
     int width, height, initialized;
     float aspectRatio, time = 0.0f, deltaTime = 0.0f;

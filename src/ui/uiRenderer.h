@@ -5,13 +5,15 @@
 #include "uiBatch.h"
 #include "uiElement.h"
 #include "gl/shader.h"
-#include "game/player/player.h"
+
+class Game;
+
 
 class UIRenderer {
 public:
     UIRenderer();
 
-    void update(float deltaTime, const World* world, const Player& player) const;
+    void update(const Game& game) const;
 
     void render() const;
 

@@ -67,6 +67,10 @@ void Window::updateWindowSize(int w, int h) {
     aspectRatio = (static_cast<float>(width) / static_cast<float>(height));
 }
 
+float Window::getDeltaTime() const {
+    return deltaTime;
+}
+
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 

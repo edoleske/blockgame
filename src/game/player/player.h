@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "inventory.h"
 
+class Game;
 class World;
 
 class Player {
@@ -20,11 +21,11 @@ public:
 
     bool isFlying() const;
 
-    void update(float deltaTime, const unique_ptr<World>& world);
+    void update(const Game& game);
 
     void updateAspectRatio(float aspectRatio);
 
-    void onMove(const vec3& velocity, const unique_ptr<World>& world);
+    void onMove(const vec3& velocity, const World* world);
 
     void onRotate(float xOffset, float yOffset);
 
@@ -42,7 +43,7 @@ private:
     const float ROTATE_SENSITIVITY = 0.1f;
     const float GRAVITY = -2.0f;
 
-    bool testCollision(const vec3& position, const vec3& oldPosition, const unique_ptr<World>& world) const;
+    bool testCollision(const vec3& position, const vec3& oldPosition, const World* world) const;
 };
 
 

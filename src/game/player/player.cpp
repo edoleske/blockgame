@@ -1,5 +1,6 @@
 #include "player.h"
 
+#include "game/game.h"
 #include "game/input.h"
 #include "game/block/blockDictionary.h"
 #include "game/item/itemBlock.h"
@@ -23,7 +24,7 @@ bool Player::isFlying() const {
     return flying;
 }
 
-void Player::update(float deltaTime, const unique_ptr<World>& world) {
+void Player::update(const Game& game) {
     const auto input = Input::getInstance();
 
     auto fly = input->getState(Input::Event::TOGGLE_FLY);
@@ -56,14 +57,14 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
         movementVector.y -= 1.0f;
     }
 
-    jumpVelocity.y = std::max(GRAVITY * deltaTime + jumpVelocity.y, GRAVITY * 5);
+    jumpVelocity.y = std::max(GRAVITY * game.getDeltaTime() + jumpVelocity.y, GRAVITY * 5);
     auto currentVelocity = flying ? vec3(0.0f) : jumpVelocity;
 
     if (glm::length(movementVector) != 0) {
         currentVelocity += glm::normalize(movementVector);
     }
 
-    onMove(currentVelocity * deltaTime, world);
+    onMove(currentVelocity * game.getDeltaTime(), game.getWorld());
 
     auto cursorOffset = input->getCursorOffset();
     onRotate(cursorOffset.x, cursorOffset.y);
@@ -88,7 +89,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
     }
 
     if (input->isPressed(Input::Event::MINE_BLOCK)) {
-        const auto block = world->mineBlock(camera.getPosition(), camera.getFront());
+        const auto block = game.getWorld()->mineBlock(camera.getPosition(), camera.getFront());
         if (block.has_value()) {
             auto stack = ItemStack(make_unique<ItemBlock>(block.value()), 1);
             inventory.insert(stack);
@@ -101,7 +102,7 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
             const auto itemBlock = dynamic_cast<ItemBlock*>(held->item.get());
             if (itemBlock != nullptr) {
                 const Block block = itemBlock->getBlock();
-                if (world->placeBlock(block, camera.getPosition(), camera.getFront())) {
+                if (game.getWorld()->placeBlock(block, camera.getPosition(), camera.getFront())) {
                     inventory.pop(inventory.getSelected());
                 }
             }
@@ -113,7 +114,7 @@ void Player::updateAspectRatio(const float aspectRatio) {
     camera.setAspectRatio(aspectRatio);
 }
 
-void Player::onMove(const vec3& velocity, const unique_ptr<World>& world) {
+void Player::onMove(const vec3& velocity, const World* world) {
     vec3 adjustedVelocity = velocity * SPEED;
     vec3 position = camera.getPosition();
 
@@ -142,11 +143,11 @@ void Player::onMove(const vec3& velocity, const unique_ptr<World>& world) {
     camera.move(position + movement);
 }
 
-void Player::onRotate(float xOffset, float yOffset) {
+void Player::onRotate(const float xOffset, const float yOffset) {
     camera.rotate(xOffset * ROTATE_SENSITIVITY, yOffset * ROTATE_SENSITIVITY);
 }
 
-bool Player::testCollision(const vec3& position, const vec3& oldPosition, const unique_ptr<World>& world) const {
+bool Player::testCollision(const vec3& position, const vec3& oldPosition, const World* world) const {
     for (int x = floor(position.x); x < floor(position.x + size.x) + 1; x++) {
         for (int y = floor(position.y); y < floor(position.y + size.y) + 1; y++) {
             for (int z = floor(position.z); z < floor(position.z + size.z) + 1; z++) {

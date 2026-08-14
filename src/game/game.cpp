@@ -77,9 +77,17 @@ void Game::updateWindowSize(int w, int h) {
     uiRenderer->updateWindowSize(w, h);
 }
 
+World* Game::getWorld() const {
+    return world.get();
+}
+
+const Player& Game::getPlayer() const {
+    return player;
+}
+
 void Game::update() {
-    player.update(deltaTime, world);
-    uiRenderer->update(deltaTime, world.get(), player);
+    player.update(*this);
+    uiRenderer->update(*this);
 }
 
 // Load textures and connect block types to those textures

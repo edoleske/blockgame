@@ -6,6 +6,7 @@
 #include "elements/crosshair.h"
 #include "elements/debugOverlay.h"
 #include "elements/toolbar.h"
+#include "game/game.h"
 #include "game/input.h"
 
 UIRenderer::UIRenderer() {
@@ -22,7 +23,7 @@ UIRenderer::UIRenderer() {
     batch = make_unique<UIBatch>();
 }
 
-void UIRenderer::update(const float deltaTime, const World* world, const Player& player) const {
+void UIRenderer::update(const Game& game) const {
     const auto input = Input::getInstance();
     const auto toggleDebug = input->isPressed(Input::Event::TOGGLE_DEBUG);
 
@@ -32,7 +33,7 @@ void UIRenderer::update(const float deltaTime, const World* world, const Player&
             if (element->hidden) continue;
 
             if (const auto overlay = dynamic_cast<DebugOverlay*>(element.get()); overlay != nullptr) {
-                overlay->update(deltaTime, world);
+                overlay->update(game.getDeltaTime(), game.getWorld());
             }
 
             continue;
@@ -41,7 +42,7 @@ void UIRenderer::update(const float deltaTime, const World* world, const Player&
             const auto toolbar = dynamic_cast<Toolbar*>(element.get());
             if (toolbar == nullptr) continue;
 
-            toolbar->updateFromInventory(player.getInventory());
+            toolbar->updateFromInventory(game.getPlayer().getInventory());
         }
     }
 }

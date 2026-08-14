@@ -22,6 +22,10 @@ public:
 
     void updateWindowSize(int w, int h) override;
 
+    World* getWorld() const;
+
+    const Player& getPlayer() const;
+
 private:
     Input input;
     Settings settings;
