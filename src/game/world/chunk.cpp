@@ -183,6 +183,10 @@ const ivec3& Chunk::getChunkPosition() const {
     return chunkPosition;
 }
 
+int Chunk::getVertexCount() const {
+    return vertexCount + transparentVertexCount;
+}
+
 bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
     return x >= 0 && x < CHUNK_SIZE_X &&
         y >= 0 && y < CHUNK_SIZE_Y &&

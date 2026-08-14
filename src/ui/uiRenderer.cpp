@@ -22,7 +22,7 @@ UIRenderer::UIRenderer() {
     batch = make_unique<UIBatch>();
 }
 
-void UIRenderer::update(const float deltaTime, const Player& player) const {
+void UIRenderer::update(const float deltaTime, const World* world, const Player& player) const {
     const auto input = Input::getInstance();
     const auto toggleDebug = input->isPressed(Input::Event::TOGGLE_DEBUG);
 
@@ -32,7 +32,7 @@ void UIRenderer::update(const float deltaTime, const Player& player) const {
             if (element->hidden) continue;
 
             if (const auto overlay = dynamic_cast<DebugOverlay*>(element.get()); overlay != nullptr) {
-                overlay->update(deltaTime);
+                overlay->update(deltaTime, world);
             }
 
             continue;

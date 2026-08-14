@@ -11,7 +11,7 @@ class UIRenderer {
 public:
     UIRenderer();
 
-    void update(float deltaTime, const Player& player) const;
+    void update(float deltaTime, const World* world, const Player& player) const;
 
     void render() const;
 

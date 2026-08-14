@@ -42,6 +42,8 @@ public:
 
     const ivec3& getChunkPosition() const;
 
+    int getVertexCount() const;
+
     static bool isValidBlockPosition(int x, int y, int z);
 
 private:

@@ -1,5 +1,7 @@
 #include "world.h"
 
+#include <ranges>
+
 #include "log.h"
 #include "game/settings.h"
 #include "game/block/blockDictionary.h"
@@ -309,6 +311,15 @@ void World::renderWorld(const Camera& playerCamera, const TextureArray& textureA
         shader->setInteger("uIsHighlight", 0);
         shader->setVector3f("uHighlightOffset", vec3(0));
     }
+}
+
+int World::getVertexCount() const {
+    // 40 vertices for highlight
+    int total = 40;
+    for (const auto& chunk : chunkMap | std::views::values) {
+        total += chunk->getVertexCount();
+    }
+    return total;
 }
 
 void World::initializeEBO() const {

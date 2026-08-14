@@ -41,6 +41,8 @@ public:
 
     void renderWorld(const Camera& playerCamera, const TextureArray& textureArray);
 
+    int getVertexCount() const;
+
 private:
     string name = "NewWorld";
     ChunkMap chunkMap;
