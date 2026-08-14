@@ -86,13 +86,12 @@ void Game::update() {
 // Returns generated texture array for binding and destructing
 void Game::initializeBlocks() {
     LOG_DEBUG("Initializing block definitions");
-
-    std::hash<BlockType> blockHasher;
     unordered_map<string, uint16_t> textureLayerMap = {};
 
     const auto table = toml::parse_file("../resources/data.toml");
-
     if (auto blocks = table["block"].as_array()) {
+        auto index = 1;
+
         for (auto& node : *blocks) {
             if (auto blockTable = node.as_table()) {
                 BlockType type;
@@ -116,7 +115,7 @@ void Game::initializeBlocks() {
                 }
 
                 type.name = name.value();
-                type.id = blockHasher(type);
+                type.id = index;
                 type.opaque = opaque;
                 type.isBillboard = billboard;
 
@@ -141,6 +140,7 @@ void Game::initializeBlocks() {
                 }
 
                 blockDictionary.insert(type);
+                index++;
             }
         }
     }

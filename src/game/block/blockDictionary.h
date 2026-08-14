@@ -19,11 +19,14 @@ public:
 
     BlockID lookup(const string& name) const;
 
+    BlockID fromHash(uint16_t hash) const;
+
     size_t count() const;
 
 private:
-    unordered_map<BlockID, BlockType> blockTypes{};
+    vector<BlockType> blockTypes{};
     unordered_map<string, BlockID> blockDictionary{};
+    unordered_map<uint16_t, BlockID> hashDictionary{};
 
     static BlockDictionary* _instance;
 };

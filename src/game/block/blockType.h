@@ -28,10 +28,11 @@ public:
     // Billboard textures expect these to be identical and use first index
     std::array<uint16_t, 6> faceTextures = {0, 0, 0, 0, 0, 0};
 
-    static constexpr BlockID fnv1a(const string& s) {
-        BlockID hash = -2128831035;
+    static constexpr uint16_t fnv1a(const string& s) {
+        if (s.empty()) return 0;
+        int hash = -2128831035;
         for (auto c : s) {
-            hash ^= static_cast<BlockID>(c);
+            hash ^= static_cast<int>(c);
             hash *= 16777619;
         }
         return (hash >> 16) ^ (hash & 0xFFFF);
@@ -40,7 +41,7 @@ public:
 
 template <>
 struct std::hash<BlockType> {
-    BlockID operator()(const BlockType& type) const noexcept {
+    uint16_t operator()(const BlockType& type) const noexcept {
         return BlockType::fnv1a(type.name);
     }
 };

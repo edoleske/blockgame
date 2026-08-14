@@ -1,22 +1,33 @@
 #include "palettedBlockData.h"
 
+#include "blockDictionary.h"
+#include "blockType.h"
+
 PalettedBlockData::PalettedBlockData() = default;
 
 PalettedBlockData::PalettedBlockData(const vector<char>& buffer) {
+    vector<uint16_t> hashes;
     uint32_t paletteSize, dataSize;
     auto index = 0;
 
     std::memcpy(&paletteSize, buffer.data() + index, sizeof(paletteSize));
     index += sizeof(paletteSize);
+    hashes.resize(paletteSize);
     palette.resize(paletteSize);
     std::memcpy(&dataSize, buffer.data() + index, sizeof(dataSize));
     index += sizeof(dataSize);
     data.resize(dataSize);
 
-    std::memcpy(palette.data(), buffer.data() + index, paletteSize * sizeof(BlockID));
-    index += paletteSize * sizeof(BlockID);
-    std::memcpy(data.data(), buffer.data() + index, dataSize * sizeof(uint64_t));
+    std::memcpy(hashes.data(), buffer.data() + index, paletteSize * sizeof(uint16_t));
+    index += paletteSize * sizeof(uint16_t);
 
+    // Parse palette using block dictionary
+    auto dict = BlockDictionary::getInstance();
+    for (auto i = 0; i < hashes.size(); ++i) {
+        palette[i] = dict->fromHash(hashes[i]);
+    }
+
+    std::memcpy(data.data(), buffer.data() + index, dataSize * sizeof(uint64_t));
     bitsPerEntry = calculateBitsPerEntry(palette.size());
 }
 
@@ -77,18 +88,25 @@ void PalettedBlockData::write(vector<char>& byteData) const {
         byteData.resize(this->size());
     }
 
+    // Transform palette from ids to hashes
+    vector<uint16_t> hashes(paletteSize);
+    auto dict = BlockDictionary::getInstance();
+    for (int i = 0; i < paletteSize; ++i) {
+        hashes[i] = std::hash<BlockType>()(dict->get(palette[i]));
+    }
+
     auto index = byteData.data();
     std::memcpy(index, &paletteSize, sizeof(paletteSize));
     index += sizeof(paletteSize);
     std::memcpy(index , &dataSize, sizeof(dataSize));
     index += sizeof(dataSize);
-    std::memcpy(index, palette.data(), paletteSize * sizeof(BlockID));
-    index += paletteSize * sizeof(BlockID);
+    std::memcpy(index, hashes.data(), paletteSize * sizeof(uint16_t));
+    index += paletteSize * sizeof(uint16_t);
     std::memcpy(index, data.data(), dataSize * sizeof(uint64_t));
 }
 
 unsigned long PalettedBlockData::size() const {
-    return 2 * sizeof(uint32_t) + palette.size() * sizeof(BlockID) + data.size() * sizeof(uint64_t);
+    return 2 * sizeof(uint32_t) + palette.size() * sizeof(uint16_t) + data.size() * sizeof(uint64_t);
 }
 
 int PalettedBlockData::getLocalIndex(const vector<BlockID>& palette, const BlockID block) {
