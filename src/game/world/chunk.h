@@ -11,6 +11,8 @@
 #include "game/block/palettedBlockData.h"
 #include "utils/regionFile.h"
 
+class World;
+
 class Chunk;
 typedef unordered_map<pair<int, int>, unique_ptr<Chunk>, IntPairHash> ChunkMap;
 
@@ -26,7 +28,7 @@ public:
 
     void renderTransparent() const;
 
-    void buildMesh(const ChunkMap& chunkMap);
+    void buildMesh(const World& world);
 
     void write(RegionFile* regionFile) const;
 
@@ -67,6 +69,8 @@ private:
         vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);
+
+    static inline int getIndex(int x, int y, int z, int ySize, int zSize);
 
     static inline bool isVisibleFace(const Block& a, const Block& b);
 };

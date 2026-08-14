@@ -118,7 +118,7 @@ void World::setBlock(int x, int y, int z, const BlockID block) {
         chunk->setBlock(rx, y, rz, block);
 
         // Rebuild chunk mesh and neighbors if necessary
-        chunk->buildMesh(chunkMap);
+        chunk->buildMesh(*this);
 
         if (rx == 0) {
             rebuildChunk(cx - 1, cz);
@@ -158,7 +158,7 @@ void World::generateSpawnArea() {
     for (int x = -spawnSize; x <= spawnSize; ++x) {
         for (int z = -spawnSize; z <= spawnSize; ++z) {
             auto chunk = chunkMap.at(make_pair(x, z)).get();
-            chunk->buildMesh(chunkMap);
+            chunk->buildMesh(*this);
         }
     }
 }
@@ -273,7 +273,7 @@ void World::renderWorld(const Camera& playerCamera, const TextureArray& textureA
                 shader->setInteger("chunkZ", z);
 
                 if (!builtOne && chunk->second->getChunkState() != ChunkState::BUILT && chunkNeighborsPopulated(x, z)) {
-                    chunk->second->buildMesh(chunkMap);
+                    chunk->second->buildMesh(*this);
                     builtOne = true;
                 }
 
@@ -396,7 +396,7 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
 inline void World::rebuildChunk(int x, int z) {
     auto chunk = getChunk(x, z);
     if (chunk != nullptr) {
-        chunk->buildMesh(chunkMap);
+        chunk->buildMesh(*this);
     }
 }
 

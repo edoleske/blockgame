@@ -1,6 +1,7 @@
 #include "chunk.h"
 
 #include "log.h"
+#include "game/world/world.h"
 #include "game/block/blockDictionary.h"
 
 Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : chunkPosition(x, 0, z) {
@@ -24,33 +25,29 @@ Chunk::Chunk(const int x, const int z, const shared_ptr<ElementBuffer>& ebo) : c
     VertexArray::unbind();
 }
 
-void Chunk::buildMesh(const ChunkMap& chunkMap) {
-    // No mesh can be built if chunk hasn't been populated
-    if (state == ChunkState::EMPTY) {
-        return;
-    }
+void Chunk::buildMesh(const World& world) {
+    // Timing chunk builds for development
+    auto start = std::chrono::steady_clock::now();
 
-    // Get adjacent chunks
-    auto leftChunkIt = chunkMap.find(make_pair(chunkPosition.x - 1, chunkPosition.z));
-    auto rightChunkIt = chunkMap.find(make_pair(chunkPosition.x + 1, chunkPosition.z));
-    auto backChunkIt = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z - 1));
-    auto frontChunkIt = chunkMap.find(make_pair(chunkPosition.x, chunkPosition.z + 1));
+    // Check if adjacent chunks are populated
+    array<Chunk*, 9> neighbors = {};
+    for (int x = 0; x < 3; ++x) {
+        for (int z = 0; z < 3; ++z) {
+            auto index = x * 3 + z;
+            auto cx = x - 1 + chunkPosition.x;
+            auto cz = z - 1 + chunkPosition.z;
 
-    // Check for error case where neighboring chunks aren't defined
-    if (leftChunkIt == chunkMap.end() || rightChunkIt == chunkMap.end() ||
-        backChunkIt == chunkMap.end() || frontChunkIt == chunkMap.end()) {
-        return;
-    }
+            if (x == 1 && z == 1) {
+                neighbors[index] = this;
+                continue;
+            }
 
-    auto leftChunk = leftChunkIt->second.get();
-    auto rightChunk = rightChunkIt->second.get();
-    auto backChunk = backChunkIt->second.get();
-    auto frontChunk = frontChunkIt->second.get();
-
-    // Assert that all neighboring chunks are populated
-    if (leftChunk->getChunkState() == ChunkState::EMPTY || rightChunk->getChunkState() == ChunkState::EMPTY ||
-        backChunk->getChunkState() == ChunkState::EMPTY || frontChunk->getChunkState() == ChunkState::EMPTY) {
-        return;
+            auto chunk = world.getChunk(cx, cz);
+            if ( chunk == nullptr || chunk->getChunkState() == ChunkState::EMPTY) {
+                return;
+            }
+            neighbors[index] = chunk;
+        }
     }
 
     state = ChunkState::POPULATED;
@@ -58,10 +55,33 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     vector<Vertex> transparentVertices(transparentVertexCount);
     auto dictionary = BlockDictionary::getInstance();
 
+    // Fetch all blocks into buffer for cheaper lookups
+    array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)> buildCache{};
+    for (int bx = 0; bx < CHUNK_SIZE_X + 2; ++bx) {
+        for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
+            for (int bz = 0; bz < CHUNK_SIZE_Z + 2; ++bz) {
+                auto cx = bx > CHUNK_SIZE_X ? 2 : bx > 0 ? 1 : 0;
+                auto cz = bz > CHUNK_SIZE_Z ? 2 : bz > 0 ? 1 : 0;
+                auto index = getIndex(bx, by + 1, bz, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2);
+
+                if (cx == 1 && cz == 1) {
+                    buildCache[index] = getBlock(bx - 1, by, bz - 1);
+                    continue;
+                }
+
+                auto chunk = neighbors[cx * 3 + cz];
+                auto localX = cx == 1 ? bx - 1 : cx == 0 ? CHUNK_SIZE_X - 1 : 0;
+                auto localZ = cz == 1 ? bz - 1 : cz == 0 ? CHUNK_SIZE_Z - 1 : 0;
+                buildCache[index] = chunk->getBlock(localX, by, localZ);
+            }
+        }
+    }
+
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto block = data.get(getIndex(bx, by, bz));
+                auto pos = ivec3(bx + 1, by + 1, bz + 1);
+                auto block = buildCache[getIndex(pos.x, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
 
                 // Generate no geometry for air blocks
                 if (block == 0) {
@@ -80,37 +100,29 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
                 // Getting adjacent blocks
                 // We could calculate world position, then use methods in world to get these much cleaner
                 // The issue is the bounds check makes it significantly slower to build a mesh
-                auto leftBlock = bx > 0
-                                     ? getBlock(bx - 1, by, bz)
-                                     : leftChunk->getBlock(CHUNK_SIZE_X - 1, by, bz);
-                auto rightBlock = bx < CHUNK_SIZE_X - 1
-                                      ? getBlock(bx + 1, by, bz)
-                                      : rightChunk->getBlock(0, by, bz);
-                auto backBlock = bz > 0
-                                     ? getBlock(bx, by, bz - 1)
-                                     : backChunk->getBlock(bx, by, CHUNK_SIZE_Z - 1);
-                auto frontBlock = bz < CHUNK_SIZE_Z - 1
-                                      ? getBlock(bx, by, bz + 1)
-                                      : frontChunk->getBlock(bx, by, 0);
-                auto bottomBlock = by > 0 ? getBlock(bx, by - 1, bz) : 0;
-                auto topBlock = by < CHUNK_SIZE_Y - 1 ? getBlock(bx, by + 1, bz) : 0;
+                auto left = buildCache[getIndex(pos.x - 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto right = buildCache[getIndex(pos.x + 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto back = buildCache[getIndex(pos.x, pos.y, pos.z - 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto front = buildCache[getIndex(pos.x, pos.y, pos.z + 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto bottom = buildCache[getIndex(pos.x, pos.y - 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto top = buildCache[getIndex(pos.x, pos.y + 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
 
-                if (leftBlock != block && isVisibleFace(type, dictionary->get(leftBlock))) {
+                if (left != block && isVisibleFace(type, dictionary->get(left))) {
                     addFace(vertices, transparentVertices, type, BlockFace::LEFT, localPosition);
                 }
-                if (rightBlock != block && isVisibleFace(type, dictionary->get(rightBlock))) {
+                if (right != block && isVisibleFace(type, dictionary->get(right))) {
                     addFace(vertices, transparentVertices, type, BlockFace::RIGHT, localPosition);
                 }
-                if (backBlock != block && isVisibleFace(type, dictionary->get(backBlock))) {
+                if (back != block && isVisibleFace(type, dictionary->get(back))) {
                     addFace(vertices, transparentVertices, type, BlockFace::BACK, localPosition);
                 }
-                if (frontBlock != block && isVisibleFace(type, dictionary->get(frontBlock))) {
+                if (front != block && isVisibleFace(type, dictionary->get(front))) {
                     addFace(vertices, transparentVertices, type, BlockFace::FRONT, localPosition);
                 }
-                if (bottomBlock != block && isVisibleFace(type, dictionary->get(bottomBlock))) {
+                if (bottom != block && isVisibleFace(type, dictionary->get(bottom))) {
                     addFace(vertices, transparentVertices, type, BlockFace::BOTTOM, localPosition);
                 }
-                if (topBlock != block && isVisibleFace(type, dictionary->get(topBlock))) {
+                if (top != block && isVisibleFace(type, dictionary->get(top))) {
                     addFace(vertices, transparentVertices, type, BlockFace::TOP, localPosition);
                 }
             }
@@ -131,6 +143,10 @@ void Chunk::buildMesh(const ChunkMap& chunkMap) {
     }
 
     state = ChunkState::BUILT;
+
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    LOG_DEBUG("Chunk build took {} microseconds", elapsed.count());
 }
 
 void Chunk::render() const {
@@ -224,8 +240,12 @@ void Chunk::setChunkState(const ChunkState newState) {
     state = newState;
 }
 
-int Chunk::getIndex(int x, int y, int z) {
-    return x * CHUNK_SIZE_Y * CHUNK_SIZE_Z + y * CHUNK_SIZE_Z + z;
+int Chunk::getIndex(const int x, const int y, const int z) {
+    return getIndex(x, y, z, CHUNK_SIZE_Y, CHUNK_SIZE_Z);
+}
+
+int Chunk::getIndex(const int x, const int y, const int z, const int ySize, const int zSize) {
+    return x * ySize * zSize + y * zSize + z;
 }
 
 bool Chunk::isVisibleFace(const Block& a, const Block& b) {
