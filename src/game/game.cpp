@@ -94,11 +94,11 @@ void Game::initializeBlocks() {
 
         for (auto& node : *blocks) {
             if (auto blockTable = node.as_table()) {
-                BlockType type;
+                Block block;
 
                 auto name = (*blockTable)["name"].value<string>();
                 auto opaque = (*blockTable)["opaque"].value_or(true);
-                auto billboard = (*blockTable)["billboard"].value_or(type.isBillboard);
+                auto billboard = (*blockTable)["billboard"].value_or(block.isBillboard);
                 auto all = (*blockTable)["all"].value<string>();
                 auto side = (*blockTable)["side"].value<string>();
                 auto top = (*blockTable)["top"].value<string>();
@@ -114,32 +114,32 @@ void Game::initializeBlocks() {
                     }
                 }
 
-                type.name = name.value();
-                type.id = index;
-                type.opaque = opaque;
-                type.isBillboard = billboard;
+                block.name = name.value();
+                block.id = index;
+                block.opaque = opaque;
+                block.isBillboard = billboard;
 
                 if (all.has_value()) {
-                    for (auto& faceTexture : type.faceTextures) {
+                    for (auto& faceTexture : block.faceTextures) {
                         faceTexture = textureLayerMap[all.value()];
                     }
                 }
 
                 if (side.has_value()) {
-                    for (int i = 2; i < type.faceTextures.size(); i++) {
-                        type.faceTextures[i] = textureLayerMap[side.value()];
+                    for (int i = 2; i < block.faceTextures.size(); i++) {
+                        block.faceTextures[i] = textureLayerMap[side.value()];
                     }
                 }
 
                 if (top.has_value()) {
-                    type.faceTextures[0] = textureLayerMap[top.value()];
+                    block.faceTextures[0] = textureLayerMap[top.value()];
                 }
 
                 if (bottom.has_value()) {
-                    type.faceTextures[1] = textureLayerMap[bottom.value()];
+                    block.faceTextures[1] = textureLayerMap[bottom.value()];
                 }
 
-                blockDictionary.insert(type);
+                blockDictionary.insert(block);
                 index++;
             }
         }

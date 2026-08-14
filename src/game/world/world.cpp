@@ -21,8 +21,10 @@ World::World() {
     highlightVAO.bind();
     highlightVBO.bind();
     highlightVBO.vertexAttribIPointer(0, 3, GL_UNSIGNED_BYTE, sizeof(Vertex), nullptr);
-    highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-    highlightVBO.vertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(Vertex, layer));
+    highlightVBO.vertexAttribIPointer(1, 2, GL_UNSIGNED_SHORT, sizeof(Vertex),
+                                      reinterpret_cast<void*>(offsetof(Vertex, uv)));
+    highlightVBO.vertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, sizeof(Vertex),
+                                      reinterpret_cast<void*>(offsetof(Vertex, layer)));
 
     highlightVertices = vector<Vertex>();
     highlightVertices.reserve(40);
@@ -93,12 +95,12 @@ optional<BlockID> World::mineBlock(const vec3& position, const vec3& front) {
     return nullopt;
 }
 
-bool World::placeBlock(const BlockType& type, const vec3& position, const vec3& front) {
+bool World::placeBlock(const Block& block, const vec3& position, const vec3& front) {
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         auto frontBlock = getBlock(hit.value());
         if (frontBlock.has_value() && !BlockDictionary::getInstance()->get(frontBlock.value()).isCollidable()) {
-            setBlock(hit.value(), type.id);
+            setBlock(hit.value(), block.id);
             return true;
         }
     }

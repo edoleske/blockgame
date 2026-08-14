@@ -15,7 +15,7 @@ public:
 
     void onUse() override;
 
-    BlockType getBlockType() const;
+    Block getBlock() const;
 
 private:
     BlockID block;

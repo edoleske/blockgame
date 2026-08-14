@@ -190,12 +190,12 @@ bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
 }
 
 void Chunk::addFace(
-    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const BlockFace face,
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const BlockFace face,
     const u8vec3& position) {
     for (const auto& vertex : Block::blockFaceVertices[face]) {
-        auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(face));
+        auto v = Vertex(vertex.position + position, vertex.uv, block.getLayer(face));
 
-        if (type.opaque) {
+        if (block.opaque) {
             vertices.push_back(v);
         } else {
             transparentVertices.push_back(v);
@@ -204,11 +204,11 @@ void Chunk::addFace(
 }
 
 void Chunk::addBillboard(
-    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position) {
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const u8vec3& position) {
     for (const auto& vertex : Block::billboardVertices) {
-        auto v = Vertex(vertex.position + position, vertex.uv, type.getLayer(BlockFace::FRONT));
+        auto v = Vertex(vertex.position + position, vertex.uv, block.getLayer(BlockFace::FRONT));
 
-        if (type.opaque) {
+        if (block.opaque) {
             vertices.push_back(v);
         } else {
             transparentVertices.push_back(v);
@@ -224,6 +224,6 @@ int Chunk::getIndex(int x, int y, int z) {
     return x * CHUNK_SIZE_Y * CHUNK_SIZE_Z + y * CHUNK_SIZE_Z + z;
 }
 
-bool Chunk::isVisibleFace(const BlockType& a, const BlockType& b) {
+bool Chunk::isVisibleFace(const Block& a, const Block& b) {
     return a.opaque != b.opaque || (!a.opaque && !b.opaque && a.id != b.id);
 }

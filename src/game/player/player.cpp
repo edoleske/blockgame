@@ -100,10 +100,8 @@ void Player::update(float deltaTime, const unique_ptr<World>& world) {
         if (held->item->getName() != "0" && held->amount > 0) {
             const auto itemBlock = dynamic_cast<ItemBlock*>(held->item.get());
             if (itemBlock != nullptr) {
-                const BlockType blockType = itemBlock->getBlockType();
-                auto result = world->placeBlock(blockType, camera.getPosition(), camera.getFront());
-
-                if (result) {
+                const Block block = itemBlock->getBlock();
+                if (world->placeBlock(block, camera.getPosition(), camera.getFront())) {
                     inventory.pop(inventory.getSelected());
                 }
             }

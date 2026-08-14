@@ -9,13 +9,13 @@ std::unique_ptr<Item> ItemBlock::clone() const {
 }
 
 int ItemBlock::getTexture() const {
-    return getBlockType().faceTextures[0];
+    return getBlock().faceTextures[0];
 }
 
 void ItemBlock::onUse() {
     // Try to place block
 }
 
-BlockType ItemBlock::getBlockType() const {
+Block ItemBlock::getBlock() const {
     return BlockDictionary::getInstance()->get(block);
 }

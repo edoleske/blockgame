@@ -2,7 +2,7 @@
 #define BLOCKGAME_BLOCKDICTIONARY_H
 
 #include "common.h"
-#include "blockType.h"
+#include "block.h"
 
 
 class BlockDictionary {
@@ -13,9 +13,9 @@ public:
 
     static BlockDictionary* getInstance();
 
-    void insert(const BlockType& type);
+    void insert(const Block& b);
 
-    BlockType get(BlockID id);
+    Block get(BlockID id);
 
     BlockID lookup(const string& name) const;
 
@@ -24,7 +24,7 @@ public:
     size_t count() const;
 
 private:
-    vector<BlockType> blockTypes{};
+    vector<Block> blocks{};
     unordered_map<string, BlockID> blockDictionary{};
     unordered_map<uint16_t, BlockID> hashDictionary{};
 

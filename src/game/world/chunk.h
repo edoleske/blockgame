@@ -58,15 +58,15 @@ private:
     int transparentVertexCount = 0;
 
     static void addFace(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, BlockFace face,
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, BlockFace face,
         const u8vec3& position);
 
     static void addBillboard(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const BlockType& type, const u8vec3& position);
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const u8vec3& position);
 
     static inline int getIndex(int x, int y, int z);
 
-    static inline bool isVisibleFace(const BlockType& a, const BlockType& b);
+    static inline bool isVisibleFace(const Block& a, const Block& b);
 };
 
 

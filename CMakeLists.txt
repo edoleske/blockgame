@@ -126,8 +126,6 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/game/item/itemStack.h
         src/game/item/itemBlock.cpp
         src/game/item/itemBlock.h
-        src/game/block/blockType.cpp
-        src/game/block/blockType.h
         src/gl/textureArray.cpp
         src/gl/textureArray.h
         src/game/block/blockDictionary.cpp

@@ -6,7 +6,7 @@ BlockDictionary* BlockDictionary::_instance = nullptr;
 
 BlockDictionary::BlockDictionary() {
     _instance = this;
-    blockTypes.resize(MAX_BLOCK_TYPES);
+    blocks.resize(MAX_BLOCK_TYPES);
     hashDictionary[0] = 0;
 }
 
@@ -20,16 +20,16 @@ BlockDictionary* BlockDictionary::getInstance() {
     return _instance;
 }
 
-void BlockDictionary::insert(const BlockType& type) {
-    blockTypes[type.id] = type;
-    blockDictionary[type.name] = type.id;
+void BlockDictionary::insert(const Block& b) {
+    blocks[b.id] = b;
+    blockDictionary[b.name] = b.id;
 
-    std::hash<BlockType> blockHasher;
-    hashDictionary[blockHasher(type)] = type.id;
+    std::hash<Block> blockHasher;
+    hashDictionary[blockHasher(b)] = b.id;
 }
 
-BlockType BlockDictionary::get(const BlockID id) {
-    return blockTypes[id];
+Block BlockDictionary::get(const BlockID id) {
+    return blocks[id];
 }
 
 BlockID BlockDictionary::lookup(const string& name) const {

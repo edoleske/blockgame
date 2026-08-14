@@ -4,13 +4,18 @@
 
 Block::Block(const BlockID id) : id(id) {}
 
-BlockID Block::getID() const {
-    return id;
+uint16_t Block::getLayer(BlockFace face) const {
+    return faceTextures[static_cast<int>(face)];
 }
 
-BlockType Block::getType() const {
-    return BlockDictionary::getInstance()->get(getID());
+bool Block::operator==(const Block& other) const {
+    return id == other.id;
 }
+
+bool Block::isCollidable() const {
+    return opaque || isBillboard;
+}
+
 
 unordered_map<BlockFace, vector<Vertex>> Block::blockFaceVertices = {
     {
