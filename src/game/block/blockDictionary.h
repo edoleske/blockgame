@@ -15,7 +15,7 @@ public:
 
     void insert(const Block& b);
 
-    Block get(BlockID id);
+    const Block* get(BlockID id) const;
 
     BlockID lookup(const string& name) const;
 

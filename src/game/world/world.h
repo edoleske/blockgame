@@ -25,7 +25,7 @@ public:
 
     optional<BlockID> mineBlock(const vec3& position, const vec3& front);
 
-    bool placeBlock(const Block& block, const vec3& position, const vec3& front);
+    bool placeBlock(const Block* block, const vec3& position, const vec3& front);
 
     void setBlock(int x, int y, int z, BlockID block);
 
@@ -68,7 +68,7 @@ private:
 
     optional<vec3> raycast(vec3 position, const vec3& front, float distance, bool place = false) const;
 
-    inline void rebuildChunk(int x, int z);
+    inline void rebuildChunk(int x, int z) const;
 
     // Region file management
     LRUCache<string, RegionFile> regionFiles { 6 };

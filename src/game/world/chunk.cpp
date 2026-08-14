@@ -51,8 +51,10 @@ void Chunk::buildMesh(const World& world) {
     }
 
     state = ChunkState::POPULATED;
-    vector<Vertex> vertices(vertexCount);
-    vector<Vertex> transparentVertices(transparentVertexCount);
+    vector<Vertex> vertices;
+    vertices.reserve(vertexCount);
+    vector<Vertex> transparentVertices;
+    transparentVertices.reserve(transparentVertexCount);
     auto dictionary = BlockDictionary::getInstance();
 
     // Fetch all blocks into buffer for cheaper lookups
@@ -81,25 +83,23 @@ void Chunk::buildMesh(const World& world) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
                 auto pos = ivec3(bx + 1, by + 1, bz + 1);
-                auto block = buildCache[getIndex(pos.x, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto id = buildCache[getIndex(pos.x, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
 
                 // Generate no geometry for air blocks
-                if (block == 0) {
+                if (id == 0) {
                     continue;
                 }
 
-                auto type = dictionary->get(block);
+                auto block = dictionary->get(id);
                 auto localPosition = u8vec3(bx, by, bz);
 
                 // Check if transparent block is a billboard
-                if (type.isBillboard) {
-                    addBillboard(vertices, transparentVertices, type, localPosition);
+                if (block->isBillboard) {
+                    addBillboard(vertices, transparentVertices, block, localPosition);
                     continue;
                 }
 
                 // Getting adjacent blocks
-                // We could calculate world position, then use methods in world to get these much cleaner
-                // The issue is the bounds check makes it significantly slower to build a mesh
                 auto left = buildCache[getIndex(pos.x - 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
                 auto right = buildCache[getIndex(pos.x + 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
                 auto back = buildCache[getIndex(pos.x, pos.y, pos.z - 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
@@ -107,29 +107,31 @@ void Chunk::buildMesh(const World& world) {
                 auto bottom = buildCache[getIndex(pos.x, pos.y - 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
                 auto top = buildCache[getIndex(pos.x, pos.y + 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
 
-                if (left != block && isVisibleFace(type, dictionary->get(left))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::LEFT, localPosition);
+                if (left != id && isVisibleFace(block, dictionary->get(left))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::LEFT, localPosition);
                 }
-                if (right != block && isVisibleFace(type, dictionary->get(right))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::RIGHT, localPosition);
+                if (right != id && isVisibleFace(block, dictionary->get(right))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::RIGHT, localPosition);
                 }
-                if (back != block && isVisibleFace(type, dictionary->get(back))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::BACK, localPosition);
+                if (back != id && isVisibleFace(block, dictionary->get(back))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::BACK, localPosition);
                 }
-                if (front != block && isVisibleFace(type, dictionary->get(front))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::FRONT, localPosition);
+                if (front != id && isVisibleFace(block, dictionary->get(front))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::FRONT, localPosition);
                 }
-                if (bottom != block && isVisibleFace(type, dictionary->get(bottom))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::BOTTOM, localPosition);
+                if (bottom != id && isVisibleFace(block, dictionary->get(bottom))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::BOTTOM, localPosition);
                 }
-                if (top != block && isVisibleFace(type, dictionary->get(top))) {
-                    addFace(vertices, transparentVertices, type, BlockFace::TOP, localPosition);
+                if (top != id && isVisibleFace(block, dictionary->get(top))) {
+                    addFace(vertices, transparentVertices, block, BlockFace::TOP, localPosition);
                 }
             }
         }
     }
 
+    vertices.shrink_to_fit();
     vertexCount = static_cast<int>(vertices.size());
+    transparentVertices.shrink_to_fit();
     transparentVertexCount = static_cast<int>(transparentVertices.size());
 
     // Copy vertices to VBO
@@ -210,12 +212,12 @@ bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
 }
 
 void Chunk::addFace(
-    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const BlockFace face,
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, const BlockFace face,
     const u8vec3& position) {
     for (const auto& vertex : Block::blockFaceVertices[face]) {
-        auto v = Vertex(vertex.position + position, vertex.uv, block.getLayer(face));
+        auto v = Vertex(vertex.position + position, vertex.uv, block->getLayer(face));
 
-        if (block.opaque) {
+        if (block->opaque) {
             vertices.push_back(v);
         } else {
             transparentVertices.push_back(v);
@@ -224,11 +226,11 @@ void Chunk::addFace(
 }
 
 void Chunk::addBillboard(
-    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block& block, const u8vec3& position) {
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, const u8vec3& position) {
     for (const auto& vertex : Block::billboardVertices) {
-        auto v = Vertex(vertex.position + position, vertex.uv, block.getLayer(BlockFace::FRONT));
+        auto v = Vertex(vertex.position + position, vertex.uv, block->getLayer(BlockFace::FRONT));
 
-        if (block.opaque) {
+        if (block->opaque) {
             vertices.push_back(v);
         } else {
             transparentVertices.push_back(v);
@@ -248,6 +250,6 @@ int Chunk::getIndex(const int x, const int y, const int z, const int ySize, cons
     return x * ySize * zSize + y * zSize + z;
 }
 
-bool Chunk::isVisibleFace(const Block& a, const Block& b) {
-    return a.opaque != b.opaque || (!a.opaque && !b.opaque && a.id != b.id);
+bool Chunk::isVisibleFace(const Block* a, const Block* b) {
+    return a->opaque != b->opaque || (!a->opaque && !b->opaque && a->id != b->id);
 }

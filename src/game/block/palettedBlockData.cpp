@@ -92,7 +92,7 @@ void PalettedBlockData::write(vector<char>& byteData) const {
     vector<uint16_t> hashes(paletteSize);
     auto dict = BlockDictionary::getInstance();
     for (int i = 0; i < paletteSize; ++i) {
-        hashes[i] = std::hash<Block>()(dict->get(palette[i]));
+        hashes[i] = std::hash<Block>()(*dict->get(palette[i]));
     }
 
     auto index = byteData.data();

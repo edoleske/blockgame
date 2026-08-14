@@ -97,12 +97,12 @@ optional<BlockID> World::mineBlock(const vec3& position, const vec3& front) {
     return nullopt;
 }
 
-bool World::placeBlock(const Block& block, const vec3& position, const vec3& front) {
+bool World::placeBlock(const Block* block, const vec3& position, const vec3& front) {
     auto hit = raycast(position, front, 6.0f, true);
     if (hit.has_value()) {
         auto frontBlock = getBlock(hit.value());
-        if (frontBlock.has_value() && !BlockDictionary::getInstance()->get(frontBlock.value()).isCollidable()) {
-            setBlock(hit.value(), block.id);
+        if (frontBlock.has_value() && !BlockDictionary::getInstance()->get(frontBlock.value())->isCollidable()) {
+            setBlock(hit.value(), block->id);
             return true;
         }
     }
@@ -380,7 +380,7 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
             std::floor(position.y),
             std::floor(position.z)
         );
-        if (block.has_value() && BlockDictionary::getInstance()->get(block.value()).isCollidable()) {
+        if (block.has_value() && BlockDictionary::getInstance()->get(block.value())->isCollidable()) {
             // If placing a block, we retract position to the last block
             if (place) {
                 position -= delta;
@@ -393,7 +393,7 @@ optional<vec3> World::raycast(vec3 position, const vec3& front, float distance, 
     return nullopt;
 }
 
-inline void World::rebuildChunk(int x, int z) {
+inline void World::rebuildChunk(const int x, const int z) const {
     auto chunk = getChunk(x, z);
     if (chunk != nullptr) {
         chunk->buildMesh(*this);

@@ -101,7 +101,7 @@ void Player::update(const Game& game) {
         if (held->item->getName() != "0" && held->amount > 0) {
             const auto itemBlock = dynamic_cast<ItemBlock*>(held->item.get());
             if (itemBlock != nullptr) {
-                const Block block = itemBlock->getBlock();
+                const Block* block = itemBlock->getBlock();
                 if (game.getWorld()->placeBlock(block, camera.getPosition(), camera.getFront())) {
                     inventory.pop(inventory.getSelected());
                 }
@@ -152,7 +152,7 @@ bool Player::testCollision(const vec3& position, const vec3& oldPosition, const 
         for (int y = floor(position.y); y < floor(position.y + size.y) + 1; y++) {
             for (int z = floor(position.z); z < floor(position.z + size.z) + 1; z++) {
                 auto block = world->getBlock(x, y, z);
-                if (block.has_value() && BlockDictionary::getInstance()->get(block.value()).opaque) {
+                if (block.has_value() && BlockDictionary::getInstance()->get(block.value())->opaque) {
                     // Ignore blocks already in bounding box (prevents player from getting stuck)
                     if (oldPosition.x < x + 1 && oldPosition.x + size.x > x &&
                         oldPosition.y < y + 1 && oldPosition.y + size.y > y &&

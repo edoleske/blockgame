@@ -28,8 +28,8 @@ void BlockDictionary::insert(const Block& b) {
     hashDictionary[blockHasher(b)] = b.id;
 }
 
-Block BlockDictionary::get(const BlockID id) {
-    return blocks[id];
+const Block* BlockDictionary::get(const BlockID id) const {
+    return &blocks[id];
 }
 
 BlockID BlockDictionary::lookup(const string& name) const {
