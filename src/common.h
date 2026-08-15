@@ -75,7 +75,7 @@ using glm::mat4;
 
 // Global constants
 constexpr int CHUNK_SIZE_X = 16;
-constexpr int CHUNK_SIZE_Y = 254;
+constexpr int CHUNK_SIZE_Y = 256;
 constexpr int CHUNK_SIZE_Z = 16;
 
 using BlockID = int;

@@ -65,6 +65,10 @@ private:
         vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, BlockFace face,
         const u8vec3& position);
 
+    static void addFace(
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, BlockFace face,
+        const u8vec3& origin, const u8vec3& end);
+
     static void addBillboard(
         vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, const u8vec3& position);
 

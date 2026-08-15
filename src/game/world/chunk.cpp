@@ -43,7 +43,7 @@ void Chunk::buildMesh(const World& world) {
             }
 
             auto chunk = world.getChunk(cx, cz);
-            if ( chunk == nullptr || chunk->getChunkState() == ChunkState::EMPTY) {
+            if (chunk == nullptr || chunk->getChunkState() == ChunkState::EMPTY) {
                 return;
             }
             neighbors[index] = chunk;
@@ -79,6 +79,106 @@ void Chunk::buildMesh(const World& world) {
         }
     }
 
+    // Calculate visible faces for each block
+    array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z> faceCache{};
+    for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
+        for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
+            for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+                auto pos = ivec3(bx + 1, by + 1, bz + 1);
+                auto id = buildCache[getIndex(pos.x, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+
+                // Generate no geometry for air blocks
+                if (id == 0) {
+                    continue;
+                }
+
+                auto block = dictionary->get(id);
+                if (block->isBillboard) {
+                    addBillboard(vertices, transparentVertices, block, u8vec3(bx, by, bz));
+                    continue;
+                }
+
+                // Getting adjacent blocks
+                uint8_t byte = 0;
+                auto left = buildCache[getIndex(pos.x - 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto right = buildCache[getIndex(pos.x + 1, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto back = buildCache[getIndex(pos.x, pos.y, pos.z - 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto front = buildCache[getIndex(pos.x, pos.y, pos.z + 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto bottom = buildCache[getIndex(pos.x, pos.y - 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                auto top = buildCache[getIndex(pos.x, pos.y + 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+
+                if (left != id && isVisibleFace(block, dictionary->get(left))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::LEFT);
+                }
+                if (right != id && isVisibleFace(block, dictionary->get(right))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::RIGHT);
+                }
+                if (back != id && isVisibleFace(block, dictionary->get(back))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::BACK);
+                }
+                if (front != id && isVisibleFace(block, dictionary->get(front))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::FRONT);
+                }
+                if (bottom != id && isVisibleFace(block, dictionary->get(bottom))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::BOTTOM);
+                }
+                if (top != id && isVisibleFace(block, dictionary->get(top))) {
+                    byte |= 1 << static_cast<uint8_t>(BlockFace::TOP);
+                }
+
+                faceCache[getIndex(bx, by, bz)] = byte;
+            }
+        }
+    }
+
+    // XZ Plane
+    for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
+        array<bool, CHUNK_SIZE_X * CHUNK_SIZE_Z> visited{};
+
+        for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
+            for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+                auto faces = faceCache[getIndex(bx, by, bz)];
+                if (!(faces << static_cast<uint8_t>(BlockFace::TOP) & 0x1)) continue;
+
+                if (visited[bx * CHUNK_SIZE_Z + bz]) continue;
+
+                auto pos = ivec3(bx + 1, by + 1, bz + 1);
+                auto id = buildCache[getIndex(pos.x, pos.y, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+
+                int ex = bx, ez = bz;
+                for (int i = ex; i < CHUNK_SIZE_X; ++i) {
+                    int fz = bz;
+                    for (int j = i > bx ? bz : bz + 1; j < CHUNK_SIZE_Z && (i == bx || j <= ez); ++j) {
+                        if (!(faceCache[getIndex(i, by, j)] << static_cast<uint8_t>(BlockFace::TOP) & 0x1)) {
+                            break;
+                        }
+
+                        auto next = buildCache[getIndex(i + 1, pos.y, j + 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                        if (id != next) {
+                            break;
+                        }
+
+                        if (visited[bx * CHUNK_SIZE_Z + bz]) break;
+
+                        fz = j;
+                    }
+                    if (i > bx && fz < ez) break;
+                    ez = fz;
+
+                    for (int k = bz; k <= fz; ++k) {
+                        visited[i * CHUNK_SIZE_Z + k] = true;
+                    }
+                    ex = i;
+
+                    if (i == bx && fz == bz) break;
+                }
+
+                addFace(vertices, transparentVertices, dictionary->get(id), BlockFace::TOP, u8vec3(bx, by, bz),
+                        u8vec3(ex, by, ez));
+            }
+        }
+    }
+
     for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
         for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
             for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
@@ -105,7 +205,7 @@ void Chunk::buildMesh(const World& world) {
                 auto back = buildCache[getIndex(pos.x, pos.y, pos.z - 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
                 auto front = buildCache[getIndex(pos.x, pos.y, pos.z + 1, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
                 auto bottom = buildCache[getIndex(pos.x, pos.y - 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
-                auto top = buildCache[getIndex(pos.x, pos.y + 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
+                // auto top = buildCache[getIndex(pos.x, pos.y + 1, pos.z, CHUNK_SIZE_Y + 2, CHUNK_SIZE_Z + 2)];
 
                 if (left != id && isVisibleFace(block, dictionary->get(left))) {
                     addFace(vertices, transparentVertices, block, BlockFace::LEFT, localPosition);
@@ -122,9 +222,9 @@ void Chunk::buildMesh(const World& world) {
                 if (bottom != id && isVisibleFace(block, dictionary->get(bottom))) {
                     addFace(vertices, transparentVertices, block, BlockFace::BOTTOM, localPosition);
                 }
-                if (top != id && isVisibleFace(block, dictionary->get(top))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::TOP, localPosition);
-                }
+                // if (top != id && isVisibleFace(block, dictionary->get(top))) {
+                //     addFace(vertices, transparentVertices, block, BlockFace::TOP, localPosition);
+                // }
             }
         }
     }
@@ -216,6 +316,43 @@ void Chunk::addFace(
     const u8vec3& position) {
     for (const auto& vertex : Block::blockFaceVertices[face]) {
         auto v = Vertex(vertex.position + position, vertex.uv, block->getLayer(face));
+
+        if (block->opaque) {
+            vertices.push_back(v);
+        } else {
+            transparentVertices.push_back(v);
+        }
+    }
+}
+
+void Chunk::addFace(
+    vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, const BlockFace face,
+    const u8vec3& origin, const u8vec3& end) {
+    if (origin == end) {
+        addFace(vertices, transparentVertices, block, face, origin);
+        return;
+    }
+
+    auto difference = end - origin;
+
+    for (const auto& vertex : Block::blockFaceVertices[face]) {
+        auto uv = vertex.uv;
+        switch (face) {
+        case BlockFace::FRONT:
+        case BlockFace::BACK:
+            uv += uv * u8vec2(difference.x, difference.y);
+            break;
+        case BlockFace::LEFT:
+        case BlockFace::RIGHT:
+            uv += uv * u8vec2(difference.z, difference.y);
+            break;
+        case BlockFace::TOP:
+        case BlockFace::BOTTOM:
+            uv += uv * u8vec2(difference.x, difference.z);
+            break;
+        }
+
+        auto v = Vertex((vertex.position * difference + vertex.position) + origin, uv, block->getLayer(face));
 
         if (block->opaque) {
             vertices.push_back(v);
