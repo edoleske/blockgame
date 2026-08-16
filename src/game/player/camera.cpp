@@ -55,7 +55,7 @@ void Camera::rotate(float xOffset, float yOffset) {
 }
 
 void Camera::recalculateProjectionMatrix() {
-    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 1000.0f);
 }
 
 void Camera::recalculateViewMatrix() {

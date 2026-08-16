@@ -28,9 +28,6 @@ Game::Game(const int width, const int height) : Window(width, height),
     // Disable VSync for performance tuning
     glfwSwapInterval(0);
 
-    // Wireframe for mesh debugging
-    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     initializeBlocks();
 
     world = make_unique<World>();
@@ -88,6 +85,11 @@ const Player& Game::getPlayer() const {
 void Game::update() {
     player.update(*this);
     uiRenderer->update(*this);
+
+    if (input.isPressed(Input::Event::TOGGLE_WIREFRAME)) {
+        isWireframe = !isWireframe;
+        glPolygonMode(GL_FRONT_AND_BACK, isWireframe ? GL_LINE : GL_FILL);
+    }
 }
 
 // Load textures and connect block types to those textures

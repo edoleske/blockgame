@@ -62,9 +62,15 @@ private:
     int transparentVertexCount = 0;
 
     static void greedyMesh(
-         vector<Vertex>& vertices,  vector<Vertex>& transparentVertices,
+        vector<Vertex>& vertices, vector<Vertex>& transparentVertices,
         const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
         const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache, int axis);
+
+    static u8vec3 getFaceSize(
+        int a, int u, int v, BlockFace face, int uSize, int vSize, BlockID block, int axis,
+        const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
+        const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache,
+        vector<bool>& visited);
 
     static inline ivec3 swizzle(int axis, int a, int u, int v);
 

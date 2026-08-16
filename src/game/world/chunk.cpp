@@ -179,50 +179,52 @@ void Chunk::buildMesh(const World& world) {
     //         }
     //     }
     // }
+    greedyMesh(vertices, transparentVertices, buildCache, faceCache, 0);
     greedyMesh(vertices, transparentVertices, buildCache, faceCache, 1);
+    greedyMesh(vertices, transparentVertices, buildCache, faceCache, 2);
 
-    for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
-        for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
-            for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
-                auto id = buildCache[getCacheIndex(bx, by, bz)];
-
-                // Generate no geometry for air blocks
-                if (id == 0) {
-                    continue;
-                }
-
-                auto block = dictionary->get(id);
-                auto localPosition = u8vec3(bx, by, bz);
-
-                // Getting adjacent blocks
-                auto left = buildCache[getCacheIndex(bx - 1, by, bz)];
-                auto right = buildCache[getCacheIndex(bx + 1, by, bz)];
-                auto back = buildCache[getCacheIndex(bx, by, bz - 1)];
-                auto front = buildCache[getCacheIndex(bx, by, bz + 1)];
-                auto bottom = buildCache[getCacheIndex(bx, by - 1, bz)];
-                // auto top = buildCache[getCacheIndex(bx, by + 1, bz)];
-
-                if (left != id && isVisibleFace(block, dictionary->get(left))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::LEFT, localPosition);
-                }
-                if (right != id && isVisibleFace(block, dictionary->get(right))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::RIGHT, localPosition);
-                }
-                if (back != id && isVisibleFace(block, dictionary->get(back))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::BACK, localPosition);
-                }
-                if (front != id && isVisibleFace(block, dictionary->get(front))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::FRONT, localPosition);
-                }
-                if (bottom != id && isVisibleFace(block, dictionary->get(bottom))) {
-                    addFace(vertices, transparentVertices, block, BlockFace::BOTTOM, localPosition);
-                }
-                // if (top != id && isVisibleFace(block, dictionary->get(top))) {
-                //     addFace(vertices, transparentVertices, block, BlockFace::TOP, localPosition);
-                // }
-            }
-        }
-    }
+    // for (int bx = 0; bx < CHUNK_SIZE_X; ++bx) {
+    //     for (int by = 0; by < CHUNK_SIZE_Y; ++by) {
+    //         for (int bz = 0; bz < CHUNK_SIZE_Z; ++bz) {
+    //             auto id = buildCache[getCacheIndex(bx, by, bz)];
+    //
+    //             // Generate no geometry for air blocks
+    //             if (id == 0) {
+    //                 continue;
+    //             }
+    //
+    //             auto block = dictionary->get(id);
+    //             auto localPosition = u8vec3(bx, by, bz);
+    //
+    //             // Getting adjacent blocks
+    //             auto left = buildCache[getCacheIndex(bx - 1, by, bz)];
+    //             auto right = buildCache[getCacheIndex(bx + 1, by, bz)];
+    //             auto back = buildCache[getCacheIndex(bx, by, bz - 1)];
+    //             auto front = buildCache[getCacheIndex(bx, by, bz + 1)];
+    //             auto bottom = buildCache[getCacheIndex(bx, by - 1, bz)];
+    //             auto top = buildCache[getCacheIndex(bx, by + 1, bz)];
+    //
+    //             if (left != id && isVisibleFace(block, dictionary->get(left))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::LEFT, localPosition);
+    //             }
+    //             if (right != id && isVisibleFace(block, dictionary->get(right))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::RIGHT, localPosition);
+    //             }
+    //             if (back != id && isVisibleFace(block, dictionary->get(back))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::BACK, localPosition);
+    //             }
+    //             if (front != id && isVisibleFace(block, dictionary->get(front))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::FRONT, localPosition);
+    //             }
+    //             if (bottom != id && isVisibleFace(block, dictionary->get(bottom))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::BOTTOM, localPosition);
+    //             }
+    //             if (top != id && isVisibleFace(block, dictionary->get(top))) {
+    //                 addFace(vertices, transparentVertices, block, BlockFace::TOP, localPosition);
+    //             }
+    //         }
+    //     }
+    // }
 
     vertices.shrink_to_fit();
     vertexCount = static_cast<int>(vertices.size());
@@ -309,16 +311,29 @@ bool Chunk::isValidBlockPosition(const int x, const int y, const int z) {
 void Chunk::greedyMesh(
     vector<Vertex>& vertices, vector<Vertex>& transparentVertices,
     const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
-    const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache, const int axis) {
+    const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache,
+    const int axis) {
     auto aSize = axis == 1 ? CHUNK_SIZE_Y : CHUNK_SIZE_X;
-    auto uSize = axis == 0 ? CHUNK_SIZE_Y : CHUNK_SIZE_X;
-    auto vSize = axis == 2 ? CHUNK_SIZE_Y : CHUNK_SIZE_X;
+    auto uSize = axis == 1 ? CHUNK_SIZE_X : CHUNK_SIZE_Y;
+    auto vSize = CHUNK_SIZE_X;
+
+    auto posFace = BlockFace::RIGHT;
+    auto negFace = BlockFace::LEFT;
+    if (axis == 2) {
+        posFace = BlockFace::FRONT;
+        negFace = BlockFace::BACK;
+    } else if (axis == 1) {
+        posFace = BlockFace::TOP;
+        negFace = BlockFace::BOTTOM;
+    }
 
     auto dictionary = BlockDictionary::getInstance();
-    vector<bool> visited(uSize * vSize);
+    vector<bool> posVisited(uSize * vSize);
+    vector<bool> negVisited(uSize * vSize);
 
     for (int a = 0; a < aSize; ++a) {
-        visited.assign(uSize * vSize, false);
+        posVisited.assign(uSize * vSize, false);
+        negVisited.assign(uSize * vSize, false);
 
         for (int u = 0; u < uSize; ++u) {
             for (int v = 0; v < vSize; ++v) {
@@ -327,48 +342,60 @@ void Chunk::greedyMesh(
                 auto by = pos.y;
                 auto bz = pos.z;
 
-                auto faces = faceCache[getIndex(bx, by, bz)];
-                if (!(faces << static_cast<uint8_t>(BlockFace::TOP) & 0x1)) continue;
-
-                if (visited[u * uSize + v]) continue;
-
                 auto id = buildCache[getCacheIndex(bx, by, bz)];
+                auto faces = faceCache[getIndex(bx, by, bz)];
 
-                int eu = u, ev = v;
-                for (int i = eu; i < uSize; ++i) {
-                    int fz = v;
-                    for (int j = i > u ? v : v + 1; j < vSize && (i == u || j <= ev); ++j) {
-                        auto p = swizzle(axis, a, i, j);
-
-                        if (!(faceCache[getIndex(p.x, p.y, p.z)] << static_cast<uint8_t>(BlockFace::TOP) & 0x1)) {
-                            break;
-                        }
-
-                        auto next = buildCache[getCacheIndex(p.x, p.y, p.z)];
-                        if (id != next) {
-                            break;
-                        }
-
-                        if (visited[i * uSize + j]) break;
-
-                        fz = j;
-                    }
-                    if (i > u && fz < ev) break;
-                    ev = fz;
-
-                    for (int k = v; k <= fz; ++k) {
-                        visited[i * uSize + k] = true;
-                    }
-                    eu = i;
-
-                    if (i == u && fz == v) break;
+                if ((faces >> static_cast<uint8_t>(posFace)) & 0x1 && !posVisited[u * vSize + v]) {
+                    auto end = getFaceSize(a, u, v, posFace, uSize, vSize, id, axis, buildCache, faceCache, posVisited);
+                    addFace(vertices, transparentVertices, dictionary->get(id), posFace, u8vec3(bx, by, bz), end);
                 }
 
-                auto end = swizzle(axis, a, eu, ev);
-                addFace(vertices, transparentVertices, dictionary->get(id), BlockFace::TOP, u8vec3(bx, by, bz), end);
+                if ((faces >> static_cast<uint8_t>(negFace)) & 0x1 && !negVisited[u * vSize + v]) {
+                    auto end = getFaceSize(a, u, v, negFace, uSize, vSize, id, axis, buildCache, faceCache, negVisited);
+                    addFace(vertices, transparentVertices, dictionary->get(id), negFace, u8vec3(bx, by, bz), end);
+                }
             }
         }
     }
+}
+
+u8vec3 Chunk::getFaceSize(
+    const int a, const int u, const int v, BlockFace face, const int uSize, const int vSize, const BlockID block,
+    const int axis,
+    const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
+    const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache, vector<bool>& visited) {
+
+    int eu = u, ev = v;
+    for (int i = eu; i < uSize; ++i) {
+        int fv = i > u ? v - 1 : v;
+        for (int j = i > u ? v : v + 1; j < vSize && (i == u || j <= ev); ++j) {
+            auto p = swizzle(axis, a, i, j);
+
+            if (!((faceCache[getIndex(p.x, p.y, p.z)] >> static_cast<uint8_t>(face)) & 0x1)) {
+                break;
+            }
+
+            auto next = buildCache[getCacheIndex(p.x, p.y, p.z)];
+            if (block != next) {
+                break;
+            }
+
+            if (visited[i * vSize + j]) {
+                break;
+            }
+
+            fv = j;
+        }
+        if (i > u && fv < ev) break;
+        if (i == u) ev = fv;
+
+        for (int k = v; k <= fv; ++k) {
+            visited[i * vSize + k] = true;
+        }
+        eu = i;
+    }
+
+    return swizzle(axis, a, eu, ev);
 }
 
 ivec3 Chunk::swizzle(const int axis, int a, int u, int v) {

@@ -1,5 +1,7 @@
 #include "input.h"
 
+#include <ranges>
+
 #include "log.h"
 #include "settings.h"
 
@@ -9,7 +11,7 @@ Input::Input() : currentCursor(0.0, 0.0), previousCursor(0.0, 0.0) {
     LOG_DEBUG("Initializing input system");
     _instance = this;
 
-    for (auto const& [key, event]: Settings::keymap) {
+    for (const auto& event : Settings::keymap | std::views::values) {
         inputMap[event] = ButtonState();
     }
 
@@ -51,14 +53,14 @@ vec2 Input::getCursorOffset() {
     return offset;
 }
 
-void Input::updateKey(int key, bool state) {
+void Input::updateKey(const int key, const bool state) {
     if (!Settings::keymap.contains(key)) return;
 
     auto event = Settings::keymap[key];
     updateInputMap(event, state);
 }
 
-void Input::updateCursor(double x, double y) {
+void Input::updateCursor(const double x, const double y) {
     currentCursor = glm::vec<2, double>(x, y);
 }
 
@@ -117,7 +119,7 @@ void Input::scrollCallback(GLFWwindow*, const double x, const double y) {
 }
 
 void Input::postUpdate() {
-    for (auto const& [key, event]: Settings::keymap) {
+    for (const auto& event : Settings::keymap | std::views::values) {
         auto [current, previous] = inputMap[event];
         inputMap[event] = ButtonState(current, current);
     }

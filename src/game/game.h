@@ -39,6 +39,8 @@ private:
     VertexArray vao;
     VertexBuffer vbo;
 
+    bool isWireframe = false;
+
     void update();
 
     void initializeBlocks();
