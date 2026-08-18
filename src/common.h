@@ -78,13 +78,17 @@ constexpr int CHUNK_SIZE_X = 16;
 constexpr int CHUNK_SIZE_Y = 256;
 constexpr int CHUNK_SIZE_Z = 16;
 
+constexpr int getIndex(const int x, const int y, const int z) {
+    return x * CHUNK_SIZE_Y * CHUNK_SIZE_Z + y * CHUNK_SIZE_Z + z;
+}
+
 using BlockID = int;
 constexpr int MAX_BLOCK_TYPES = 255;
 
 struct IntPairHash {
-            std::size_t operator() (const pair<int, int> &v) const {
-                return std::hash<int>()(v.first) ^ std::hash<int>()(v.second) << 1;
-            }
+    std::size_t operator()(const pair<int, int>& v) const {
+        return std::hash<int>()(v.first) ^ std::hash<int>()(v.second) << 1;
+    }
 };
 
 #endif //BLOCKGAME_COMMON_H

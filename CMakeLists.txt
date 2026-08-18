@@ -143,6 +143,12 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/ui/elements/itemSprite.h
         src/ui/elements/debugOverlay.cpp
         src/ui/elements/debugOverlay.h
+        src/game/world/mesh/greedyMesher.cpp
+        src/game/world/mesh/greedyMesher.h
+        src/game/world/mesh/mesher.cpp
+        src/game/world/mesh/mesher.h
+        src/game/world/mesh/faceCullingMesher.cpp
+        src/game/world/mesh/faceCullingMesher.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src ${tomlplusplus_SOURCE_DIR}/include ${spdlog_SOURCE_DIR}/include)

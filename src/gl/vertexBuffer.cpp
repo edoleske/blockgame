@@ -17,19 +17,21 @@ void VertexBuffer::unbind() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexBuffer::bufferData(GLsizeiptr size, void* data, GLenum usage) {
+void VertexBuffer::bufferData(const GLsizeiptr size, const void* data, const GLenum usage) const {
     bind();
     glBufferData(GL_ARRAY_BUFFER, size, data, usage);
 }
 
-void VertexBuffer::vertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
-                                       const GLvoid* pointer) {
+void VertexBuffer::vertexAttribPointer(
+    const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride,
+    const GLvoid* pointer) const {
     bind();
     glVertexAttribPointer(index, size, type, normalized, stride, pointer);
     glEnableVertexAttribArray(index);
 }
 
-void VertexBuffer::vertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
+void VertexBuffer::vertexAttribIPointer(
+    const GLuint index, const GLint size, const GLenum type, const GLsizei stride, const GLvoid* pointer) const {
     bind();
     glVertexAttribIPointer(index, size, type, stride, pointer);
     glEnableVertexAttribArray(index);

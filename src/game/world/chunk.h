@@ -60,37 +60,6 @@ private:
     VertexArray transparentVAO;
     VertexBuffer transparentVBO;
     int transparentVertexCount = 0;
-
-    static void greedyMesh(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices,
-        const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
-        const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache, int axis);
-
-    static u8vec3 getFaceSize(
-        int a, int u, int v, BlockFace face, int uSize, int vSize, BlockID block, int axis,
-        const array<BlockID, (CHUNK_SIZE_X + 2) * (CHUNK_SIZE_Z + 2) * (CHUNK_SIZE_Y + 2)>& buildCache,
-        const array<uint8_t, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z>& faceCache,
-        vector<bool>& visited);
-
-    static inline ivec3 swizzle(int axis, int a, int u, int v);
-
-    static void addFace(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, BlockFace face,
-        const u8vec3& position);
-
-    static void addFace(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, BlockFace face,
-        const u8vec3& origin, const u8vec3& end);
-
-    static void addBillboard(
-        vector<Vertex>& vertices, vector<Vertex>& transparentVertices, const Block* block, const u8vec3& position);
-
-    static inline int getIndex(int x, int y, int z);
-
-    // Helper to get expanded block cache index from local coordinates (includes -1, 16 indices)
-    static inline int getCacheIndex(int x, int y, int z);
-
-    static inline bool isVisibleFace(const Block* a, const Block* b);
 };
 
 
